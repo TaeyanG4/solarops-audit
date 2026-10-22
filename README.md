@@ -6,7 +6,9 @@
 
 **관측률 100%가 유효값 100%를 뜻하지 않습니다.** 품질 지표를 분리하고, 재처리 결과의 일관성과 실패 시 기존 결과 보존을 검증합니다. 에너지는 15분 전력의 추정치이며 저출력 표시는 검토 후보입니다.
 
-![공개 자료 월별 현황](docs/portfolio/images/overview.png)
+![공개 자료 월별 현황](docs/portfolio/images/overview-redesign/after-1440.png)
+
+전체 현황은 추정 발전량·슬롯 품질·원본 보간을 구분합니다. 날짜별 키보드 탐색과 수치 표, 모바일 발전소 요약을 제공합니다. [디자인 시스템](docs/design/overview-system.md) · [1440/768/390px 전후 비교와 검증](docs/benchmarks/overview-redesign-20261023.md).
 
 [5분 시연](docs/portfolio/DEMO_GUIDE.md) · [포트폴리오 사례](docs/portfolio/CASE_STUDY.md) · [기술 선택 근거](docs/architecture/technology-stack.md) · [현재 진행도](docs/IMPLEMENTATION_STATUS.md) · [문서 전체](docs/README.md)
 

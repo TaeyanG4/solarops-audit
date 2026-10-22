@@ -68,11 +68,7 @@ function badge(status) {
 function hero(title, subtitle, side) {
   const box = node("div", undefined, "hero"),
     left = node("div");
-  left.append(
-    node("div", "REVIEW WITH EVIDENCE", "eyebrow"),
-    node("h1", title),
-    node("p", subtitle),
-  );
+  left.append(node("h1", title), node("p", subtitle));
   box.append(left);
   if (side) box.append(node("div", side, "hero-side"));
   return box;
@@ -99,9 +95,9 @@ function panel(title, subtitle, action) {
   box.append(head);
   return box;
 }
-function table(headers, rows) {
+function table(headers, rows, className = "") {
   const wrap = node("div", undefined, "table-wrap"),
-    tab = node("table"),
+    tab = node("table", undefined, className),
     head = node("thead"),
     tr = node("tr"),
     body = node("tbody");
@@ -113,8 +109,9 @@ function table(headers, rows) {
   head.append(tr);
   for (const row of rows) {
     const tr = node("tr");
-    for (const value of row) {
+    for (const [index, value] of row.entries()) {
       const td = node("td");
+      td.dataset.label = headers[index];
       value instanceof Node
         ? td.append(value)
         : (td.textContent = value ?? "—");
@@ -182,71 +179,180 @@ function svgNode(tag, attrs = {}, text) {
   return element;
 }
 function energyChart(timeline) {
-  const svg = svgNode("svg", {
-    viewBox: "0 0 800 220",
-    class: "chart",
-    role: "img",
-    "aria-label":
-      "일별 추정 발전량. 자료 없는 날은 빈칸으로 표시하며 표에서 발전소별 품질을 확인할 수 있습니다.",
-  });
+  const box = node("div", undefined, "energy-chart");
+  if (!timeline.length) return node("p", "일별 자료가 없습니다.", "subtext");
+  const hasEnergy = (day) =>
+    day.metrics?.estimated_energy_kwh !== null &&
+    day.metrics?.estimated_energy_kwh !== undefined;
   const max = Math.max(
     1,
-    ...timeline.map((d) => d.metrics?.estimated_energy_kwh || 0),
+    ...timeline.map((d) => d.metrics?.estimated_energy_kwh ?? 0),
   );
-  [0, 0.5, 1].forEach((ratio) => {
-    const y = 180 - ratio * 145;
+  const unit = node("p", "MWh · 추정", "chart-unit");
+  const plot = node("div", undefined, "energy-plot"),
+    axis = node("div", undefined, "chart-axis"),
+    canvas = node("div", undefined, "chart-canvas");
+  [1, 0.5, 0].forEach((ratio) =>
+    axis.append(node("span", number((max * ratio) / 1000, 1))),
+  );
+  const svg = svgNode("svg", {
+    viewBox: "0 0 720 200",
+    preserveAspectRatio: "none",
+    class: "energy-svg",
+    role: "group",
+    "aria-label":
+      "일별 추정 발전량. 좌우 방향키로 날짜 이동. 아래 날짜 선택과 수치 표로도 확인할 수 있습니다.",
+  });
+  [8, 98, 188].forEach((y) =>
     svg.append(
-      svgNode("line", { x1: 58, x2: 790, y1: y, y2: y, class: "grid" }),
-      svgNode(
-        "text",
-        { x: 48, y: y + 4, "text-anchor": "end" },
-        number((max * ratio) / 1000, 1),
+      svgNode("line", { x1: 0, x2: 720, y1: y, y2: y, class: "grid" }),
+    ),
+  );
+  const days = node("div", undefined, "chart-days");
+  [0, 5, 10, 15, 20, 25, timeline.length - 1]
+    .filter((i, n, arr) => i < timeline.length && arr.indexOf(i) === n)
+    .forEach((i) => days.append(node("span", `${timeline[i].day.slice(8)}일`)));
+  const inspector = node("div", undefined, "day-inspector");
+  inspector.setAttribute("aria-live", "polite");
+  inspector.setAttribute("aria-atomic", "true");
+  const controls = node("div", undefined, "chart-controls");
+  const dateLabel = select(
+    "상세 날짜",
+    timeline.map((d, i) => [String(i), d.day]),
+    "0",
+    (value) => show(Number(value)),
+  );
+  const previous = button(
+    "이전",
+    () => show(selected - 1),
+    "secondary chart-step",
+  );
+  const next = button("다음", () => show(selected + 1), "secondary chart-step");
+  previous.setAttribute("aria-label", "이전 날짜");
+  next.setAttribute("aria-label", "다음 날짜");
+  controls.append(dateLabel, previous, next);
+  let selected = 0;
+  const marks = [];
+  function description(day) {
+    return hasEnergy(day)
+      ? `${day.day} · 추정 ${number(day.metrics.estimated_energy_kwh, 2)} kWh · ${day.metrics.partition_count}개 발전소`
+      : `${day.day} · ${day.metrics ? "추정값 없음" : "자료 없음"} · 0 발전량이 아닙니다`;
+  }
+  function show(index) {
+    selected = Math.max(0, Math.min(timeline.length - 1, index));
+    const day = timeline[selected];
+    dateLabel.querySelector("select").value = String(selected);
+    previous.disabled = selected === 0;
+    next.disabled = selected === timeline.length - 1;
+    marks.forEach((mark, i) => {
+      mark.setAttribute("tabindex", i === selected ? "0" : "-1");
+      mark.setAttribute("aria-pressed", String(i === selected));
+    });
+    inspector.replaceChildren(
+      node(
+        "strong",
+        hasEnergy(day)
+          ? `${number(day.metrics.estimated_energy_kwh / 1000, 2)} MWh`
+          : day.metrics
+            ? "추정값 없음"
+            : "자료 없음",
+      ),
+      node(
+        "span",
+        hasEnergy(day)
+          ? `${day.day} · 추정 · ${day.metrics.partition_count}개 발전소 합계`
+          : `${day.day} · 0 발전량으로 처리하지 않음`,
       ),
     );
-  });
-  svg.append(svgNode("text", { x: 10, y: 17 }, "MWh (추정)"));
+  }
   timeline.forEach((day, index) => {
-    const width = 725 / timeline.length,
-      x = 60 + index * width;
-    if (day.metrics) {
-      const h = (day.metrics.estimated_energy_kwh / max) * 145;
-      const bar = svgNode("rect", {
-        x,
-        y: 180 - Math.max(h, 1),
-        width: width - 5,
-        height: Math.max(h, 1),
-        rx: 2,
-        fill: h ? "#377858" : "#bccbbb",
-      });
-      bar.append(
-        svgNode(
-          "title",
-          {},
-          `${day.day}: ${number(day.metrics.estimated_energy_kwh, 2)} kWh · ${day.metrics.partition_count}개 발전소`,
-        ),
+    const width = 720 / timeline.length,
+      x = index * width;
+    const mark = svgNode("g", {
+      role: "button",
+      "aria-label": description(day),
+      class: "day-mark",
+    });
+    mark.append(
+      svgNode("rect", { x, y: 0, width, height: 200, class: "day-hit" }),
+    );
+    if (hasEnergy(day)) {
+      const height = Math.max(
+        1,
+        (day.metrics.estimated_energy_kwh / max) * 180,
       );
-      svg.append(bar);
-    } else
-      svg.append(
-        svgNode("line", {
-          x1: x,
-          x2: x + width - 5,
-          y1: 187,
-          y2: 187,
-          stroke: "#b1bdb0",
-          "stroke-dasharray": "2 2",
+      mark.append(
+        svgNode("rect", {
+          x: x + 3,
+          y: 188 - height,
+          width: Math.max(1, width - 6),
+          height,
+          rx: 2,
+          class: "energy-bar",
         }),
       );
-    if (index % 5 === 0 || index === timeline.length - 1)
-      svg.append(
-        svgNode(
-          "text",
-          { x: x + width / 2, y: 208, "text-anchor": "middle" },
-          day.day.slice(8),
-        ),
+    } else {
+      mark.append(
+        svgNode("line", {
+          x1: x + 3,
+          x2: x + width - 3,
+          y1: 188,
+          y2: 188,
+          class: "missing-mark",
+        }),
       );
+    }
+    mark.addEventListener("pointerenter", (event) => {
+      if (event.pointerType === "mouse") show(index);
+    });
+    mark.addEventListener("click", () => show(index));
+    mark.addEventListener("focus", () => show(index));
+    mark.addEventListener("keydown", (event) => {
+      const destinations = {
+        ArrowRight: index + 1,
+        ArrowLeft: index - 1,
+        Home: 0,
+        End: timeline.length - 1,
+      };
+      if (event.key in destinations) {
+        event.preventDefault();
+        show(destinations[event.key]);
+        marks[selected].focus();
+      } else if (["Enter", " "].includes(event.key)) {
+        event.preventDefault();
+        show(index);
+      }
+    });
+    marks.push(mark);
+    svg.append(mark);
   });
-  return svg;
+  canvas.append(svg, days);
+  plot.append(axis, canvas);
+  show(0);
+  const details = node("details", undefined, "chart-data");
+  details.append(
+    node("summary", "일별 수치 표 보기"),
+    table(
+      ["날짜 (UTC)", "추정 kWh", "발전소 수"],
+      timeline.map((day) => [
+        day.day,
+        day.metrics ? number(day.metrics.estimated_energy_kwh, 2) : "자료 없음",
+        day.metrics ? number(day.metrics.partition_count) : "—",
+      ]),
+    ),
+  );
+  box.append(
+    unit,
+    plot,
+    legend([
+      ["추정 발전량", "var(--green)"],
+      ["점선: 자료 없음", "var(--missing)"],
+    ]),
+    controls,
+    inspector,
+    details,
+  );
+  return box;
 }
 function legend(items) {
   const box = node("div", undefined, "legend");
@@ -264,13 +370,13 @@ async function overview(signal) {
     `/api/v1/overview?period=${encodeURIComponent(state.period)}${suffix}`,
     signal,
   );
-  const root = node("div"),
+  const root = node("div", undefined, "overview"),
     sum = data.summary;
   root.append(
     hero(
-      "월별 데이터 현황",
-      "어떤 자료를 믿고, 어디를 먼저 살펴볼지 확인하세요.",
-      `${state.period} / ${data.timezone}\n현재 계산 버전의 활성 파티션`,
+      "월별 운영 현황",
+      "추정 발전량과 자료 품질을 함께 확인하고, 검토할 발전소로 이동하세요.",
+      `${state.period} · ${data.timezone} 기준`,
     ),
   );
   if (!sum.plant_count) {
@@ -291,7 +397,7 @@ async function overview(signal) {
       "추정 발전량",
       number(sum.estimated_energy_kwh / 1000, 2),
       "MWh",
-      "관측된 유효 전력 × 0.25h",
+      "유효 전력 × 0.25h · 원본 보간 포함 가능",
       true,
     ),
     card(
@@ -301,10 +407,10 @@ async function overview(signal) {
       `관측 슬롯 완전성 ${pct(sum.coverage_ratio)}`,
     ),
     card(
-      "누락 / 무효 슬롯",
-      `${number(sum.missing_slots)} / ${number(sum.invalid_slots)}`,
-      "",
-      "누락과 관측된 무효값을 구분",
+      "무효 슬롯",
+      number(sum.invalid_slots),
+      "개",
+      `계산 제외 · 누락 ${number(sum.missing_slots)}슬롯은 별도`,
     ),
     card(
       "조회된 발전소",
@@ -319,15 +425,21 @@ async function overview(signal) {
       "일별 추정 발전량",
       "각 날짜에 자료가 있는 발전소의 합계 · 발전소 수가 다를 수 있습니다.",
     );
-  trend.append(
-    energyChart(data.timeline),
-    legend([
-      ["자료 있음", "#377858"],
-      ["자료 없음은 빈칸", "#b1bdb0"],
-    ]),
+  trend.classList.add("trend-panel");
+  trend.append(energyChart(data.timeline));
+  const quality = panel(
+    "관측 데이터 품질",
+    "등록된 일별 파티션의 예상 슬롯 기준",
   );
-  const quality = panel("자료를 읽는 세 가지 기준", "인버터 관측 슬롯 기준");
+  quality.classList.add("quality-panel");
+  const qualityTotal = node("div", undefined, "quality-total");
+  qualityTotal.append(
+    node("strong", pct(sum.valid_coverage_ratio)),
+    node("span", "유효값 비율"),
+  );
+  quality.append(qualityTotal);
   const track = node("div", undefined, "quality-track");
+  track.setAttribute("aria-hidden", "true");
   const total = sum.valid_slots + sum.invalid_slots + sum.missing_slots;
   [
     [sum.valid_slots, "valid"],
@@ -340,11 +452,11 @@ async function overview(signal) {
   });
   const qualityRows = node("div", undefined, "quality-rows");
   [
-    ["유효한 관측", sum.valid_slots],
-    ["무효값 · 계산 제외", sum.invalid_slots],
-    ["누락 · 채우지 않음", sum.missing_slots],
-  ].forEach(([label, value]) => {
-    const row = node("div");
+    ["유효값", sum.valid_slots, "valid"],
+    ["무효값 · 계산 제외", sum.invalid_slots, "invalid"],
+    ["누락 · 채우지 않음", sum.missing_slots, "missing"],
+  ].forEach(([label, value, kind]) => {
+    const row = node("div", undefined, `quality-row ${kind}`);
     row.append(node("span", label), node("b", number(value)));
     qualityRows.append(row);
   });
@@ -353,10 +465,19 @@ async function overview(signal) {
     qualityRows,
     node(
       "p",
-      `보간 표시 ${pct(sum.source_interpolation_ratio)} · 보간 여부 불명 ${number(sum.interpolation_unknown_slots)}슬롯. 보간 여부는 유효/무효 분류와 별도 속성입니다.`,
+      "미등록 일자는 이 비율에 포함되지 않습니다. 발전소별 등록 일수를 함께 확인하세요.",
       "quality-note",
     ),
   );
+  const interpolation = node("div", undefined, "interpolation-note");
+  interpolation.append(
+    node("strong", `원본 보간 표시 ${pct(sum.source_interpolation_ratio)}`),
+    node(
+      "p",
+      `보간 여부 불명 ${number(sum.interpolation_unknown_slots)}슬롯. 유효·무효와 별도 속성으로, 보간된 값도 유효값에 포함될 수 있습니다.`,
+    ),
+  );
+  quality.append(interpolation);
   split.append(trend, quality);
   root.append(split);
   const search = node("input", undefined, "search");
@@ -368,13 +489,14 @@ async function overview(signal) {
     "유효값 비율 낮은 순 · 설비 고장 순위가 아닌 자료 품질 확인 순서입니다.",
     search,
   );
+  list.classList.add("plant-panel");
   const rows = data.plants.map((plant) => {
     const name = node("div");
     name.append(
       node("strong", plant.plant_id),
       node(
         "span",
-        `${plant.source_kinds.includes("public") ? "공개" : "합성"} · ${plant.region} · ${number(plant.capacity_kw)} kW`,
+        `${plant.source_kinds.map((kind) => (kind === "public" ? "공개" : "합성")).join(" / ")} · ${plant.region} · ${number(plant.capacity_kw)} kW`,
         "small",
       ),
     );
@@ -400,23 +522,41 @@ async function overview(signal) {
         "text-button",
       ),
     );
+    actions
+      .querySelectorAll("button")
+      .forEach((action) =>
+        action.setAttribute(
+          "aria-label",
+          `${plant.plant_id} ${action.textContent} 보기`,
+        ),
+      );
+    const valid = node("div", undefined, "coverage-cell");
+    const meter = node("span", undefined, "coverage-meter");
+    meter.setAttribute("aria-hidden", "true");
+    const fill = node("span");
+    fill.style.width = `${(plant.valid_coverage_ratio ?? 0) * 100}%`;
+    meter.append(fill);
+    valid.append(node("strong", pct(plant.valid_coverage_ratio)), meter);
     return [
       name,
       dates,
       number(plant.estimated_energy_kwh / 1000, 2),
-      pct(plant.valid_coverage_ratio),
+      valid,
       `${number(plant.missing_slots)} / ${number(plant.invalid_slots)}`,
       pct(plant.source_interpolation_ratio),
       actions,
     ];
   });
   const tableBox = node("div");
+  const resultCount = node("p", "", "result-count");
+  resultCount.setAttribute("role", "status");
   function filter() {
     const filtered = rows.filter((_, i) =>
       data.plants[i].plant_id
         .toLowerCase()
         .includes(search.value.toLowerCase()),
     );
+    resultCount.textContent = `${filtered.length} / ${data.plants.length}개 발전소 · 유효값 비율 오름차순`;
     tableBox.replaceChildren(
       filtered.length
         ? table(
@@ -426,17 +566,18 @@ async function overview(signal) {
               "추정 MWh",
               "유효값 비율",
               "누락 / 무효",
-              "소스 보간",
+              "원본 보간",
               "자세히",
             ],
             filtered,
+            "plant-table",
           )
         : node("p", "일치하는 발전소가 없습니다.", "subtext"),
     );
   }
   search.oninput = filter;
   filter();
-  list.append(tableBox);
+  list.append(resultCount, tableBox);
   root.append(list);
   root.append(
     node(
@@ -468,7 +609,11 @@ async function reports(signal) {
   );
   if (reports.some((report) => report.source_metadata_status === "unavailable"))
     root.append(
-      node("p", "일부 보고서의 출처 파일을 읽을 수 없습니다. 운영자가 저장소를 확인해 주세요.", "notice"),
+      node(
+        "p",
+        "일부 보고서의 출처 파일을 읽을 수 없습니다. 운영자가 저장소를 확인해 주세요.",
+        "notice",
+      ),
     );
   if (!reports.length) {
     root.append(

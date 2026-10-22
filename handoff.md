@@ -17,11 +17,11 @@
 ## Active handoff
 
 ### Agent: A
-- Current host: released
-- Current thread: H-A-06
-- Resumable state: 기능036a27b와 CI39804115471 success. 8502는 PS_001/2024년4월 공개 보고서. 최종 문서·버전별 소스 패키지로 인계하며 실행 중 실험 없음.
-- Blocker: H-A-06은 승인된 고객 표본/대상 없음. 현재 범위의 실행 가능한 고가치 기술 작업 없음.
-- Next action: H-A-06은 승인 표본/대상이 제공될 때 재개. 새 결함/요구가 생기면 근거와 점수로 새 항목 등록.
+- Current host: Codex
+- Current thread: H-A-12
+- Resumable state: H-A-12 구현·로컬 검증 완료, 기능커밋과 CI 확인 대기. 증거 artifacts/ui-overview-20261023/, docs/benchmarks/overview-redesign-20261023.md. dashboard 전용 이미지로8502 제공, Airflow/kind 중지 유지.
+- Blocker: H-A-06은 승인된 고객 표본/대상 없음. UI 리디자인 H-A-12는 실행 가능.
+- Next action: H-A-12, 이후 H-A-06은 승인 표본/대상 의존.
 
 ## Completed / review log
 
@@ -168,3 +168,14 @@
 - Resource: CPU
 - Other executor: none
 - New plan items: none — 확인된 고가치 기술 결함은 해소; 실제 고객 근거는 H-A-06에 유지
+
+### 2026-10-23 00:53 — A — none
+- Host: Codex
+- Action: 사용자 지정 UI 리디자인 범위로 슬롯 A 재개, 기존 API/계산 계약 유지와 세 viewport 증거 계획 등록.
+- Result: 새 요청과 검증 범위 기록; see D-A-011
+- Artifacts: plan.md, handoff.md
+- Discovery updates: none — 새 요청 착수이며 실험 결과 아님
+- Review verdict: none
+- Resource: CPU
+- Other executor: none
+- New plan items: H-A-12
