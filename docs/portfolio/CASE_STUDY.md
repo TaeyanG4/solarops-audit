@@ -2,9 +2,9 @@
 
 태양광 발전량 차트에서 출발해 **입력의 품질, 재처리의 일관성, 결과의 출처**까지 설명하는 데이터 엔지니어링 프로젝트입니다. 공개 BR-PVGen과 합성 자료를 사용하며 고객 운영 실적이나 고장 탐지 정확도를 주장하지 않습니다.
 
-![공개 자료 월별 현황](images/readme-20261023/overview.png)
+![공개 자료 월별 현황](images/readme-hidpi-20261023/overview.png)
 
-공개 자료의 제작자·범위·다운로드는 [데이터 출처](../data-sources.md), 도구와 적용 범위는 [스킬 기록](../development/skills.md), 화면 출처는 [이미지 정보](images/readme-20261023/README.md)에 정리했습니다.
+공개 자료의 제작자·범위·다운로드는 [데이터 출처](../data-sources.md), 도구와 적용 범위는 [스킬 기록](../development/skills.md), 화면 출처는 [이미지 정보](images/readme-hidpi-20261023/README.md)에 정리했습니다.
 
 ## 해결하려는 문제
 
@@ -52,7 +52,7 @@ SolarOps는 이 문제를 입력 계약, 원자적인 일별 공개, 논리 해�
 
 ## 현재 한계와 다음 우선순위
 
-![실패한 작업에서 하위 파티션까지 연결](images/readme-20261023/run-evidence.png)
+![실패한 작업에서 하위 파티션까지 연결](images/readme-hidpi-20261023/run-evidence.png)
 
 *위 화면은 DEMO_01 합성 자료에 의도적으로 커밋 실패를 주입한 복구 검사입니다.*
 

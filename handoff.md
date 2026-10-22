@@ -8,7 +8,7 @@
 - 전체 현황 리디자인 완료. [공개 2024년 4월 화면](http://127.0.0.1:8502/?view=overview&period=2024-04&source=public), [GitHub](https://github.com/TaeyanG4/solarops-audit) 비공개 유지.
 - UI 기능 `afd6169`의 [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39812883684): Windows/Ubuntu 각각 113통과·5제외. 로컬 Windows 112통과·6제외와 구분합니다.
 - README·출처·스킬·이미지와 기록 구조 개선 완료. `dbbe744` GitHub 반영, CI 양 OS 각각 113통과·5제외, 문서·복원·패키징 성공. [상세 근거](docs/worklog/2026-10-23.md).
-- 앞선 운영 확인 시 Compose app-db·minio·dashboard 실행, Airflow/kind 및 별도 8501/8503 서버 중지였습니다. 현재 실행 상태가 필요하면 다시 조회합니다. [시작·종료 안내](README.md#빠른-실행).
+- 10-23 접속 장애: 중지된 Compose app-db·minio·dashboard를 다시 시작해 준비 상태·PS_001 보고서 조회를 확인했습니다. Airflow는 중지, kind 컨테이너는 작업 시작 전부터 실행 중이었습니다. [재시작 안내](docs/runbooks/operator.md#8502가-열리지-않을-때).
 - 실제 고객 계약·매출·현장 고장 정확도·외부 운영 SLO는 검증하지 않았습니다.
 
 ## 다음 재개 지점
@@ -22,6 +22,7 @@
 
 | 일자 | 수행 영역과 결과 | 상세 |
 |---|---|---|
+| 10-23 | 중지된 서비스 3개 복구·보고서 확인, 2배 픽셀 밀도 캡처와 본문 폭 조정·원본 확대 링크 | [작업 기록](docs/worklog/2026-10-23.md) |
 | 10-23 | README 보강, 직접 출처·스킬 사용 목적, 최신 캡처, 짧은 인계와 일자별 기록으로 통일 | [작업 기록](docs/worklog/2026-10-23.md) |
 | 10-23 | 전체 현황 정보 위계·차트·품질·반응형 개선, 세 너비·키보드·오류·API 보존 검증 | [작업 기록](docs/worklog/2026-10-23.md) |
 | 10-23 | 보존 raw·동시 버전·보고서 역순 완료·조회 부작용·파일 무결성 수정 | [작업 기록](docs/worklog/2026-10-23.md) |

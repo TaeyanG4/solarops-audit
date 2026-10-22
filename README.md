@@ -10,9 +10,9 @@
 
 [빠른 실행](#빠른-실행) · [데이터 출처](#어떤-데이터를-사용하는가) · [기술 선택](#구조와-기술-선택) · [사용 스킬](#개발에-사용한-ai-스킬) · [검증 근거](#검증한-범위) · [전체 문서](docs/README.md)
 
-![전체 현황: 공개 BR-PVGen 2024년 4월, 추정 발전량과 데이터 품질](docs/portfolio/images/readme-20261023/overview.png)
+![전체 현황: 공개 BR-PVGen 2024년 4월, 추정 발전량과 데이터 품질](docs/portfolio/images/readme-hidpi-20261023/overview.png)
 
-*2026-10-23 실제 로컬 화면. 공개 2024년 4월 자료이며 발전량은 추정치입니다. [전체 화면·반응형 전후 비교](docs/benchmarks/overview-redesign-20261023.md).*
+*2026-10-23 실제 로컬 화면. 공개 2024년 4월 자료이며 발전량은 추정치입니다. 글자 가독성을 위해 820px 화면을 2배 픽셀 밀도로 캡처했습니다. [원본 크게 보기](docs/portfolio/images/readme-hidpi-20261023/overview.png?raw=1) · [전체 화면·반응형 전후 비교](docs/benchmarks/overview-redesign-20261023.md).*
 
 ## 어떤 문제를 해결하는가
 
@@ -55,11 +55,13 @@
 | 월간 보고서 | 생성 시점의 HTML·CSV·원본 계보를 고정해 조회 |
 | 실행 이력 | 작업 상태·실패 원인·입력 버전·하위 일별 파티션 추적 |
 
-![발전소별 검토 순서: 등록 일수·유효값·누락·무효·원본 보간을 함께 확인](docs/portfolio/images/readme-20261023/plants.png)
+![발전소별 검토 순서 중 PS_001과 PS_005: 등록 일수·유효값·누락·무효·원본 보간](docs/portfolio/images/readme-hidpi-20261023/plants.png)
 
-*공개 2024년 4월 자료. PS_005는 20일만 등록된 부분 기간입니다. 미등록 날짜와 등록 파티션 내부의 누락 슬롯은 다릅니다. 표의 순서는 데이터 품질 검토 순서입니다.*
+*공개 2024년 4월 자료의 5개 발전소 중 검토 순서 첫 두 항목을 발췌했습니다. PS_005는 20일만 등록된 부분 기간입니다. 미등록 날짜와 등록 파티션 내부의 누락 슬롯은 다릅니다. [비교 영역 원본 보기](docs/portfolio/images/readme-hidpi-20261023/plants.png?raw=1).*
 
-[390px 날짜 탐색 화면](docs/portfolio/images/readme-20261023/mobile-chart.png) · [합성 실패 작업의 근거 화면](docs/portfolio/images/readme-20261023/run-evidence.png) · [5분 시연 순서](docs/portfolio/DEMO_GUIDE.md)
+[390px 날짜 탐색 화면](docs/portfolio/images/readme-hidpi-20261023/mobile-chart.png) · [합성 실패 작업의 근거 화면](docs/portfolio/images/readme-hidpi-20261023/run-evidence.png) · [5분 시연 순서](docs/portfolio/DEMO_GUIDE.md)
+
+[일별 차트 확대](docs/portfolio/images/readme-hidpi-20261023/daily-chart.png?raw=1) · [품질 분류 확대](docs/portfolio/images/readme-hidpi-20261023/quality.png?raw=1). 좁은 화면에서는 이미지 원본을 열어 확대하면 작은 수치를 확인하기 쉽습니다.
 
 ## 빠른 실행
 
@@ -91,6 +93,12 @@ docker compose --env-file .env -f infra/compose/compose.yaml stop dashboard app-
 ```
 
 `stop`은 데이터 볼륨을 삭제하지 않습니다. 별도로 실행한 네이티브 서버나 Airflow/kind는 각각 관리합니다. [최초 설치·환경 변수·공개 자료 처리](docs/guides/setup.md) · [화면 운영](docs/runbooks/operator.md)
+
+Docker는 켜져 있지만 8502가 열리지 않으면 컨테이너가 중지됐는지 확인하세요. 기존 컨테이너는 다음 명령으로 다시 켭니다. [접속 오류 확인 순서](docs/runbooks/operator.md#8502가-열리지-않을-때).
+
+```text
+docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio dashboard
+```
 
 ## 구조와 기술 선택
 
@@ -136,7 +144,7 @@ flowchart LR
 |---|---|---|
 | [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | 정보 위계·색·글자·차트·반응형 설계 가이드 검색 | [디자인 시스템](docs/design/overview-system.md) |
 | [Impeccable](https://github.com/pbakaus/impeccable) | 접근성·상태·가독성·레이아웃 audit/polish와 정적 검출 | [검수·수정 근거](docs/benchmarks/overview-redesign-20261023.md) |
-| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 화면 캡처·필터·키보드·오류 경로·세 너비 검증 | [최신 이미지](docs/portfolio/images/readme-20261023/README.md)와 UI 검증 |
+| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 화면 캡처·필터·키보드·오류 경로·세 너비 검증 | [최신 이미지](docs/portfolio/images/readme-hidpi-20261023/README.md)와 UI 검증 |
 | [skill-installer](https://github.com/openai/skills/tree/main/skills/.system/skill-installer) | 요청한 스킬을 공식 저장소에서 설치 | 로컬 개발 도구 준비 |
 
 스킬은 개발·검수를 돕는 도구이며 앱 실행 의존성이 아닙니다. 자동 추천을 그대로 채택하지 않은 이유와 도구 버전·적용 범위는 [스킬 사용 기록](docs/development/skills.md)에 정리했습니다. 앞으로 작업 기록에 research-orchestrator 스킬은 사용하지 않습니다.

@@ -8,7 +8,7 @@
 |---|---|---|
 | [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | 에너지 분석 화면의 정보 위계·색·글자·차트·반응형 가이드 검색 | [전체 현황 디자인 시스템](../design/overview-system.md): KPI 요약 띠, 의미별 색, 13/14px 표, 고정 12px 축, 날짜 탐색·대체 수치표 |
 | [Impeccable](https://github.com/pbakaus/impeccable) | context, craft-floor, operate, audit, polish 지침으로 가독성·상태·접근성·반응형 검수 | [발견 문제와 수정](../benchmarks/overview-redesign-20261023.md): 축소되는 축, 숨는 상세 버튼, 보간 의미, 모바일 필터 잘림 등을 보완 |
-| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 Chrome 렌더링, 필터·키보드·실패 경로 검사, 스크린샷 | [1440/768/390px 전후 검증](../benchmarks/overview-redesign-20261023.md), [최신 README 이미지](../portfolio/images/readme-20261023/README.md) |
+| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 Chrome 렌더링, 필터·키보드·실패 경로 검사, 스크린샷 | [1440/768/390px 전후 검증](../benchmarks/overview-redesign-20261023.md), [최신 README 이미지](../portfolio/images/readme-hidpi-20261023/README.md) |
 | [skill-installer](https://github.com/openai/skills/tree/main/skills/.system/skill-installer) | 사용자가 요청한 위 세 스킬을 공식 저장소에서 로컬 설치 | 개발 환경 준비. 앱 의존성·API·데이터 계산에는 추가하지 않음 |
 
 ## 자동 추천을 적용한 방식

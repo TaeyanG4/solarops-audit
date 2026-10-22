@@ -1,5 +1,22 @@
 # 운영자가 확인할 순서
 
+## 8502가 열리지 않을 때
+
+Docker Desktop 엔진이 실행 중이어도 SolarOps 컨테이너는 중지 상태일 수 있습니다. 저장소 루트에서 상태를 확인하고, 기존 컨테이너를 시작합니다.
+
+```text
+docker compose --env-file .env -f infra/compose/compose.yaml ps -a
+docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio dashboard
+```
+
+대시보드 조회에 필요한 서비스는 **app-db(카탈로그), minio(보고서·파일), dashboard(웹/API)** 세 개입니다. 시작 후 [준비 상태](http://127.0.0.1:8502/ready)가 `ready`인지 확인한 다음 [PS_001 공개 보고서](http://127.0.0.1:8502/?view=reports&period=2024-04&source=public&plant=PS_001)를 새로고침합니다. 대시보드만 켜면 DB나 파일 저장소에 접근하지 못할 수 있습니다.
+
+컨테이너 자체가 없고 기존 데이터 볼륨이 남아 있다면 README의 `up -d app-db minio dashboard`로 재생성합니다. 볼륨까지 지워졌다면 재시작으로 자료를 복원할 수 없으므로 [복원 절차](backup-restore.md)를 확인합니다. Airflow와 Kubernetes는 이 보고서 조회에 필요하지 않습니다.
+
+2026-10-23 접속 장애는 위 세 컨테이너가 모두 중지된 상태였습니다. 기존 컨테이너 시작 후 `/health`, `/ready`, PS_001 보고서 HTML·CSV·출처 JSON 모두 200 응답과 실제 보고서 본문 렌더를 확인했습니다. 데이터 재처리·이미지 재빌드·볼륨 삭제는 하지 않았습니다.
+
+## 데이터 확인
+
 1. `uv run solarops demo`로 합성 1주 보고서를 생성합니다.
 2. `uv run solarops serve` 후 http://127.0.0.1:8501 에서 월간 리포트를 선택합니다.
 3. 추정 kWh, 관측 슬롯 비율, 유효값 비율, 소스 보간율을 함께 봅니다. 관측 100%라도 NULL이 많을 수 있습니다.
