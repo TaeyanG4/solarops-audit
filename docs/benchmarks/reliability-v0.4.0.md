@@ -1,6 +1,6 @@
 # v0.4.0 계산 경계·진단·복원 검증
 
-기준: 2026-10-22. [현재 상태](../IMPLEMENTATION_STATUS.md) · [계산 버전 결정](../adr/0007-calculation-v2.md) · [발견 기록](../../discoveries.md)
+기준: 2026-10-22. [현재 상태](../IMPLEMENTATION_STATUS.md) · [계산 버전 결정](../adr/0007-calculation-v2.md) · [수행 기록](../worklog/2026-10-22.md)
 
 ## 계산 v2
 

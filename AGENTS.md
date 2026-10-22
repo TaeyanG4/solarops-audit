@@ -17,14 +17,23 @@ limit this request. Keep its technical acceptance gates and report actual eviden
 
 ## Planning and continuity (user requested)
 
-- Read AGENTS.md, discoveries.md, handoff.md, then plan.md when resuming.
-- Keep plan.md as the active scored queue, discoveries.md as findings/evidence,
-  and handoff.md as shared state, append-only completed events and the resume point.
-- Score each factor 0–3: Priority = 2*Impact + 2*Information + Confidence +
+- Read AGENTS.md, handoff.md, then plan.md when resuming; follow links to dated
+  work logs only when their detail is relevant.
+- This is software delivery, not research. Do not apply research-orchestrator-skill
+  or require agent slots, hypotheses, discovery IDs, or independent-review queues.
+- Keep plan.md for unfinished work, with priority scores and dependencies.
+  Score each factor 0–3: Priority = 2*Impact + 2*Information + Confidence +
   Unblock + Diversity + (3-Cost). Work highest eligible score first; ties use
   lower Cost, then higher Information. Explain dependency-based deferrals.
-- Finish with evidence, log the result, remove completed queue entries and rescore
-  affected work. Keep actual test results separate from independent review status.
-- Use slot A for this single-agent workflow. Do not create agents merely to fill slots.
+- Keep handoff.md within 100 lines: current state, next action/blocker, and at
+  most eight recent work summaries. Each summary links to its dated work log.
+- Store detailed changes, decisions, commands, test results, limitations and
+  evidence in docs/worklog/YYYY-MM-DD.md (Asia/Seoul). Summarize each work area
+  in 3–6 lines; link existing benchmark/design documents instead of copying them.
+  Split unusually large days into YYYY-MM-DD-topic.md and link the date index.
+- Finish with actual evidence, update the handoff summary, and remove completed
+  plan items. No mandatory research review status or discoveries.md maintenance.
+- Preserve historical records under docs/worklog/archive/; they are historical
+  evidence, not current instructions. Keep original data and docs/plan/ unchanged.
 - Existing AGENTS.md is the stable rules file (agents.md resolves here on Windows);
-  preserve this Git spelling for Codex/Linux rather than create a case-only duplicate.
+  preserve this Git spelling rather than create a case-only duplicate.

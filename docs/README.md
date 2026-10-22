@@ -7,11 +7,13 @@
 | 목적 | 문서 |
 |---|---|
 | 5분 안에 실행 | [시연 순서](portfolio/DEMO_GUIDE.md), [설치·환경 변수](guides/setup.md) |
-| 현재 진행도와 다음 과제 | [구현 상태](IMPLEMENTATION_STATUS.md), [점수 기반 계획](../plan.md), [인계·진행 기록](../handoff.md), [결과 근거](../discoveries.md), [버전별 변경](../CHANGELOG.md) |
+| 현재 진행도와 다음 과제 | [구현 상태](IMPLEMENTATION_STATUS.md), [점수 기반 계획](../plan.md), [인계·진행 기록](../handoff.md), [날짜별 상세 기록](worklog/README.md), [버전별 변경](../CHANGELOG.md) |
 | 포트폴리오 설명 | [문제·설계·증거 사례](portfolio/CASE_STUDY.md) |
 | 기술 선택 이해 | [버전·선택 이유·대안](architecture/technology-stack.md), [폴더·데이터 흐름·트랜잭션](architecture/system.md) |
+| 데이터 출처 | [제작자·범위·라이선스·파일 다운로드](data-sources.md) |
 | 데이터 해석 | [실제 CSV 스키마·품질·에너지 계약](data-contract.md) |
 | 로컬 운영 | [화면·보고서](runbooks/operator.md), [DAG·백필](runbooks/dags.md), [실패·진단](runbooks/recovery.md), [백업·복원 시험](runbooks/backup-restore.md) |
+| 디자인·사용 스킬 | [디자인 시스템](design/overview-system.md), [스킬별 목적·결과물](development/skills.md), [최신 이미지](portfolio/images/readme-20261023/README.md) |
 | 검사·패키징·기여 | [개발 안내](../CONTRIBUTING.md), [스크립트 목록](../scripts/README.md) |
 | 실행 증거 | [공개 전체 처리·Compose·kind](benchmarks/2026-10-22.md), [v0.3 화면·조회 성능](benchmarks/workspace-v0.3.0.md), [v0.3.1 유지보수](benchmarks/maintenance-v0.3.1.md), [v0.4 계산·진단·복원](benchmarks/reliability-v0.4.0.md) |
 | 파일럿 준비 | [수익화 판단](market/revenue-assessment.md), [제안과 범위](market/pilot.md), [측정 양식](market/pilot-scorecard.md), [인터뷰 양식](market/interview-template.md), [스키마 대응표](market/schema-mapping.csv) |
