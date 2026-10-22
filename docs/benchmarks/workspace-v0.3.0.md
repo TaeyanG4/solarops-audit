@@ -47,3 +47,13 @@ uv run python scripts/benchmark_dashboard.py --mode overview --output artifacts/
 ![실패 실행의 원인과 하위 파티션](../portfolio/images/run-evidence.png)
 
 화면 증거는 `docs/portfolio/images/overview.png`, `docs/portfolio/images/run-evidence.png`, 모바일은 gitignored `artifacts/mobile-v030.png`입니다.
+
+## 원격 CI와 최종 이미지 실행
+
+[v0.3.0 기능 커밋의 GitHub Actions](https://github.com/TaeyanG4/solarops-audit/actions/runs/39767534134)에서 Ubuntu·Windows 작업이 모두 성공했습니다. 각 OS에서 오프라인 검사, 정상 합성 데모, 실패·복구 데모, wheel 빌드, lockfile 일치와 아티팩트 업로드까지 완료했습니다. 업로드한 자료는 합성 보고서와 검증 증거이며 공개 원본이나 비밀 설정은 포함하지 않습니다.
+
+Compose `compose-synthetic-*-1792666684`의 정상/재시도/백필/품질/보고서 5개 시나리오와 kind `k8s-public-*-1792666800`의 공개 자료 계획/처리/백필/품질/보고서 5개 시나리오가 새 이미지에서 성공했습니다. Compose의 주입 실패는 replay 태스크 try_number=2에서 성공했고, 모든 DAG는 검증 후 pause했습니다. kind 모드 DagBag의 4개 DAG와 공개/합성 템플릿도 검증했습니다.
+
+처리 시간은 원본 등록 뒤 batch가 생성된 시점부터 기록합니다. 다운로드·원본 checksum/등록 시간은 포함하지 않습니다. batch 등록 전에 실패하는 입력 검증은 CLI 오류로 남고 이력 화면의 batch에는 포함되지 않을 수 있습니다.
+
+증거: `artifacts/airflow-compose-v030.log`, `artifacts/k8s-public-v030.log`, `artifacts/portfolio-demo-v030.json`. 배포 이미지 ID는 `docs/image-versions.json`에 기록했습니다.
