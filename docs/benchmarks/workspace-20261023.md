@@ -26,6 +26,7 @@
 | Ruff check/format | 통과,69개 파일 형식 확인 | 명령 실행 결과 |
 | JS 문법 | dashboard/controls/navigation/admin 네 파일 통과 | `node --check` |
 | wheel | 빌드 성공, admin HTML/Python·선택창·보고서 CSS·폰트/OFL·템플릿 포함 확인 | `dist/solarops_audit-0.4.1-py3-none-any.whl` |
+| GitHub CI (`0618ce1`) | Windows/Ubuntu 각각 **127 passed,5 skipped**, 합성 데모·복원·wheel·소스 ZIP 성공 | [run39841897047](https://github.com/TaeyanG4/solarops-audit/actions/runs/39841897047), `github-ci.json` |
 | 전체 현황 브라우저 회귀 | **107명령**,3너비 axe 위반0 | `overview-final/` |
 | 워크스페이스 브라우저 | **195명령**,23회 axe 위반0, API 응답 동일 | `workspace-reviewed/` |
 | 실제 서비스 수명주기 | **132명령**,15회 axe 위반0, 전체 중지→기본 시작→kind 시작 | `workspace-check/lifecycle.json` |

@@ -37,3 +37,9 @@
 - 별도 documenter가 DESIGN.md와 schemaVersion2 sidecar를 최종 소스의 사이드바·16/14px·선택창·보고서·관리 구성으로 갱신했습니다. 현재436개 문서 링크·55개 스크립트·8개 원본 checksum 검사를 통과했습니다.
 - 실행 서버의 CSS/JS/report.css/favicon6개와 소스의 SHA가 모두 일치합니다. 최종 이미지ID는 `f93d0fa683f1…`이며 Compose기본3개·kind·관리8504응답을 확인했습니다.
 - Git diff whitespace 검사를 통과했고 OFL은 원문의 공백까지 보존하도록 gitattributes로 제한했습니다. 데이터/secret/도구 바이너리는 게시 대상에서 제외했습니다. 검사용 Agent Browser세션은 종료했습니다.
+
+## GitHub 전달 완료
+
+- 기능 커밋 `0618ce1`을 기존 비공개main에 push했습니다. [CI39841897047](https://github.com/TaeyanG4/solarops-audit/actions/runs/39841897047)는 Windows/Ubuntu 각각127통과·5제외(21.26s/12.34s)이며 문서438링크·55스크립트·8원본 checksum, 합성 데모·복원·wheel·소스 ZIP이 모두 성공했습니다.
+- 별도 documenter의 YAML필드·토큰 참조·schemaVersion2·UTF-8·색25개·타이포12역할·컴포넌트견본10개 검사를 확인했습니다. 문서/검수는 실제 고객평가나 추가 서비스실험을 대신하지 않습니다.
+- 완료된 OPS-01/UI-04/UI-05/최종전달을plan에서 제거하고 BIZ-01만 고객자료 의존으로 남겼습니다. handoff는37줄·최근8개요약을 유지합니다. CI원본은 `artifacts/ui-workspace-20261023/github-ci.json`에 있습니다.
