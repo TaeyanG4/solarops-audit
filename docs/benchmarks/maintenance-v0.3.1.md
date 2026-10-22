@@ -39,7 +39,13 @@
 - 각 환경의 4개 DAG는 검사 후 모두 pause 상태를 확인했습니다. 기존 데이터/PVC/실행 Pod/원본은 삭제하지 않았습니다.
 - 실행 로그: `artifacts/airflow-compose-v031.log`, `artifacts/k8s-public-v031.log`.
 
-원격 CI 결과는 기능 커밋 검사 완료 후 연결합니다.
+## 원격 CI와 화면
+
+[기능 커밋 658c814의 GitHub Actions](https://github.com/TaeyanG4/solarops-audit/actions/runs/39779616306)가 성공했습니다. Ubuntu/Windows 각각 **81 passed, 1 skipped**이며 두 환경 모두 의존성 설치·lint·문서/경로·JS 문법·정상 데모·복구 데모·wheel·소스 ZIP·lockfile·아티팩트 업로드까지 통과했습니다. 제외된 1개는 실제 서비스 통합 검사로, 로컬에서 별도 통과했습니다.
+
+실제 8502 화면에서 v0.3.1 전체 현황, 기존 PS_001 공개 보고서, 합성 DEMO_01과 기존 `all` 보고서가 출처별로 표시됨을 확인했습니다. 선택한 발전소가 없는 자료 구분에서는 안내 후 사용 가능한 보고서를 선택하도록 유지합니다. 브라우저 콘솔 오류는 관찰되지 않았습니다. 최종 화면은 PS_001·2024년 4월 공개 보고서이며 증거는 `artifacts/report-v031.png`에 보존했습니다.
+
+CI에는 현재 사용 중인 Actions의 Node 20→24 전환 안내가 남아 있습니다. 실행은 성공했으며, Actions 주 버전 갱신은 앱 의존성 갱신과 구분해 후속 검증합니다.
 
 ## 재현 명령
 

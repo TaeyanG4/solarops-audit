@@ -11,7 +11,7 @@
 | 입력·정규화·품질·계보·보고서 | 구현 및 공개 전체 처리 검증 | 51개 발전소, 인버터 14,400,480행, 12,572개 파티션의 native/서비스 결과 일치 |
 | Airflow·Compose·kind/KPO | 실제 실행·재시도·백필 검증 | 공개/합성 시나리오, Pod 중단 복구, 일별 해시 비교 |
 | 월별 UI·API·실행 이력 | 구현 및 브라우저/회귀 검증 | 단일 SELECT, 슬롯 가중 집계, batch→partition 연결 |
-| 배포·품질 관리 | private GitHub, 두 OS CI, wheel·소스 ZIP | [최신 유지보수 검증](benchmarks/maintenance-v0.3.1.md) |
+| 배포·품질 관리 | private GitHub, 두 OS CI 각 81개 통과, wheel·소스 ZIP | [최신 유지보수 검증](benchmarks/maintenance-v0.3.1.md) |
 | 문서·구조 | v0.3.1 정리 | README·문서 목차·설치·기술 스택·구조·개발 안내, 목적별 스크립트 |
 | 고객·사업 검증 | 준비 자료만 있음 | 인터뷰/스키마 매핑/가격 산술; 실제 계약·매출 없음 |
 | 외부 운영 | 미실행 | 인증·백업 복원 훈련·SLO·보존정책은 후속 범위 |
