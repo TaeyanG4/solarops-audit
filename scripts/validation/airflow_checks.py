@@ -19,7 +19,7 @@ if args.source_kind == "public" and not all(
     (args.plant, args.start, args.end, args.source_version, args.period)
 ):
     parser.error("Public checks require --plant, --from, --to, --source-version and --period")
-root = Path(__file__).resolve().parents[1]
+root = Path(__file__).resolve().parents[2]
 stamp = str(int(time.time()))
 if args.mode == "compose":
     prefix = [

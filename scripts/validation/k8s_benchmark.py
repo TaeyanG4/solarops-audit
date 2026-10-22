@@ -5,7 +5,7 @@ import subprocess
 import time
 from pathlib import Path
 
-root = Path(__file__).resolve().parents[1]
+root = Path(__file__).resolve().parents[2]
 kube = ["kubectl", "--kubeconfig", str(root / "artifacts/kubeconfig"), "-n", "solarops"]
 stamp = str(int(time.time()))
 code = """
@@ -30,7 +30,7 @@ for concurrency in (1, 2, 4):
         "containers": [
             {
                 "name": "worker",
-                "image": "solarops-worker:0.3.0",
+                "image": "solarops-worker:0.3.1",
                 "imagePullPolicy": "IfNotPresent",
                 "command": ["python", "-c", code],
                 "envFrom": [{"secretRef": {"name": "solarops-app"}}],

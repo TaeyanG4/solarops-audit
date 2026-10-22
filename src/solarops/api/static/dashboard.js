@@ -449,24 +449,15 @@ async function overview(signal) {
 }
 
 async function reports(signal) {
-  const data = await get("/api/v1/reports", signal),
+  const params = new URLSearchParams({ period: state.period });
+  if (state.source !== "all") params.set("source_kind", state.source);
+  const data = await get(`/api/v1/reports?${params}`, signal),
     root = node("div");
   const reports = [];
   for (const report of data.items.sort((a, b) =>
     b.generated_at.localeCompare(a.generated_at),
   )) {
     if (report.period !== state.period) continue;
-    // Report source flags are read from the immutable manifest by the report itself.
-    if (
-      state.source === "public" &&
-      !(report.scope.startsWith("PS_") || report.scope === "all-public")
-    )
-      continue;
-    if (
-      state.source === "synthetic" &&
-      !(report.scope === "DEMO_01" || report.scope === "all-synthetic")
-    )
-      continue;
     reports.push(report);
   }
   root.append(
@@ -475,6 +466,10 @@ async function reports(signal) {
       "생성 시점의 품질 지표와 원본 계보를 함께 보관합니다.",
     ),
   );
+  if (reports.some((report) => report.source_metadata_status === "unavailable"))
+    root.append(
+      node("p", "일부 보고서의 출처 파일을 읽을 수 없습니다. 운영자가 저장소를 확인해 주세요.", "notice"),
+    );
   if (!reports.length) {
     root.append(
       empty(

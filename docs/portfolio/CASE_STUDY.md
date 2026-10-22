@@ -15,9 +15,9 @@ SolarOps는 이 문제를 입력 계약, 원자적인 일별 공개, 논리 해�
 | 설명할 역량 | 구현 | 증거 |
 |---|---|---|
 | 데이터 계약과 품질 | 실제 공개 CSV 스키마, UTC, NULL·보간·표본 수, 중복 충돌 | [계약](../data-contract.md), [계약 검사](../../tests/test_contracts.py) |
-| 재현성과 복구 | 원본 checksum, 명시 버전, 일별 트랜잭션, 실패 시 이전 활성 결과 유지 | [실행형 데모](../../scripts/portfolio_demo.py), [회귀 검사](../../tests/test_pipeline.py) |
+| 재현성과 복구 | 원본 checksum, 명시 버전, 일별 트랜잭션, 실패 시 이전 활성 결과 유지 | [실행형 데모](../../scripts/demo/portfolio_demo.py), [회귀 검사](../../tests/test_pipeline.py) |
 | 저장소와 배치 처리 | DuckDB·Arrow로 일별 정규화, PostgreSQL·MinIO | [51개 전체 처리 검증](../benchmarks/2026-10-22.md) |
-| 오케스트레이션 | 같은 CLI를 Airflow LocalExecutor와 KPO에서 실행 | [DAG 운영](../runbooks/dags.md), [공개 자료 시나리오](../../scripts/airflow_checks.py) |
+| 오케스트레이션 | 같은 CLI를 Airflow LocalExecutor와 KPO에서 실행 | [DAG 운영](../runbooks/dags.md), [공개 자료 시나리오](../../scripts/validation/airflow_checks.py) |
 | API 설계와 성능 | 월 범위의 단일 SELECT, 필요한 지표만 조회, API 팬아웃 제거 | [조회 모델](../../src/solarops/api/readmodels.py), [쿼리 수 회귀 검사](../../tests/test_workspace.py) |
 | 운영 가시성 | 최신순·상태별 작업 이력, batch→partition 연결, 실패 원인 | [API](../../src/solarops/api/app.py), 실행 화면 |
 | 전달과 재현 | OS별 CI, 실제 합성 보고서·검사 결과·wheel 아티팩트 | [GitHub Actions](https://github.com/TaeyanG4/solarops-audit/actions) |
@@ -31,6 +31,8 @@ SolarOps는 이 문제를 입력 계약, 원자적인 일별 공개, 논리 해�
 - 동시 Pod 1/2/4 성능은 766행의 작은 합성 작업으로 측정했습니다. 대규모 선형 확장성의 증거로 사용하지 않습니다.
 
 [측정 상세와 재현 방법](../benchmarks/workspace-v0.3.0.md)
+
+전체 버전·대안·선택 이유는 [기술 스택](../architecture/technology-stack.md), 파일별 책임과 커밋 경계는 [구조 안내](../architecture/system.md)를 참고합니다.
 
 ## 설명할 수 있어야 하는 설계 선택
 

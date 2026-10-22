@@ -14,7 +14,7 @@ parser.add_argument("--source-dir", type=Path, default=Path("data/source"))
 args = parser.parse_args()
 if not re.fullmatch(r"PS_[0-9]{3}", args.plant):
     parser.error("Expected public plant ID such as PS_001")
-root = Path(__file__).resolve().parents[1]
+root = Path(__file__).resolve().parents[2]
 source = args.source_dir.resolve()
 files = [
     "BR-PVGen_metadata.csv",
@@ -39,7 +39,7 @@ spec = {
         "containers": [
             {
                 "name": "stage",
-                "image": "solarops-worker:0.3.0",
+                "image": "solarops-worker:0.3.1",
                 "imagePullPolicy": "IfNotPresent",
                 "command": [
                     "python",

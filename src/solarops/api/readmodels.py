@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from sqlalchemy import func, select
 
 from solarops.config import CALCULATION_VERSION
-from solarops.reports.render import month_bounds
+from solarops.contracts.dates import month_bounds
 from solarops.storage.postgres import active, metrics, runs
 
 COUNTS = (

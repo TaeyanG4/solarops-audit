@@ -10,6 +10,7 @@ doctor:
 lint:
 	$(UV) run ruff check src tests scripts dags
 	$(UV) run ruff format --check src tests scripts dags
+	$(UV) run python scripts/validation/check_docs.py
 test:
 	$(UV) run pytest -q
 demo-sample:
@@ -25,7 +26,7 @@ download-full:
 	$(UV) run solarops source extract data/source/BR-PVGen_inverter.zip data/source/inverter
 	$(UV) run solarops source extract data/source/BR-PVGen_meteorological.zip data/source/station
 up-local:
-	bash scripts/bootstrap-local.sh
+	bash scripts/ops/bootstrap-local.sh
 down-local:
 	$(COMPOSE) --profile airflow stop
 db-migrate:
@@ -35,12 +36,12 @@ airflow-up:
 	$(COMPOSE) --profile airflow run --rm airflow-init
 	$(COMPOSE) --profile airflow up -d airflow-api airflow-scheduler airflow-dag-processor
 dag-validate:
-	docker run --rm -v "$(CURDIR)/scripts/validate_dags.py:/tmp/validate_dags.py:ro" --entrypoint python solarops-airflow:0.3.0 /tmp/validate_dags.py
+	docker run --rm -v "$(CURDIR)/scripts/validation/validate_dags.py:/tmp/validate_dags.py:ro" --entrypoint python solarops-airflow:0.3.1 /tmp/validate_dags.py
 test-services:
-	$(UV) run python scripts/service-test.py
+	$(UV) run python scripts/validation/service-test.py
 k8s-bootstrap:
-	bash scripts/k8s-bootstrap.sh
+	bash scripts/ops/k8s-bootstrap.sh
 k8s-deploy:
-	bash scripts/k8s-deploy.sh
+	bash scripts/ops/k8s-deploy.sh
 k8s-smoke:
-	bash scripts/k8s-smoke.sh
+	bash scripts/ops/k8s-smoke.sh

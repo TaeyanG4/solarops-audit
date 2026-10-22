@@ -25,7 +25,7 @@ data/source/
 kind에서는 KPO 작업이 기존 `solarops-data` PVC의 `/data/source`를 읽습니다. 다운로드한 자료 중 한 발전소만 복사할 수 있습니다:
 
 ```bash
-python3 scripts/k8s-stage-public.py --plant PS_001
+python3 scripts/ops/k8s-stage-public.py --plant PS_001
 ```
 
 이 도구는 metadata/인버터/기상 3개 파일을 SHA-256으로 검증하고 기존 파일이 동일하면 재사용합니다. 내용이 다르면 중단하며 덮어쓰지 않습니다. 전송 중 파일은 `/data/source-staging`에 남기고 검증된 파일만 원자적으로 연결합니다. 도움 Pod는 종료 후 보존되며 다운로드·기존 데이터 삭제는 하지 않습니다. 수정된 원본으로 교체해야 할 때는 별도 소스 루트/PVC와 명시 버전을 준비합니다.
@@ -61,11 +61,11 @@ Airflow 3.3 CLI: `airflow dags list-runs DAG_ID --output json` (dag ID는 위치
 
 ```bash
 # Compose의 정상/재시도/실제 백필/품질/보고서 검증; 끝난 DAG는 pause
-uv run python scripts/airflow_checks.py --mode compose
+uv run python scripts/validation/airflow_checks.py --mode compose
 # kind
-python3 scripts/airflow_checks.py --mode k8s
+python3 scripts/validation/airflow_checks.py --mode k8s
 # 공개 PS_001 계획/처리/백필/품질/보고서 실제 실행
-uv run python scripts/airflow_checks.py --mode compose --source-kind public \
+uv run python scripts/validation/airflow_checks.py --mode compose --source-kind public \
   --plant PS_001 --from 2024-04-03 --to 2024-04-04 \
   --source-version brpvgen-v1 --period 2024-04
 # kind에서도 소스 복사 후 --mode k8s로 같은 검증 가능
@@ -75,4 +75,4 @@ UI Params의 날짜는 ISO date, 버전은 경로 안전 문자로 제한합니�
 
 `fault_marker`와 `test_delay`는 합성 자료의 장애 시연에만 적용됩니다. `fault_marker`가 새 이름이면 첫 실행에서 DB 커밋 도중 예외를 발생시키고, 다음 재시도에서 같은 결과를 정상 공개합니다. 동일 marker는 다시 실패시키지 않습니다. 기존 marker를 삭제하지 말고 새 이름을 사용합니다.
 
-배포 이미지 버전은 0.3.0입니다. 이후 코드 변경은 새 버전/digest로 배포하세요. Compose는 `docker compose --env-file .env -f infra/compose/compose.yaml --profile airflow build dashboard airflow-api` 후 해당 서비스를 `up -d`합니다. kind는 `bash scripts/k8s-refresh.sh`로 이미지 로드와 롤아웃을 수행합니다. 완료 Pod/로그는 검증 증거로 남습니다.
+배포 이미지 버전은 0.3.1입니다. 이후 코드 변경은 새 버전/digest로 배포하세요. Compose는 `docker compose --env-file .env -f infra/compose/compose.yaml --profile airflow build dashboard airflow-api` 후 해당 서비스를 `up -d`합니다. kind는 `bash scripts/ops/k8s-refresh.sh`로 이미지 로드와 롤아웃을 수행합니다. 완료 Pod/로그는 검증 증거로 남습니다.

@@ -1,6 +1,6 @@
 """Structural QA for the SolarOps Audit planning bundle; no network required."""
-import re
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parent.parent
 REQUIRED = [

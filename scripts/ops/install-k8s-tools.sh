@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 mkdir -p .tools
 if [[ ! -f .tools/kind ]]; then
   curl -fL https://github.com/kubernetes-sigs/kind/releases/download/v0.33.0/kind-linux-amd64 -o .tools/kind

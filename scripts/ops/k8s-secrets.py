@@ -4,7 +4,7 @@ import base64
 import json
 from pathlib import Path
 
-root = Path(__file__).resolve().parents[1]
+root = Path(__file__).resolve().parents[2]
 env = dict(
     line.split("=", 1)
     for line in (root / ".env").read_text().splitlines()

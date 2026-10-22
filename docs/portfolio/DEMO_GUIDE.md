@@ -6,7 +6,7 @@ Python 3.12와 uv를 준비한 checkout에서:
 
 ```text
 uv sync --frozen
-uv run python scripts/portfolio_demo.py --serve
+uv run python scripts/demo/portfolio_demo.py --serve
 ```
 
 매 실행마다 새 `data/portfolio-<UTC 시각>` 디렉터리를 만듭니다. 출력 경로를 지정하려면 `--output data/my-demo-01`을 사용합니다. 이미 있는 경로는 거부하므로 이전 자료를 덮어쓰지 않습니다. 데모는 환경에 PostgreSQL/S3 설정이 있어도 독립 SQLite·로컬 파일을 사용합니다.

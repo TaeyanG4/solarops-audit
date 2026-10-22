@@ -5,5 +5,7 @@
   "solarops-worker:0.2.0": "sha256:8e5f0d6ff48431db78b863ea7b6384dbc19c20c8e10d4fd2a7f848b2407a3213",
   "solarops-airflow:0.2.0": "sha256:1a34f221ae16cbdac3e59d861c371f14bd321b7a3742ef141779876f21675d54",
   "solarops-worker:0.3.0": "sha256:2c50670cafa8499dd9a5b0dfe0ed7adbc468097ecea168dfda725019eb2fb031",
-  "solarops-airflow:0.3.0": "sha256:ac545f0485fa8352b6115eca50fd3de20ad39397e9850348ed98ebfc506fc8bd"
+  "solarops-airflow:0.3.0": "sha256:ac545f0485fa8352b6115eca50fd3de20ad39397e9850348ed98ebfc506fc8bd",
+  "solarops-worker:0.3.1": "sha256:ac240bf2f9462ef2c821dc9194e3f25f0ebb9de41202dcbb050839f7c04c54f6",
+  "solarops-airflow:0.3.1": "sha256:aba2079dd3f7891381818f56a6974da61c371702754ec179af5b620b52becc47"
 }

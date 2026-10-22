@@ -1,18 +1,23 @@
 import json
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 
+from botocore.exceptions import BotoCoreError, ClientError
 from fastapi import FastAPI, HTTPException, Query
+from fastapi import Path as ApiPath
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, text
 
 from solarops import __version__
 from solarops.api.readmodels import fleet_overview, run_history
-from solarops.config import Settings, identifier
+from solarops.config import Settings
+from solarops.contracts.dates import date_bounds, month_bounds, next_day
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog, active_reports, plants, reports, runs
+
+PlantId = Annotated[str, ApiPath(pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$")]
 
 
 def create_app(settings=None):
@@ -73,16 +78,18 @@ def create_app(settings=None):
 
     @app.get("/api/v1/plants/{plant_id}/metrics")
     def plant_metrics(
-        plant_id: str,
+        plant_id: PlantId,
         start: str = Query("1900-01-01", alias="from"),
         end: str = Query("2200-01-01", alias="to"),
         offset: int = Query(0, ge=0),
         limit: int = Query(100, ge=1, le=500),
     ):
         try:
-            identifier(plant_id)
+            date_bounds(start, end)
         except ValueError:
-            raise HTTPException(422, "Invalid plant ID") from None
+            raise HTTPException(
+                422, "Expected YYYY-MM-DD dates with from < to (exclusive)"
+            ) from None
         data = catalog.snapshot(settings.org, start, end, plant_id)
         return {
             "items": [
@@ -100,7 +107,7 @@ def create_app(settings=None):
 
     @app.get("/api/v1/plants/{plant_id}/issues")
     def plant_issues(
-        plant_id: str, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=500)
+        plant_id: PlantId, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=500)
     ):
         data = catalog.snapshot(settings.org, plant=plant_id)
         items = [
@@ -111,13 +118,11 @@ def create_app(settings=None):
         return {"items": items[offset : offset + limit], "total": len(items)}
 
     @app.get("/api/v1/plants/{plant_id}/series")
-    def plant_series(plant_id: str, day: str):
-        from datetime import date, timedelta
-
+    def plant_series(plant_id: PlantId, day: str):
         try:
-            end = (date.fromisoformat(day) + timedelta(days=1)).isoformat()
+            end = next_day(day)
         except ValueError:
-            raise HTTPException(422, "Expected ISO date") from None
+            raise HTTPException(422, "Expected YYYY-MM-DD with a representable next day") from None
         data = catalog.snapshot(settings.org, day, end, plant_id)
         return {"items": json.loads(artifact(data[0]["payload"]["series_uri"])) if data else []}
 
@@ -162,15 +167,49 @@ def create_app(settings=None):
             )
 
     @app.get("/api/v1/reports")
-    def report_list():
+    def report_list(
+        period: str | None = None,
+        source_kind: Literal["public", "synthetic"] | None = None,
+    ):
+        if period is not None:
+            try:
+                month_bounds(period)
+            except ValueError:
+                raise HTTPException(422, "Expected a valid YYYY-MM period") from None
+        statement = select(active_reports).where(
+            active_reports.c.org_id == settings.org,
+            active_reports.c.report_timezone == settings.timezone,
+        )
+        if period is not None:
+            statement = statement.where(active_reports.c.period == period)
         with catalog.engine.connect() as conn:
-            data = conn.execute(
-                select(active_reports).where(
-                    active_reports.c.org_id == settings.org,
-                    active_reports.c.report_timezone == settings.timezone,
-                )
-            ).mappings()
-            return {"items": [r["payload"] for r in data]}
+            payloads = [dict(r["payload"]) for r in conn.execute(statement).mappings()]
+        items = []
+        for payload in payloads:
+            if "source_kinds" not in payload:
+                # Older reports retain their source evidence in the immutable manifest.
+                # Never infer provenance from plant names or rewrite historical artifacts.
+                try:
+                    manifest = json.loads(artifact(payload["artifacts"]["manifest.json"]))
+                    payload["source_kinds"] = sorted(
+                        {source["source_kind"] for source in manifest["sources"]}
+                    )
+                except (
+                    OSError,
+                    ValueError,
+                    KeyError,
+                    TypeError,
+                    BotoCoreError,
+                    ClientError,
+                    HTTPException,
+                ):
+                    payload["source_kinds"] = None
+            payload["source_metadata_status"] = (
+                "available" if payload["source_kinds"] else "unavailable"
+            )
+            if source_kind is None or source_kind in (payload["source_kinds"] or []):
+                items.append(payload)
+        return {"items": items}
 
     @app.get("/api/v1/reports/{report_id}")
     def report_info(report_id: UUID):

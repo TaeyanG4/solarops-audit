@@ -6,7 +6,7 @@
 
 전달 산출물: HTML/CSV 보고서, 품질 이슈 목록, 원본 SHA-256·규칙 버전·재처리 이력, 사람이 검토할 구간. 고장 확정, 정산용 계량값, 발전 손실액, 성능보증, 원격 설비 제어는 제공하지 않습니다.
 
-인터뷰 기록은 `interview-template.md`, 스키마 대응은 `schema-mapping.csv`를 사용합니다. 가격과 원가는 `uv run python scripts/pilot_price.py --revenue 200000 --hours 4 --hourly-cost 25000 --hosting 20000`으로 계산할 수 있습니다. 계산 결과는 입력 가정의 산술이며 판매 예측이 아닙니다.
+인터뷰 기록은 `interview-template.md`, 스키마 대응은 `schema-mapping.csv`를 사용합니다. 가격과 원가는 `uv run python scripts/demo/pilot_price.py --revenue 200000 --hours 4 --hourly-cost 25000 --hosting 20000`으로 계산할 수 있습니다. 계산 결과는 입력 가정의 산술이며 판매 예측이 아닙니다.
 
 시작 전 사람이 확인할 내용:
 

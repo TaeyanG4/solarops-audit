@@ -20,8 +20,8 @@
 클라이언트는 Windows Python urllib, 서버는 Compose FastAPI + PostgreSQL이며 localhost에서 순차 실행했습니다. 애플리케이션 캐시는 없지만 DB/OS 캐시를 초기화하지 않았습니다. 별도의 부하 격리나 동시 사용자 실험은 하지 않았습니다. 이 결과에는 HTTP 왕복 횟수의 차이가 포함됩니다. 전체 시스템의 일반적인 56배 성능 향상이나 DB만의 가속으로 해석하지 않습니다.
 
 ```text
-uv run python scripts/benchmark_dashboard.py --mode legacy --output artifacts/legacy-new.json
-uv run python scripts/benchmark_dashboard.py --mode overview --output artifacts/overview-new.json
+uv run python scripts/validation/benchmark_dashboard.py --mode legacy --output artifacts/legacy-new.json
+uv run python scripts/validation/benchmark_dashboard.py --mode overview --output artifacts/overview-new.json
 ```
 
 기존 결과를 보존하기 위해 출력 파일은 새 경로여야 합니다. `--repeat`, `--period`, `--url`로 조건을 명시할 수 있습니다. 원본 증거는 `artifacts/dashboard-legacy-v030.json`, `artifacts/dashboard-overview-v030.json`입니다.

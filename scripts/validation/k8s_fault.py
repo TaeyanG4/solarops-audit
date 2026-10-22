@@ -5,7 +5,7 @@ import subprocess
 import time
 from pathlib import Path
 
-root = Path(__file__).resolve().parents[1]
+root = Path(__file__).resolve().parents[2]
 kube = ["kubectl", "--kubeconfig", str(root / "artifacts/kubeconfig"), "-n", "solarops"]
 airflow = kube + ["exec", "airflow-scheduler-0", "-c", "scheduler", "--", "airflow"]
 run_id = "pod-crash-" + str(int(time.time()))

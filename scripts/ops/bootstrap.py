@@ -5,7 +5,7 @@ import os
 import secrets
 from pathlib import Path
 
-target = Path(__file__).resolve().parents[1] / ".env"
+target = Path(__file__).resolve().parents[2] / ".env"
 if target.exists():
     print("Existing .env preserved")
 else:

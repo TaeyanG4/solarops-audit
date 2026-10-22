@@ -1,5 +1,7 @@
 from pathlib import Path
 
+raise SystemExit("Archived v0.1 one-shot migration. Do not run against current source.")
+
 path = Path("src/solarops/reports/templates/monthly.html")
 s = path.read_text(encoding="utf-8")
 s = s.replace(

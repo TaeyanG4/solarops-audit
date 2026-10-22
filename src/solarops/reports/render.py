@@ -7,6 +7,7 @@ from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from solarops.config import CALCULATION_VERSION
+from solarops.contracts.dates import month_bounds
 from solarops.pipeline import canonical_hash
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog, active_reports, now, put, reports
@@ -14,12 +15,6 @@ from solarops.storage.postgres import Catalog, active_reports, now, put, reports
 env = Environment(
     loader=FileSystemLoader(Path(__file__).parent / "templates"), autoescape=select_autoescape()
 )
-
-
-def month_bounds(period):
-    first = date.fromisoformat(period + "-01")
-    end = date(first.year + (first.month == 12), first.month % 12 + 1, 1)
-    return first.isoformat(), end.isoformat()
 
 
 def build_report(settings, period, plant=None, source_kind=None):
@@ -56,6 +51,7 @@ def build_report(settings, period, plant=None, source_kind=None):
         "timezone": settings.timezone,
         "calculation_version": CALCULATION_VERSION,
         "source_manifest_hash": canonical_hash(manifests),
+        "source_kinds": sorted({s["source_kind"] for s in sources.values()}),
         "status": "complete" if complete else "partial_period",
         "days": len(metrics),
         "plant_count": len({r["plant_id"] for r in snapshot}),
@@ -98,6 +94,7 @@ def build_report(settings, period, plant=None, source_kind=None):
         scope=report["scope"],
         generated_at=report["generated_at"],
         source_manifest_hash=report["source_manifest_hash"],
+        source_kinds=report["source_kinds"],
         status=report["status"],
         artifacts=artifacts,
         local_directory=str(directory.resolve()),
