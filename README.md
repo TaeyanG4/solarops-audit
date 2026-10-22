@@ -10,6 +10,8 @@
 
 **데이터 출처:** [BR-PVGen / Zenodo](https://zenodo.org/records/21511487) · 브라질 51개 발전소의 공개 역사 자료 · CC BY 4.0. 합성 데모는 별도로 표시하며 화면의 발전량은 추정치입니다.
 
+**실제로 작동하는가?** 2026-10-23 실행 서비스·DB·객체를 직접 점검했습니다. 원본 4개는 Zenodo 게시 체크섬과 일치하고, 대표 하루의 독립 계산값이 DB·API·보고서·Kubernetes 결과와 일치합니다. Airflow/KPO 실행 이력도 확인했으며, 합성 장애 시험과 공개 데이터 처리를 구분합니다. [기술스택·데이터 실사와 한계](docs/benchmarks/stack-authenticity-20261023.md).
+
 [빠른 실행](#빠른-실행) · [데이터 출처](#어떤-데이터를-사용하는가) · [기술 선택](#구조와-기술-선택) · [사용 스킬](#개발에-사용한-ai-스킬) · [검증 근거](#검증한-범위) · [전체 문서](docs/README.md)
 
 ![전체 현황: 공개 BR-PVGen 2024년 4월, 추정 발전량과 데이터 품질](docs/portfolio/images/workspace-20261023/overview.png)
@@ -147,6 +149,7 @@ flowchart LR
 
 | 항목 | 확인한 결과 | 근거 |
 |---|---|---|
+| 기술스택·자료 실사 | 원본 4개·CSV 102개·공개 계보 103개 해시 대조, 대표 계산 경로 일치, 실제 Airflow/KPO 이력 확인 | [2026-10-23 실사](docs/benchmarks/stack-authenticity-20261023.md) |
 | 전체 공개 자료 | 51개 발전소·인버터 14,400,480행·일별 파티션 12,572개, v1/v2 일별 지표·원본 SHA 일치 | [v0.4 검증](docs/benchmarks/reliability-v0.4.0.md) |
 | 실패·동시성·복구 | 입력 변경·동시 버전·보고서 역순 완료·파일 누락/변조·격리 복원 | [v0.4.1 검증](docs/benchmarks/integrity-v0.4.1.md) |
 | 화면·보고서·관리 | 1440/768/390px, overview 107명령·workspace 195명령, axe 3+23회 위반 0, API 동일 | [최신 UI 검증](docs/benchmarks/workspace-20261023.md) |

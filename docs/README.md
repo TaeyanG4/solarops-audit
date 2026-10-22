@@ -10,6 +10,7 @@
 | 현재 진행도와 다음 과제 | [구현 상태](IMPLEMENTATION_STATUS.md), [점수 기반 계획](../plan.md), [인계·진행 기록](../handoff.md), [날짜별 상세 기록](worklog/README.md), [버전별 변경](../CHANGELOG.md) |
 | 포트폴리오 설명 | [문제·설계·증거 사례](portfolio/CASE_STUDY.md) |
 | 기술 선택 이해 | [버전·선택 이유·대안](architecture/technology-stack.md), [폴더·데이터 흐름·트랜잭션](architecture/system.md) |
+| 실제 사용·자료 진위 | [실행 기술·원본 해시·독립 계산·합성 시험 구분](benchmarks/stack-authenticity-20261023.md) |
 | 데이터 출처 | [제작자·범위·라이선스·파일 다운로드](data-sources.md) |
 | 데이터 해석 | [실제 CSV 스키마·품질·에너지 계약](data-contract.md) |
 | 로컬 운영 | [화면·보고서](runbooks/operator.md), [DAG·백필](runbooks/dags.md), [실패·진단](runbooks/recovery.md), [백업·복원 시험](runbooks/backup-restore.md) |

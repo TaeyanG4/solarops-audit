@@ -1,0 +1,381 @@
+{
+  "audit_date_kst": "2026-10-23",
+  "code_commit": "4e6d1d2",
+  "scope": "Read-only inspection of existing services/data; no new ingestion or fault injection",
+  "source": {
+    "checked_at_utc": "2026-10-22T19:47:38.837685+00:00",
+    "metadata_url": "https://zenodo.org/api/records/21511487",
+    "doi": "10.5281/zenodo.21511487",
+    "title": "BR-PVGen - The Brazilian Photovoltaic Generation Dataset",
+    "files": [
+      {
+        "name": "BR-PVGen_inverter.zip",
+        "bytes": 294085407,
+        "md5": "fbdb7cdb328a3e6ffb470f95bc56bcf4",
+        "sha256": "58ec09c4da8e8d61659bda5dd9db5fe27ebaea7bc547117464e910b7aaf902c6",
+        "matches_live_publisher": true
+      },
+      {
+        "name": "Readme.txt",
+        "bytes": 10090,
+        "md5": "49bbfb45c13db13baf2c669a7d67c1d0",
+        "sha256": "4e8ec256c926b32cea8e8e1f2b9fb334f75cedd391eca570cdd229006add8a20",
+        "matches_live_publisher": true
+      },
+      {
+        "name": "BR-PVGen_metadata.csv",
+        "bytes": 3095,
+        "md5": "abae1b232035097a55d8534a9ec51ab8",
+        "sha256": "ba45f4dfb557bbfca37c3ee16c8b7d2a5f0aec9fad4e6b6774be760c4852237c",
+        "matches_live_publisher": true
+      },
+      {
+        "name": "BR-PVGen_meteorological.zip",
+        "bytes": 57222929,
+        "md5": "7c20c037074734f426d79a4e3f0db0bf",
+        "sha256": "a4b23123c16bf6a97a8d282e6ad18c2e697ac990d0b96602c68c6b2abfce240f",
+        "matches_live_publisher": true
+      }
+    ],
+    "all_extracted_match_archives": true,
+    "full_dataset_downloaded": false
+  },
+  "extracted_csv_count": 102,
+  "lineage": {
+    "all_public_lineage_hashes_match_published_files": true,
+    "distinct_public_sources": 103,
+    "runtime_code_files_matching_checkout": 36
+  },
+  "runtime": {
+    "checked_at_utc": "2026-10-22T19:49:40.995899+00:00",
+    "python": "3.12.13",
+    "libraries": {
+      "fastapi": "0.159.1",
+      "uvicorn": "0.54.0",
+      "duckdb": "2.0.0",
+      "pyarrow": "26.0.0",
+      "sqlalchemy": "2.1.6",
+      "psycopg": "3.3.6",
+      "boto3": "1.43.117",
+      "jinja2": "3.1.6"
+    },
+    "backend": "postgresql",
+    "postgres_version": "PostgreSQL 16.10 (Debian 16.10-1.pgdg12+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+    "inventory": {
+      "synthetic": {
+        "plants": 1,
+        "partitions": 7,
+        "inverter_rows": 1342
+      },
+      "public": {
+        "plants": 51,
+        "partitions": 12572,
+        "inverter_rows": 14400480
+      }
+    },
+    "overview": {
+      "synthetic": {
+        "expected_slots": 1344,
+        "observed_slots": 1342,
+        "valid_slots": 1342,
+        "missing_slots": 2,
+        "invalid_slots": 0,
+        "interpolation_unknown_slots": 0,
+        "review_candidate_count": 1,
+        "estimated_energy_kwh": 832.424,
+        "interpolated_slots": 2,
+        "partition_count": 7,
+        "coverage_ratio": 0.9985119047619048,
+        "valid_coverage_ratio": 0.9985119047619048,
+        "source_interpolation_ratio": 0.0014903129657228018,
+        "plant_count": 1,
+        "complete_plants": 0
+      },
+      "public": {
+        "expected_slots": 195264,
+        "observed_slots": 195264,
+        "valid_slots": 161084,
+        "missing_slots": 0,
+        "invalid_slots": 34180,
+        "interpolation_unknown_slots": 175946,
+        "review_candidate_count": 0,
+        "estimated_energy_kwh": 1477828.846,
+        "interpolated_slots": 19318,
+        "partition_count": 140,
+        "coverage_ratio": 1.0,
+        "valid_coverage_ratio": 0.8249549328089151,
+        "source_interpolation_ratio": 0.09893272697476237,
+        "plant_count": 5,
+        "complete_plants": 4
+      }
+    },
+    "pipeline_run_statuses": {
+      "committed": 25410,
+      "failed": 14
+    },
+    "pipeline_failure_codes": {
+      "INJECTED_DURING_COMMIT": 14
+    },
+    "sample": {
+      "plant": "PS_001",
+      "day": "2024-04-03",
+      "run_id": "40bef888-1cbb-45f9-b822-79fee15c9110",
+      "logical_hash": "564c16574fd94d1609fc62d05cbec262ebec50f5a2a5731a971745a0232bcdfb",
+      "raw_objects": [
+        {
+          "kind": "metadata",
+          "sha256": "ba45f4dfb557bbfca37c3ee16c8b7d2a5f0aec9fad4e6b6774be760c4852237c",
+          "match": true
+        },
+        {
+          "kind": "inverter",
+          "sha256": "8600a00344caeefa0e15ae660f1fcd81e574738db546f0c279d5726ba6ca658f",
+          "match": true
+        },
+        {
+          "kind": "station",
+          "sha256": "96707e1e9bb1ca821483e73ad9868461b6061886d6c186d72e202ffbd6b5f8bf",
+          "match": true
+        }
+      ],
+      "parquets": {
+        "inverter": {
+          "rows": 3744,
+          "bytes": 54456,
+          "sha256": "1314ac4b2323b625591dcae067cf6d5d6c8dd54e2e9a251b104f81b76adc1831",
+          "compression": "ZSTD",
+          "all_rows_match_raw": true
+        },
+        "station": {
+          "rows": 96,
+          "bytes": 13204,
+          "sha256": "04b5deb08dc1a663b470664912c88e9cc8405ff8304c02122f81ac2d94030e4d",
+          "compression": "ZSTD",
+          "all_rows_match_raw": true
+        }
+      },
+      "independent_energy_kwh": 19752.692125,
+      "db_and_api_match": true,
+      "valid_slots": 2751,
+      "invalid_slots": 993
+    },
+    "report": {
+      "id": "d9a964f0-8846-4785-8989-9d392c7927a3",
+      "estimated_energy_kwh": 585980.279,
+      "source_kinds": [
+        "public"
+      ],
+      "artifacts": {
+        "report.html": {
+          "bytes": 2770410,
+          "sha256_match": true,
+          "http_matches_s3": true
+        },
+        "metrics.csv": {
+          "bytes": 6582,
+          "sha256_match": true,
+          "http_matches_s3": true
+        },
+        "manifest.json": {
+          "bytes": 137283,
+          "sha256_match": true,
+          "http_matches_s3": true
+        }
+      }
+    },
+    "readiness": {
+      "status": "ready"
+    }
+  },
+  "airflow": {
+    "version": "3.3.2",
+    "kpo_provider": "10.24.0",
+    "executor": "LocalExecutor",
+    "dags": [
+      {
+        "dag_id": "solarops_backfill_manual",
+        "is_paused": true
+      },
+      {
+        "dag_id": "solarops_ingest_daily",
+        "is_paused": true
+      },
+      {
+        "dag_id": "solarops_quality_daily",
+        "is_paused": true
+      },
+      {
+        "dag_id": "solarops_report_monthly",
+        "is_paused": true
+      }
+    ],
+    "stored_dag_run_states": {
+      "success": 44
+    },
+    "stored_task_states": {
+      "success": 80
+    },
+    "operators": {
+      "KubernetesPodOperator": 80
+    },
+    "latest_public_scenario_pod_matches": [
+      {
+        "run_id": "k8s-public-plan-1792682448",
+        "dag_id": "solarops_backfill_manual",
+        "state": "success",
+        "tasks": 2,
+        "pods": [
+          "solarops-replay-validate-publish-woksd2h0",
+          "solarops-validate-runtime-k8syzslx"
+        ]
+      },
+      {
+        "run_id": "k8s-public-normal-1792682448",
+        "dag_id": "solarops_ingest_daily",
+        "state": "success",
+        "tasks": 2,
+        "pods": [
+          "solarops-replay-validate-publish-r11m0yth",
+          "solarops-validate-runtime-mcn0rg2z"
+        ]
+      },
+      {
+        "run_id": "k8s-public-backfill-1792682448",
+        "dag_id": "solarops_backfill_manual",
+        "state": "success",
+        "tasks": 2,
+        "pods": [
+          "solarops-replay-validate-publish-b7kdt92h",
+          "solarops-validate-runtime-8hxxc9dp"
+        ]
+      },
+      {
+        "run_id": "k8s-public-quality-1792682448",
+        "dag_id": "solarops_quality_daily",
+        "state": "success",
+        "tasks": 1,
+        "pods": [
+          "solarops-verify-published-metrics-mnn6dziv"
+        ]
+      },
+      {
+        "run_id": "k8s-public-report-1792682448",
+        "dag_id": "solarops_report_monthly",
+        "state": "success",
+        "tasks": 2,
+        "pods": [
+          "solarops-await-validated-data-p4nlszw9",
+          "solarops-generate-check-lineage-publish-report-2g5z4ow8"
+        ]
+      }
+    ],
+    "retried_tasks": [
+      {
+        "dag_id": "solarops_ingest_daily",
+        "run_id": "k8s-retry-1792662245",
+        "task_id": "replay_validate_publish",
+        "state": "success",
+        "try_number": 2,
+        "operator": "KubernetesPodOperator"
+      },
+      {
+        "dag_id": "solarops_ingest_daily",
+        "run_id": "k8s-retry-1792663966",
+        "task_id": "replay_validate_publish",
+        "state": "success",
+        "try_number": 2,
+        "operator": "KubernetesPodOperator"
+      },
+      {
+        "dag_id": "solarops_backfill_manual",
+        "run_id": "pod-crash-1792663226",
+        "task_id": "replay_validate_publish",
+        "state": "success",
+        "try_number": 2,
+        "operator": "KubernetesPodOperator"
+      }
+    ]
+  },
+  "kubernetes": {
+    "server": "v1.35.0",
+    "namespace": "solarops",
+    "pod_phases": {
+      "Running": 6,
+      "Succeeded": 95,
+      "Failed": 3
+    },
+    "all_running_containers_ready": true,
+    "catalog": {
+      "backend": "PostgreSQL 16.10 (Debian 16.10-1.pgdg12+1) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+      "inventory": [
+        {
+          "calculation_version": "energy-interval-v1",
+          "partitions": 8,
+          "plants": 2
+        },
+        {
+          "calculation_version": "energy-interval-v2",
+          "partitions": 1,
+          "plants": 1
+        }
+      ],
+      "sample": {
+        "run_id": "30c11a19-6f03-475d-8861-1efa97be7438",
+        "logical_hash": "564c16574fd94d1609fc62d05cbec262ebec50f5a2a5731a971745a0232bcdfb",
+        "energy_kwh": "19752.692125"
+      }
+    }
+  },
+  "catalog_comparison": {
+    "native_sqlite": {
+      "energy-interval-v1": {
+        "partitions": 12572,
+        "logical_hash_signature": "d3e58b52a9a1f3e1a4efdb6e34d57fc0077926797c03a12e4eea7a2231f5a8d5",
+        "metrics_excluding_version_signature": "1ea0cc52e354392bdacd9a7d64ad0e5613c477628b099e9a4a790c5e022c370f"
+      },
+      "energy-interval-v2": {
+        "partitions": 0,
+        "logical_hash_signature": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "metrics_excluding_version_signature": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      }
+    },
+    "compose_postgresql": {
+      "energy-interval-v1": {
+        "partitions": 12572,
+        "logical_hash_signature": "d3e58b52a9a1f3e1a4efdb6e34d57fc0077926797c03a12e4eea7a2231f5a8d5",
+        "metrics_excluding_version_signature": "1ea0cc52e354392bdacd9a7d64ad0e5613c477628b099e9a4a790c5e022c370f"
+      },
+      "energy-interval-v2": {
+        "partitions": 12572,
+        "logical_hash_signature": "190019d64fcf01627805ee3ff775f81322202c3dffbfc70927aaafe54a240d96",
+        "metrics_excluding_version_signature": "1ea0cc52e354392bdacd9a7d64ad0e5613c477628b099e9a4a790c5e022c370f"
+      }
+    },
+    "v1_native_service_equal": true,
+    "service_v1_v2_metrics_equal_except_version": true,
+    "native_v2_not_migrated": true
+  },
+  "minio": {
+    "image": "solarops-minio:2025-10-15",
+    "binary_version_output": "DEVELOPMENT.GOGET",
+    "build_recipe_source_tag": "RELEASE.2025-10-15T17-29-55Z",
+    "independent_rebuild_verified": false
+  },
+  "helm": {
+    "cli": "v3.19.0+g3d8990f",
+    "chart": "airflow-1.22.0",
+    "revision": 10,
+    "status": "deployed",
+    "chart_app_version": "3.2.2",
+    "actual_airflow_image_version": "3.3.2"
+  },
+  "limitations": [
+    "Publisher checksums establish file identity, not on-site measurement accuracy.",
+    "All 103 catalog public source hashes checked; only representative three raw S3 objects and two Parquet objects read in full.",
+    "Kubernetes current v2 catalog contains one public day, not all 51 plants.",
+    "Default native data/solarops.db retains v1 only; dashboard uses Compose PostgreSQL v2.",
+    "Historical DAG/task records re-read; no new workloads or failure injection in this audit.",
+    "MinIO tag derives from build recipe; binary reports DEVELOPMENT.GOGET and was not independently rebuilt.",
+    "Live customer telemetry, metered energy, revenue and confirmed fault accuracy are not verified."
+  ]
+}

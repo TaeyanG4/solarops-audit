@@ -2,9 +2,13 @@
 
 [문서 홈](../README.md) · [구조와 데이터 흐름](system.md)
 
+설정된 기술과 실제 사용 증거는 [2026-10-23 실행 스택·데이터 실사](../benchmarks/stack-authenticity-20261023.md)를 함께 확인합니다. 라이브러리 설치뿐 아니라 DB 조회·S3 객체·원본 계산·실제 KPO 이력을 대조했습니다. kind DAG는 paused이며 전체 공개 데이터 처리는 Compose, kind v2 검증은 공개 하루 범위입니다.
+
 선택 기준은 로컬에서 재현 가능하고, 메모리 사용을 제한하며, 결과의 출처와 재시도 경계를 설명할 수 있는가입니다. 아래 버전은 직접 의존성 및 현재 인프라 설정 기준입니다. 전이 의존성은 [uv.lock](../../uv.lock), 배포된 이미지 식별자는 [image-versions.json](../image-versions.json)을 확인합니다.
 
 ## 처리와 저장
+
+MinIO는 공식 release tag를 지정한 자체 빌드입니다. 실행 바이너리의 `--version`은 `DEVELOPMENT.GOGET`으로 표시됩니다. 실제 S3 동작은 검증했지만 소스 아카이브 digest 고정·바이너리 재현 빌드까지 검증한 것은 아닙니다. Helm chart의 기본 app_version(3.2.2)과 실제 이미지의 Airflow(3.3.2)도 구별합니다.
 
 | 기술 / 버전 | 담당 역할과 선택 근거 | 대안·비용·재검토 조건 |
 |---|---|---|
