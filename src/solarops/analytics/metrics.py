@@ -128,7 +128,9 @@ def analyze(
             and station["document_count"] is not None
             and station["document_count"] > 0
         )
-        power = sum(r["value"] for r in rs if r["valid"]) / 1000 if rs else None
+        valid_power = [r["value"] for r in rs if r["valid"]]
+        # A real zero is an observation; no valid observation must remain unknown.
+        power = sum(valid_power) / 1000 if valid_power else None
         poa = station["value"] if station and station["valid"] else None
         status = "INSUFFICIENT_DATA" if not reliable else "normal"
         if not reliable:

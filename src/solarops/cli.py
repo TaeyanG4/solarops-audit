@@ -29,6 +29,10 @@ def main(argv=None):
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor")
     sub.add_parser("db-migrate")
+    inspect = sub.add_parser("inspect-runs", help="Read-only review of unfinished runs")
+    inspect.add_argument("--older-than-minutes", type=int, default=60)
+    inspect.add_argument("--limit", type=int, default=100)
+    inspect.add_argument("--offset", type=int, default=0)
     source = sub.add_parser("source").add_subparsers(dest="source_command", required=True)
     source.add_parser("inspect")
     fetch = source.add_parser("fetch")
@@ -121,6 +125,10 @@ def execute(args):
             case "extract":
                 return safe_extract(args.archive, args.destination)
     settings = Settings()
+    if args.command == "inspect-runs":
+        from solarops.diagnostics import inspect_runs
+
+        return inspect_runs(settings, args.older_than_minutes, args.limit, args.offset)
     if args.command == "replay":
         from solarops.replay import replay
 

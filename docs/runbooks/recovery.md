@@ -14,4 +14,8 @@
 
 **프로세스가 갑자기 죽은 실행:** pipeline_run이 running/validated로 남을 수 있습니다. 공개 결과 여부는 active manifest의 run_id로 확인합니다. 자동 TTL 삭제·강제 실패 처리기를 넣지 않았습니다. 운영자가 실행 상태/Pod 종료시각을 확인한 후 재시도합니다.
 
+`uv run solarops inspect-runs --older-than-minutes 60 --limit 100 --offset 0`은 설정된 조직의 미완료 실행을 오래된 순으로 조회합니다. Compose는 `docker compose --env-file .env -f infra/compose/compose.yaml exec -T dashboard solarops inspect-runs`로 동일하게 조회합니다. `has_more`가 true이면 offset을 늘립니다. `active_partition_count`, `active_child_partition_count`, `child_status_counts`를 함께 확인합니다. 시간 누락·미래 시각도 검토 대상으로 표시합니다. SQLite는 기존 파일만 읽기 전용으로 열며 상태·스키마를 변경하지 않습니다.
+
+`needs_review=true`는 실패 판정이 아닙니다. Airflow 실행/시도, 작업 프로세스나 Pod 상태·종료시각을 대조하고, 살아 있는 작업은 기다립니다. 종료가 확인되면 누락 날짜를 선택해 재실행하고 논리 해시와 보고서 계보를 확인합니다. 이 CLI는 작업을 강제 실패 처리하거나 삭제·재시도하지 않습니다.
+
 kind는 재해복구 저장소가 아닙니다. 고객 도입 전 PostgreSQL dump + 객체 저장소 스냅샷을 별도 암호화 저장소에 보관하고 복원 시험을 해야 합니다. 이 프로젝트는 공개/합성 데이터만 가지고 있습니다.

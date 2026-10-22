@@ -95,6 +95,7 @@ def build_report(settings, period, plant=None, source_kind=None):
         generated_at=report["generated_at"],
         source_manifest_hash=report["source_manifest_hash"],
         source_kinds=report["source_kinds"],
+        calculation_version=report["calculation_version"],
         status=report["status"],
         artifacts=artifacts,
         local_directory=str(directory.resolve()),

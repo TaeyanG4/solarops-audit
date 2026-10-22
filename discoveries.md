@@ -1,0 +1,48 @@
+# SolarOps Audit — 결과와 판단 근거
+
+`PENDING`은 다른 호스트의 독립 검토가 없다는 뜻입니다. 자체 실행의 통과/실패는 Evidence에 별도로 기록하며 검토 완료를 꾸며내지 않습니다.
+
+## D-A-001 — v0.3.1 기준과 수익화 판단
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 기술 MVP와 로컬 배포 검증은 확보했지만 실제 수요·매출·고객 파일 정확성은 미검증이다. 첫 수익 경로는 검수형 보고서 파일럿이며 SaaS 셀프서비스는 후속이다.
+- Evidence: docs/benchmarks/maintenance-v0.3.1.md, docs/IMPLEMENTATION_STATUS.md, docs/market/pilot.md; 사용자와 2026-10-22 논의. 20만원 매출·시급2.5만원·직접비2만원 가정이면 4시간시 8만원, 12시간시 -12만원. 세금/영업/초기개발/고정비 제외이며 시장가격/매출 실적이 아님.
+- Implication: new current best: 배포 기준 v0.3.1 / energy-interval-v1; 계산 경계 수정과 고객별 수작업 측정을 먼저 진행한다.
+- Reviews:
+
+## D-A-002 — v2 계산 경계와 해시 회귀
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 모두 무효인 전력 슬롯은 null, 실제 0은 0, 일부 유효 슬롯은 유효값 합으로 구분한다. 현지 일자의 UTC 구간과 원본 범위의 교집합으로 공개를 판단하면 UTC±경계의 불필요한 빈 파티션이 사라진다.
+- Evidence: tests/test_calculation_v2.py; artifacts/calculation-v2-before.log의 4실패(3개 결함 재현+1개 v2 요건), artifacts/calculation-v2-after.log의 관련18개 통과. 전체 Windows 88 passed,2 skipped. 시계열·품질·후보도 v2 논리해시에 포함하고 반복 해시 일치를 검사. DST 23/25시간 누락일은 92/100슬롯 유지.
+- Implication: H-A-01 완료. v1 결과는 수정하지 않고 별도 v2 적재·일별 수치 비교 후 배포해야 함. 전체 데이터/서비스 전환은 H-A-02에서 검증한다.
+- Reviews:
+
+## D-A-003 — 유료 파일럿 범위·원가와 미검증 항목
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 초기 연동 비용과 반복 납품 비용을 분리하고 발전소 1–3개/한 형식/한 달/수정 1회로 범위를 제한하면 실측 가능한 판매 실험이 된다. 고객 수요나 수익이 확인된 것은 아니다.
+- Evidence: docs/market/revenue-assessment.md, docs/market/pilot-scorecard.md, docs/market/pilot.md. pilot_price.py 실제 두 실행은 4시간 80,000원, 12시간 −120,000원. 손익분기 7.2시간은 입력 가정의 산술이며 실적이 아님. 측정 양식은 미측정 상태.
+- Implication: H-A-03 완료. 실제 승인 표본·구매 의사 검증은 H-A-06에 유지하며 Confidence 0/16점 유지.
+- Reviews:
+
+## D-A-004 — 읽기 전용 미완료 실행 진단
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 조직별 running/validated 실행의 나이와 active 연결을 상태 변경 없이 조회한다. 오래됨/시간 누락/미래 시각은 검토 후보이며 프로세스 종료의 증거는 아니다.
+- Evidence: tests/test_diagnostics.py 7개 통과: org 격리, timestamp, pagination, active 자식, SELECT만 실행, DB 비변경, 없는 SQLite 생성 금지, 실제 readonly SQLite. artifacts/inspect-runs-v040.json은 실제 PostgreSQL 실행중 batch 1개를 within_threshold로 확인.
+- Implication: H-A-04 완료. 자동 실패/삭제/재시도는 추가하지 않는다. 작업 생존 여부와 함께 운영자가 판단하는 절차를 runbook에 문서화한다.
+- Reviews:
+
+## D-A-005 — 합성 로컬 자료의 별도 경로 복원
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 쓰기가 끝난 합성 SQLite/로컬 파일은 DB snapshot과 파일별 SHA를 보존해 별도 경로로 복원할 수 있다. 원본 보고서는 바이트 그대로, 복원 catalog만 경로를 재배치한다. 서비스 DB/객체의 동시 백업까지 검증한 것은 아니다.
+- Evidence: scripts/validation/backup_restore_drill.py, data/restore-v040-verified/evidence.json, backup-manifest.json. 7개 활성 파티션/DB 포함31파일, integrity ok, 손상 사본 거부, 복원 API/과거 보고서/원본 재처리 해시/새 보고서 확인. 최초 URL 오타 실패 로그 artifacts/restore-v040.log도 보존.
+- Implication: H-A-05의 별도 합성 복원 시험 완료. PostgreSQL/MinIO의 생산자 일관성 경계와 격리 복원은 H-A-07에서 별도 검증한다.
+- Reviews:

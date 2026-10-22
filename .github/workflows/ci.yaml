@@ -23,6 +23,7 @@ jobs:
       - run: uv run pytest -q --junitxml=artifacts/pytest.xml
       - run: uv run solarops demo
       - run: uv run python scripts/demo/portfolio_demo.py --output data/ci/portfolio-demo
+      - run: uv run python scripts/validation/backup_restore_drill.py --output data/ci/restore-drill
       - run: uv build --wheel --out-dir artifacts/dist
       - run: uv run python scripts/release/package_source.py --output artifacts/source.zip
       - run: git diff --exit-code uv.lock
@@ -33,6 +34,8 @@ jobs:
             data/ci/reports/
             data/ci/portfolio-demo/evidence.json
             data/ci/portfolio-demo/reports/
+            data/ci/restore-drill/evidence.json
+            data/ci/restore-drill/backup-manifest.json
             artifacts/pytest.xml
             artifacts/dist/
             artifacts/source.zip

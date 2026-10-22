@@ -9,12 +9,13 @@ from pathlib import Path
 
 import psutil
 
-from solarops.config import Settings
+from solarops.config import CALCULATION_VERSION, Settings
 from solarops.pipeline import ingest
 from solarops.reports.render import build_report
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--services", action="store_true")
+parser.add_argument("--output", type=Path, help="New evidence log path; never overwrite")
 args = parser.parse_args()
 if args.services:
     values = dict(
@@ -31,17 +32,18 @@ if args.services:
     )
 settings = Settings()
 source = Path("data/source")
-out = Path(
+out = args.output or Path(
     "artifacts/full-dataset-services.jsonl" if args.services else "artifacts/full-dataset.jsonl"
 )
 out.parent.mkdir(exist_ok=True)
 start = time.perf_counter()
 process = psutil.Process()
-with out.open("a", encoding="utf-8") as log:
+with out.open("x" if args.output else "a", encoding="utf-8") as log:
     log.write(
         json.dumps(
             {
                 "event": "start",
+                "calculation_version": CALCULATION_VERSION,
                 "platform": platform.platform(),
                 "python": platform.python_version(),
                 "logical_cpus": psutil.cpu_count(),

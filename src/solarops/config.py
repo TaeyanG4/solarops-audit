@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-CALCULATION_VERSION = "energy-interval-v1"
+CALCULATION_VERSION = "energy-interval-v2"
 SCHEMA_VERSION = "1"
 
 

@@ -10,7 +10,7 @@ import duckdb
 from sqlalchemy import select, text
 
 from solarops.acquisition.brpvgen import DOI, checksum
-from solarops.analytics.metrics import analyze
+from solarops.analytics.metrics import analyze, day_window
 from solarops.config import CALCULATION_VERSION, identifier
 from solarops.contracts.brpvgen import read_metadata
 from solarops.normalize.parquet import normalize, rows, sql_quote, write_parquet
@@ -199,10 +199,9 @@ def ingest(
             day = (left + timedelta(days=offset)).isoformat()
             inv_rows = inv_day[1] if inv_day and inv_day[0] == day else []
             sta_rows = sta_day[1] if sta_day and sta_day[0] == day else []
+            day_start, day_end = day_window(day, settings.timezone)
             # Outside observed source bounds, do not invent expected coverage.
-            if inv_rows or any(
-                a.date().isoformat() <= day <= b.date().isoformat() for a, b in bounds.values()
-            ):
+            if inv_rows or any(a < day_end and b >= day_start for a, b in bounds.values()):
                 outcomes.append(
                     publish_day(
                         catalog,
@@ -322,6 +321,9 @@ def publish_day(
                 "inverter": inv_rows,
                 "station": sta_rows,
                 "metric": metric,
+                "quality": quality,
+                "candidates": candidates,
+                "series": series,
                 "rules": {
                     "poa": poa_threshold,
                     "ratio": power_ratio,

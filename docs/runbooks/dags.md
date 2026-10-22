@@ -75,4 +75,4 @@ UI Params의 날짜는 ISO date, 버전은 경로 안전 문자로 제한합니�
 
 `fault_marker`와 `test_delay`는 합성 자료의 장애 시연에만 적용됩니다. `fault_marker`가 새 이름이면 첫 실행에서 DB 커밋 도중 예외를 발생시키고, 다음 재시도에서 같은 결과를 정상 공개합니다. 동일 marker는 다시 실패시키지 않습니다. 기존 marker를 삭제하지 말고 새 이름을 사용합니다.
 
-배포 이미지 버전은 0.3.1입니다. 이후 코드 변경은 새 버전/digest로 배포하세요. Compose는 `docker compose --env-file .env -f infra/compose/compose.yaml --profile airflow build dashboard airflow-api` 후 해당 서비스를 `up -d`합니다. kind는 `bash scripts/ops/k8s-refresh.sh`로 이미지 로드와 롤아웃을 수행합니다. 완료 Pod/로그는 검증 증거로 남습니다.
+배포 이미지 버전은 0.4.0입니다. 이후 코드 변경은 새 버전/digest로 배포하세요. Compose는 `docker compose --env-file .env -f infra/compose/compose.yaml --profile airflow build dashboard airflow-api` 후 해당 서비스를 `up -d`합니다. kind는 `bash scripts/ops/k8s-refresh.sh`로 이미지 로드와 롤아웃을 수행합니다. 완료 Pod/로그는 검증 증거로 남습니다.

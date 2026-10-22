@@ -10,6 +10,8 @@
 
 [5분 시연](docs/portfolio/DEMO_GUIDE.md) · [포트폴리오 사례](docs/portfolio/CASE_STUDY.md) · [기술 선택 근거](docs/architecture/technology-stack.md) · [현재 진행도](docs/IMPLEMENTATION_STATUS.md) · [문서 전체](docs/README.md)
 
+작업은 [점수 기반 계획](plan.md)의 높은 순위부터 진행합니다. 완료 근거는 [발견 기록](discoveries.md), 재개 지점과 이력은 [handoff.md](handoff.md)에 남깁니다. [수익화 판단](docs/market/revenue-assessment.md)은 기술 검증과 실제 고객·매출 검증을 구분합니다.
+
 ## 빠른 실행
 
 Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/), Git이 필요합니다. 저장소 접근 권한이 있는 계정으로:
@@ -32,6 +34,8 @@ uv run python scripts/demo/portfolio_demo.py --serve
 - 슬롯 수를 분모로 한 품질 지표, 추정 에너지, 출처가 고정된 보고서
 - 월별 현황 단일 조회, 발전소 시계열, 작업→일별 파티션 실행 이력
 - 같은 CLI를 쓰는 로컬 실행, Airflow 재시도·백필, Kubernetes 작업 Pod
+- 모두 무효인 전력과 실제 0의 구분, 시간대 경계 회귀, v1을 보존하는 별도 계산 v2
+- 읽기 전용 미완료 작업 진단과 합성 SQLite·파일의 별도 폴더 복원 시험
 
 ```mermaid
 flowchart LR
@@ -51,7 +55,7 @@ Python·uv는 공통 실행과 의존성 재현, DuckDB·Arrow는 CSV 외부 정
 
 | 확인 항목 | 실제 증거와 해석 범위 |
 |---|---|
-| 공개 전체 처리 | 51개 발전소 · 인버터 14,400,480행 · 12,572개 일별 파티션. native/서비스의 논리 해시·지표 일치 ([초기 검증](docs/benchmarks/2026-10-22.md)) |
+| 공개 전체 처리 | 51개 발전소 · 인버터 14,400,480행 · 12,572개 일별 파티션. v1 native/서비스 일치, v2 서비스 재처리 후 v1/v2 일별 지표·원본 SHA 일치 ([v0.4 검증](docs/benchmarks/reliability-v0.4.0.md)) |
 | 재처리·복구 | 동일 입력 반복, 중복 충돌, 트랜잭션 실패, Compose/kind DAG 및 Pod 중단 후 재시도 검증 |
 | 화면 조회 | 월별 HTTP 요청 53회→1회, 로컬 5회 중앙값 703.239ms→12.576ms. 응답 범위와 요청 방식이 달라 일반 성능 배수로 해석하지 않음 ([측정 조건](docs/benchmarks/workspace-v0.3.0.md)) |
 | 품질 관리 | Windows·Ubuntu CI: 잠긴 의존성, lint, API/처리 회귀 검사, 합성 복구 데모, wheel 및 문서 링크 검사 ([최신 결과](docs/IMPLEMENTATION_STATUS.md)) |
@@ -68,6 +72,9 @@ infra/             Docker·Compose·kind·Helm 구성
 scripts/           ops / validation / demo / data / release / archive
 docs/              시작 안내·설계·운영·검증·포트폴리오·원본 기획
 migrations/        카탈로그 구조 안내
+plan.md            점수·선행조건·다음 검사가 있는 미완료 작업
+handoff.md         현재 상태·완료 이력·다음 재개 지점
+discoveries.md     실행 결과·판단 근거·독립 검토 상태
 data/, artifacts/  로컬 데이터와 실행 증거 — Git 제외
 ```
 
@@ -75,7 +82,7 @@ data/, artifacts/  로컬 데이터와 실행 증거 — Git 제외
 
 ## 현재 범위
 
-엔지니어링 MVP와 로컬 시연은 구현됐습니다. 실제 고객 인터뷰·데이터 계약·현장 고장 라벨 평가, 고객 인증, 운영 백업 복원 훈련은 아직 수행하지 않았습니다. 일별 사건 경계를 넘는 병합과 중단된 실행 상태의 자동 조정도 후속 과제입니다. 자세한 우선순위와 완료 기준은 [구현 상태](docs/IMPLEMENTATION_STATUS.md)에 기록합니다.
+엔지니어링 MVP와 로컬 시연은 구현됐습니다. 실제 고객 인터뷰·데이터 계약·현장 고장 라벨 평가, 고객 인증, PostgreSQL·MinIO 운영 백업 복원은 아직 수행하지 않았습니다. 합성 로컬 복원 시험과 중단 작업 진단은 구현했으며, 일별 사건 경계를 넘는 병합과 실행 상태의 자동 조정은 후속 과제입니다. 자세한 범위는 [구현 상태](docs/IMPLEMENTATION_STATUS.md)에 기록합니다.
 
 서비스는 127.0.0.1에서 사용하는 로컬 검증용입니다. `.env`, 원본 데이터, 로그, 생성된 비밀 설정은 Git에 포함하지 않습니다. 원본 ZIP과 `docs/plan/`은 보존된 기획 자료이며 현재 상태 문서는 별도로 관리합니다.
 
