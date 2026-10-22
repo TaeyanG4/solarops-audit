@@ -1,3 +1,4 @@
+import base64
 import csv
 import json
 import uuid
@@ -77,7 +78,23 @@ def build_report(settings, period, plant=None, source_kind=None):
         "public": any(s["source_kind"] == "public" for s in sources.values()),
     }
     html = directory / "report.html"
-    html.write_text(env.get_template("monthly.html").render(report=report), encoding="utf-8")
+    report_css = (Path(__file__).parents[1] / "api/static/report.css").read_text(encoding="utf-8")
+    font = (Path(__file__).parents[1] / "api/static/fonts/PretendardVariable.woff2").read_bytes()
+    font_license = (Path(__file__).parents[1] / "api/static/fonts/OFL.txt").read_text(
+        encoding="utf-8"
+    )
+    report_css = (
+        "/* Pretendard 1.3.9.\n" + font_license + "\n*/"
+        "@font-face{font-family:Pretendard;font-weight:100 900;font-display:swap;"
+        "src:url(data:font/woff2;base64,"
+        + base64.b64encode(font).decode("ascii")
+        + ") format('woff2')}"
+        + report_css
+    )
+    html.write_text(
+        env.get_template("monthly.html").render(report=report, report_css=report_css),
+        encoding="utf-8",
+    )
     csv_path = directory / "metrics.csv"
     with csv_path.open("w", encoding="utf-8-sig", newline="") as out:
         writer = csv.DictWriter(out, fieldnames=list(metrics[0]))

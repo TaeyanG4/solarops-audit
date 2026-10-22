@@ -9,6 +9,10 @@ __pycache__/
 /data/
 /artifacts/
 .tools/
+/.agents/
+/.codex/hooks.json
+/.impeccable/*
+!/.impeccable/design.json
 *.zip
 *.log
 .coverage

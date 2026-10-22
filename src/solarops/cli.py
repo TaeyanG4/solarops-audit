@@ -28,6 +28,8 @@ def main(argv=None):
     )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor")
+    admin = sub.add_parser("admin", help="Loopback-only host service manager on port 8504")
+    admin.add_argument("--project-root", type=Path, default=Path.cwd())
     sub.add_parser("db-migrate")
     inspect = sub.add_parser("inspect-runs", help="Read-only review of unfinished runs")
     inspect.add_argument("--older-than-minutes", type=int, default=60)
@@ -107,6 +109,20 @@ def main(argv=None):
 
 
 def execute(args):
+    if args.command == "admin":
+        import uvicorn
+
+        from solarops.admin.app import create_admin_app
+
+        uvicorn.run(
+            create_admin_app(args.project_root),
+            host="127.0.0.1",
+            port=8504,
+            proxy_headers=False,
+            access_log=False,
+        )
+        return None
+
     from solarops.acquisition.brpvgen import checksum, fetch, inspect_source, safe_extract
     from solarops.pipeline import ingest
     from solarops.reports.render import build_report

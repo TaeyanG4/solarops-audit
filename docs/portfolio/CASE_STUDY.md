@@ -2,9 +2,11 @@
 
 태양광 발전량 차트에서 출발해 **입력의 품질, 재처리의 일관성, 결과의 출처**까지 설명하는 데이터 엔지니어링 프로젝트입니다. 공개 BR-PVGen과 합성 자료를 사용하며 고객 운영 실적이나 고장 탐지 정확도를 주장하지 않습니다.
 
-![공개 자료 월별 현황](images/readme-hidpi-20261023/overview.png)
+![공개 자료 월별 현황](images/workspace-20261023/overview.png)
 
-공개 자료의 제작자·범위·다운로드는 [데이터 출처](../data-sources.md), 도구와 적용 범위는 [스킬 기록](../development/skills.md), 화면 출처는 [이미지 정보](images/readme-hidpi-20261023/README.md)에 정리했습니다.
+공개 자료의 제작자·범위·다운로드는 [데이터 출처](../data-sources.md), 도구와 적용 범위는 [스킬 기록](../development/skills.md), 화면 출처는 [이미지 정보](images/workspace-20261023/README.md)에 정리했습니다.
+
+최신 UI는 작업별 사이드바와 iframe 없는 보고서입니다. 관리 기능은 대시보드가 꺼져도 복구할 수 있도록 별도 loopback8504에 두고, 고정된 기존 SolarOps 자원만 제어합니다. 실제 전체 중지→기본 시작→kind 시작을 확인했습니다. [화면·계약·실행 근거](../benchmarks/workspace-20261023.md).
 
 ## 해결하려는 문제
 

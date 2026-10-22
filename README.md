@@ -6,13 +6,15 @@
 
 브라질 공개 발전소 자료와 합성 데모를 수집해 일별 Parquet·품질 지표·월간 보고서·읽기 전용 대시보드로 제공합니다. 데이터가 빠지거나 잘못됐을 때의 표시, 같은 자료를 다시 처리했을 때의 일관성, 작업 실패 후 이전 결과 보존까지 구현했습니다.
 
+**현재 화면:** 분석·감사 자료·관리로 묶은 사이드바, 본문 16px·보조 14px, 공통 월/목록 선택창을 적용했습니다. 월간 보고서는 화면 안의 iframe 없이 본문에서 바로 읽습니다. [화면·전후 비교](docs/benchmarks/workspace-20261023.md).
+
 **데이터 출처:** [BR-PVGen / Zenodo](https://zenodo.org/records/21511487) · 브라질 51개 발전소의 공개 역사 자료 · CC BY 4.0. 합성 데모는 별도로 표시하며 화면의 발전량은 추정치입니다.
 
 [빠른 실행](#빠른-실행) · [데이터 출처](#어떤-데이터를-사용하는가) · [기술 선택](#구조와-기술-선택) · [사용 스킬](#개발에-사용한-ai-스킬) · [검증 근거](#검증한-범위) · [전체 문서](docs/README.md)
 
-![전체 현황: 공개 BR-PVGen 2024년 4월, 추정 발전량과 데이터 품질](docs/portfolio/images/readme-hidpi-20261023/overview.png)
+![전체 현황: 공개 BR-PVGen 2024년 4월, 추정 발전량과 데이터 품질](docs/portfolio/images/workspace-20261023/overview.png)
 
-*2026-10-23 실제 로컬 화면. 공개 2024년 4월 자료이며 발전량은 추정치입니다. 글자 가독성을 위해 820px 화면을 2배 픽셀 밀도로 캡처했습니다. [원본 크게 보기](docs/portfolio/images/readme-hidpi-20261023/overview.png?raw=1) · [전체 화면·반응형 전후 비교](docs/benchmarks/overview-redesign-20261023.md).*
+*실제 화면을 820 CSS px·DPR 2로 렌더링해 크롭했습니다. 이미지를 축소 편집하거나 글자를 샤프닝하지 않았습니다. [원본 크게 보기](docs/portfolio/images/workspace-20261023/overview.png?raw=1) · [사이드바를 포함한 1440px 화면](docs/portfolio/images/workspace-20261023/overview-1440.png?raw=1) · [반응형 비교](docs/benchmarks/workspace-20261023.md).*
 
 ## 어떤 문제를 해결하는가
 
@@ -50,18 +52,21 @@
 
 | 화면 | 할 수 있는 일 |
 |---|---|
-| 전체 현황 | 월/공개·합성 필터, 추정 발전량·품질 요약, 날짜별 키보드 탐색과 수치표 |
-| 발전소 관측 | 15분 전력·일사량, 빈 관측값, 판단 불가와 검토 후보 구분 |
-| 월간 보고서 | 생성 시점의 HTML·CSV·원본 계보를 고정해 조회 |
+| 전체 현황 | 추정 에너지·품질, 부분 기간/무효/누락 필터, 날짜 탐색과 수치표 |
+| 발전소 | 월별 비교와 개별 15분 전력·일사량 관측. 빈값·판단 불가·검토 후보 구분 |
+| 데이터 품질 | 유효·무효·누락 분류와 별도 원본 보간, 발전소별 비교 |
+| 월간 보고서 | 본문에서 요약·품질·일별 내역·계보 조회, CSV/JSON 및 별도 인쇄용 HTML |
 | 실행 이력 | 작업 상태·실패 원인·입력 버전·하위 일별 파티션 추적 |
+| 데이터 출처 | BR-PVGen 원문·라이선스·파일별 역할, 공개/합성 자료의 차이 |
+| 시스템 관리 | 독립 로컬 관리 서버에서 기존 SolarOps Compose·kind 자원의 상태와 시작·중지 |
 
-![발전소별 검토 순서 중 PS_001과 PS_005: 등록 일수·유효값·누락·무효·원본 보간](docs/portfolio/images/readme-hidpi-20261023/plants.png)
+![월간 보고서: 통합 본문, 추정 에너지와 품질 지표](docs/portfolio/images/workspace-20261023/report.png)
 
-*공개 2024년 4월 자료의 5개 발전소 중 검토 순서 첫 두 항목을 발췌했습니다. PS_005는 20일만 등록된 부분 기간입니다. 미등록 날짜와 등록 파티션 내부의 누락 슬롯은 다릅니다. [비교 영역 원본 보기](docs/portfolio/images/readme-hidpi-20261023/plants.png?raw=1).*
+*PS_001 공개 2024년 4월 보고서. 관측 슬롯 100%와 유효값 74.9%는 다른 지표입니다. 일별 내역은 필요할 때 펼쳐 보고 페이지 전체를 한 번에 스크롤합니다. 기존 보고서 UUID는 보존합니다. [보고서 원본 확대](docs/portfolio/images/workspace-20261023/report.png?raw=1).*
 
-[390px 날짜 탐색 화면](docs/portfolio/images/readme-hidpi-20261023/mobile-chart.png) · [합성 실패 작업의 근거 화면](docs/portfolio/images/readme-hidpi-20261023/run-evidence.png) · [5분 시연 순서](docs/portfolio/DEMO_GUIDE.md)
+[390px 목록 선택창](docs/portfolio/images/workspace-20261023/source-options-mobile.png) · [월 선택창](docs/portfolio/images/workspace-20261023/month-picker-mobile.png) · [시스템 관리](docs/portfolio/images/workspace-20261023/admin-1440.png) · [5분 시연 순서](docs/portfolio/DEMO_GUIDE.md)
 
-[일별 차트 확대](docs/portfolio/images/readme-hidpi-20261023/daily-chart.png?raw=1) · [품질 분류 확대](docs/portfolio/images/readme-hidpi-20261023/quality.png?raw=1). 좁은 화면에서는 이미지 원본을 열어 확대하면 작은 수치를 확인하기 쉽습니다.
+[일별 차트 확대](docs/portfolio/images/workspace-20261023/chart.png?raw=1) · [품질 분류 확대](docs/portfolio/images/workspace-20261023/quality.png?raw=1) · [합성 실패 근거](docs/portfolio/images/readme-hidpi-20261023/run-evidence.png). GitHub가 본문 너비에 맞춰 표시하므로 작은 수치는 원본 링크에서 확대할 수 있습니다.
 
 ## 빠른 실행
 
@@ -83,6 +88,7 @@ uv run python scripts/demo/portfolio_demo.py --serve
 | 독립 합성 데모 8503 | Python·uv | 위 명령 / Ctrl+C |
 | 기본 네이티브 8501 | Python·uv, `solarops demo`로 생성한 자료 | [설치 안내](docs/guides/setup.md#빠른-실행) / Ctrl+C |
 | Compose 대시보드 8502 | Docker, 준비된 PostgreSQL·MinIO·catalog | 아래 3개 서비스 / `stop` |
+| 로컬 관리 서버 8504 | Python·uv·Docker CLI, 이미 생성된 SolarOps 컨테이너 | 아래 PowerShell 실행기 또는 `solarops admin` |
 | Airflow / Kubernetes | 배치 스케줄·작업 Pod 시연 시 선택 | [DAG 운영](docs/runbooks/dags.md), 대시보드 조회에는 불필요 |
 
 구성이 끝난 환경에서 대시보드와 저장소 켜기/끄기:
@@ -93,6 +99,16 @@ docker compose --env-file .env -f infra/compose/compose.yaml stop dashboard app-
 ```
 
 `stop`은 데이터 볼륨을 삭제하지 않습니다. 별도로 실행한 네이티브 서버나 Airflow/kind는 각각 관리합니다. [최초 설치·환경 변수·공개 자료 처리](docs/guides/setup.md) · [화면 운영](docs/runbooks/operator.md)
+
+Windows에서 [시스템 관리 화면](http://127.0.0.1:8504/) 켜기·상태 확인·끄기:
+
+```powershell
+.\scripts\ops\admin.ps1 start
+.\scripts\ops\admin.ps1 status
+.\scripts\ops\admin.ps1 stop
+```
+
+관리 화면의 **SolarOps 작업 환경 → 시작**은 기본 3개 서비스(DB·MinIO·대시보드)를 켭니다. **중지**는 SolarOps Compose 서비스와 kind를 모두 멈춥니다. 관리 서버(8504)는 다시 켜는 데 필요해 계속 실행되므로, 완전히 종료할 때 마지막 명령도 실행하세요. Docker Desktop 자체와 다른 프로젝트는 제어하지 않습니다. Kubernetes/Airflow는 필요할 때 개별 시작합니다. [정확한 제어 범위와 운영 순서](docs/runbooks/operator.md#시스템-관리-8504).
 
 Docker는 켜져 있지만 8502가 열리지 않으면 컨테이너가 중지됐는지 확인하세요. 기존 컨테이너는 다음 명령으로 다시 켭니다. [접속 오류 확인 순서](docs/runbooks/operator.md#8502가-열리지-않을-때).
 
@@ -121,6 +137,7 @@ flowchart LR
 | SQLAlchemy · SQLite/PostgreSQL | 서버 없는 데모와 서비스 환경을 지원, 일별 활성 결과를 트랜잭션으로 전환 |
 | MinIO · S3 API | 원본과 산출물을 작업 간 공유하고 파일 checksum·계보 보존 |
 | FastAPI · HTML/CSS/JS | 읽기 중심 UI와 API를 한 패키지로 전달, 별도 프런트엔드 빌드 체인 없이 실행 |
+| 별도 로컬 FastAPI 관리 서버 | 분석 앱을 꺼도 다시 시작할 수 있도록 호스트에서 실행. Docker 소켓을 대시보드 컨테이너에 넘기지 않고 고정된 기존 자원만 제어 |
 | Airflow · Docker · Kubernetes KPO | 재시도·백필·이력과 작업 자원 격리. 핵심 로직은 같은 CLI 사용 |
 | pytest · Ruff · GitHub Actions | 계약·실패·동시성 회귀, Windows/Ubuntu 검사와 패키징 |
 
@@ -132,7 +149,9 @@ flowchart LR
 |---|---|---|
 | 전체 공개 자료 | 51개 발전소·인버터 14,400,480행·일별 파티션 12,572개, v1/v2 일별 지표·원본 SHA 일치 | [v0.4 검증](docs/benchmarks/reliability-v0.4.0.md) |
 | 실패·동시성·복구 | 입력 변경·동시 버전·보고서 역순 완료·파일 누락/변조·격리 복원 | [v0.4.1 검증](docs/benchmarks/integrity-v0.4.1.md) |
-| 화면 품질 | 1440/768/390px, 각 axe 위반 0건, 키보드·합성 터치·빈값·오류 복구, 전후 API 동일 | [UI 검증](docs/benchmarks/overview-redesign-20261023.md) |
+| 화면·보고서·관리 | 1440/768/390px, overview 107명령·workspace 195명령, axe 3+23회 위반 0, API 동일 | [최신 UI 검증](docs/benchmarks/workspace-20261023.md) |
+| 서비스 제어 | 실제 전체 중지→기본 3서비스 시작→kind 시작, 독립 관리 서버 유지·다른 프로젝트 보존 | [관리 검증과 한계](docs/benchmarks/workspace-20261023.md) |
+| 최신 로컬 회귀 | Python 126통과·6제외, Ruff·4개 JS 문법·wheel 정적 자산 확인 | [최신 수행 기록](docs/worklog/2026-10-23-workspace.md) |
 | 회귀·전달 | UI 기능 커밋 기준 Windows/Ubuntu 각각 113통과·5제외, 합성 복원·wheel·소스 패키징 성공 | [검증 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39812883684) |
 | 월별 조회 | HTTP 53회 → 1회. 같은 로컬 조건 5회 중앙값 703.239ms → 12.576ms | [측정 조건](docs/benchmarks/workspace-v0.3.0.md) |
 
@@ -142,9 +161,10 @@ flowchart LR
 
 | 스킬 | 실제 사용 목적 | 결과물 |
 |---|---|---|
-| [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | 정보 위계·색·글자·차트·반응형 설계 가이드 검색 | [디자인 시스템](docs/design/overview-system.md) |
-| [Impeccable](https://github.com/pbakaus/impeccable) | 접근성·상태·가독성·레이아웃 audit/polish와 정적 검출 | [검수·수정 근거](docs/benchmarks/overview-redesign-20261023.md) |
-| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 화면 캡처·필터·키보드·오류 경로·세 너비 검증 | [최신 이미지](docs/portfolio/images/readme-hidpi-20261023/README.md)와 UI 검증 |
+| [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | 정보 위계·색·글자·차트·반응형 설계 가이드 검색 | [새 디자인 시스템](DESIGN.md) |
+| [Impeccable](https://github.com/pbakaus/impeccable) | 가독성·상태·접근성·정적 검출, 별도 최종 검수와 시스템 문서화 | [검수·수정 근거](docs/benchmarks/workspace-20261023.md) |
+| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 화면·선택창·키보드·오류 경로·세 너비·관리 수명주기 검증 | [최신 이미지](docs/portfolio/images/workspace-20261023/README.md)와 UI 검증 |
+| [Web Design Guidelines](https://github.com/vercel-labs/agent-skills) | 실제 링크·폼·URL 상태·포커스·반응형 검사 | [설치와 적용 기록](docs/development/skills.md) |
 | [skill-installer](https://github.com/openai/skills/tree/main/skills/.system/skill-installer) | 요청한 스킬을 공식 저장소에서 설치 | 로컬 개발 도구 준비 |
 
 스킬은 개발·검수를 돕는 도구이며 앱 실행 의존성이 아닙니다. 자동 추천을 그대로 채택하지 않은 이유와 도구 버전·적용 범위는 [스킬 사용 기록](docs/development/skills.md)에 정리했습니다. 앞으로 작업 기록에 research-orchestrator 스킬은 사용하지 않습니다.

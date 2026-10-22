@@ -1,5 +1,22 @@
 # 개발에 사용한 AI 스킬
 
+## 현재 워크스페이스에 적용한 목적
+
+최신 근거는 [사이드바·보고서·관리 검증](../benchmarks/workspace-20261023.md), [실제 캡처](../portfolio/images/workspace-20261023/README.md), [현재 DESIGN.md](../../DESIGN.md)입니다. 아래 초기 개선과 수평 Energy Desk 기록은 단계별 이력이며 최신 화면과 구분합니다.
+
+| 스킬 | 이번 실제 역할 | 적용/제외 판단 |
+|---|---|---|
+| UI UX Pro Max | `operations dashboard navigation --design-system`, `navigation hierarchy sidebar --domain ux` 검색 | 기능 위계·작업 그룹·레이블·접근성 참고. landing hero/CTA와 Fira 추천은 한국어 운영 앱에 맞지 않아 제외 |
+| Impeccable4.7.0 | new-work/craft-floor/audit/polish, detector1회, 별도 finish reviewer, DESIGN/sidecar documenter | 사용자 지정 사이드바·큰 글씨·통합 보고서를 기준으로 검수. 이전 중간안 ship을 재사용하지 않음 |
+| Agent Browser0.39.1 | Chrome156/axe4.12.1 실제3너비·키보드·보고서·관리 시작/중지·DPR2캡처 | overview107명령, workspace195명령, axe3+23회 위반0. 실제 기기·스크린리더 평가와 구분 |
+| Web Design Guidelines | href·깊은 링크·보이는 레이블·포커스·폼·넘침 확인 | 최신 규칙 원문을 로컬 증거에 보존. 자동 점수로 사용성을 보증하지 않음 |
+
+모든 이미지는 실제 렌더링이며 생성형 이미지 스킬은 사용하지 않았습니다. favicon은 기존 브랜드 기하를 SVG로 작성했습니다. 문서 작성에는 research-orchestrator를 사용하지 않고 짧은 handoff·우선순위 plan·날짜별 수행 기록을 유지했습니다. 설치 명령과 버전은 아래에 보존합니다.
+
+이번 detector64항목은 이전 DESIGN과 달라진 토큰 advisory63개와 admin의 정적 stylesheet 경로 해석으로 인한 글자 위계 경고1개입니다. 실제 캡처/계산 스타일과 별도 검수를 함께 확인했습니다. 초기 detector0건과 혼동하지 않습니다. 원본 evidence는 `artifacts/ui-workspace-20261023/`에 있습니다.
+
+## 초기 개선의 이력
+
 [프로젝트 홈](../../README.md) · [디자인 시스템](../design/overview-system.md) · [실제 UI 검증](../benchmarks/overview-redesign-20261023.md)
 
 스킬은 구현과 검수를 돕는 개발 지침·도구입니다. SolarOps의 런타임 의존성이 아니며, 앱을 실행하는 사람은 이 스킬들을 설치할 필요가 없습니다. 아래 기록은 2026-10-23에 실제 적용한 범위입니다. GitHub 별 수나 자동 추천 점수를 품질 검증으로 사용하지 않았습니다.
@@ -26,8 +43,35 @@ Agent Browser CLI 0.39.1 / Headless Chrome 155 / axe-core 4.12.1로 전체 현�
 - 전후 이미지·검사·한계: [UI 검증 보고서](../benchmarks/overview-redesign-20261023.md).
 - 적용 날짜와 후속 작업: [2026-10-23 작업 기록](../worklog/2026-10-23.md).
 
-Web Design Guidelines와 Taste Skill은 추천 목록에만 있었으며 이번 구현에 적용하지 않았습니다. 별도 제품 의존성이나 검수 실적으로 표시하지 않습니다.
+Web Design Guidelines는 후속 Energy Desk 작업에서 실제 적용했습니다. Taste Skill은 사용하지 않았습니다.
 
 ## 앞으로의 작업 기록
 
 사용자 요청에 따라 2026-10-23부터 research-orchestrator 스킬과 discoveries 기록을 작업 절차에서 제외했습니다. 현재 상태는 [handoff](../../handoff.md), 미완료 우선순위는 [plan](../../plan.md), 상세 근거는 [날짜별 작업 기록](../worklog/README.md)에 둡니다. 이전 문서는 [보관본](../worklog/archive/README.md)으로 남기며 현재 지침으로 사용하지 않습니다.
+
+## Energy Desk 신규 디자인 및 프로젝트 설치
+
+사용자가 기존 화면과 닮은 중간안을 거절하고 새 디자인을 요청해, HTML/CSS의 화면 구조를 다시 작성했습니다. [새 검증](../benchmarks/energy-desk-20261023.md)과 [디자인 시스템](../../DESIGN.md)이 현재 근거입니다. 위의 Chrome 155 결과는 이전 작업 기록이며, 이번 실행은 **Agent Browser 0.39.1 / Chrome 156 / axe 4.12.1**입니다.
+
+| 스킬 | 이번 사용 |
+|---|---|
+| UI UX Pro Max | `data dense dashboard`의 정확한 스타일 결과, energy 색·chart 검색. fitness·radar 등 부적합한 결과를 버리고 운영 분석의 정보 위계·접근 가능한 수치표를 채택 |
+| Impeccable | new-work의 신규 외형, layout의 읽기 순서·그룹 구성, craft-floor·audit·polish, 실제 캡처 기반 별도 finish review와 시스템 기록 |
+| Agent Browser | 1440/768/390px 실제 Chrome, 키보드·필터·뒤로 가기·null/0·오류 복구·합성 터치, DPR2 원본 캡처 |
+| [Web Design Guidelines](https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines) | 최신 규칙 원문을 가져와 href 탐색·URL 상태·form labels·focus·반응형·theme-color 검토 |
+| skill-installer | 공식 설치 경로 확인. 프로젝트 설치는 아래 공식 CLI를 사용 |
+
+실제로 실행한 설치 명령 (저장소 루트, Windows는 `npx.cmd` / `npm.cmd`):
+
+```text
+npx --yes ui-ux-pro-max-cli@2.15.0 init --ai codex
+npx --yes impeccable@4.7.0 install --providers=codex --scope=project
+npx --yes skills@1.7.4 add vercel-labs/agent-browser --skill agent-browser -a codex --yes
+npm install -g agent-browser@0.39.1
+agent-browser install
+npx --yes skills@1.7.4 add vercel-labs/agent-skills --skill web-design-guidelines -a codex --yes
+```
+
+설치 결과는 `.agents/skills/`와 로컬 `.codex/hooks.json`에 있습니다. 이 도구 파일·실행 바이너리는 Git과 Docker context에서 제외하고 [skills-lock.json](../../skills-lock.json)에 두 Vercel 스킬의 source/hash를 남겼습니다. 다른 CLI 버전은 이 문서에 고정했습니다. 브라우저 설치는 당시 Chrome 156을 받았으며 앱 런타임에 추가하지 않았습니다. AGENTS.md는 설치 전후 SHA-256이 일치합니다.
+
+새 디자인은 사용자가 자율 구현과 이후 수정을 맡긴 code-led 작업입니다. 별도 concept-seed 선택·승인 이미지 비교를 수행한 것으로 기록하지 않습니다. Impeccable의 별도 리뷰는 코드와 제공한 캡처에 대한 검수이며 실제 고객 평가가 아닙니다.

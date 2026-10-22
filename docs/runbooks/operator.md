@@ -1,5 +1,36 @@
 # 운영자가 확인할 순서
 
+## 시스템 관리 8504
+
+[분석 화면 8502](http://127.0.0.1:8502/?view=overview&period=2024-04&source=public)과 [관리 화면 8504](http://127.0.0.1:8504/)는 별도 프로세스입니다. 관리 서버는 대시보드 컨테이너를 멈춘 뒤에도 다시 켤 수 있도록 **호스트 Python**으로 실행됩니다. Docker Desktop은 먼저 켜져 있어야 합니다.
+
+저장소 루트의 Windows PowerShell에서:
+
+```powershell
+.\scripts\ops\admin.ps1 start
+.\scripts\ops\admin.ps1 status
+.\scripts\ops\admin.ps1 stop
+```
+
+`start`는 숨김 백그라운드 프로세스를 시작하고, `status`는 PID와8504포트의 수신 상태를 확인합니다. `stop`은 이 실행기가 소유한 관리 서버와 venv 자식 프로세스만 종료합니다. 실행 중인 서비스 조작이 끝난 후 사용하세요. PID·stdout/stderr·조작 이력은 Git 제외 `artifacts/ops/`에 남습니다.
+
+다른 OS 또는 보이는 터미널에서 실행하려면 `uv run solarops admin --project-root .`를 사용하고 해당 터미널에서 Ctrl+C로 관리 서버를 종료합니다. 이 Ctrl+C는 Docker 컨테이너를 멈추지 않습니다. 이전 8501/8503 데모 서버를 직접 실행한 경우에만 해당 터미널도 별도로 종료합니다.
+
+| 관리 화면의 대상 | 시작 | 중지 |
+|---|---|---|
+| SolarOps 작업 환경 | Compose app-db → minio → dashboard | SolarOps kind와 모든 해당 Compose 소비자 → MinIO/DB |
+| 대시보드 | 필요한 app-db·minio와 dashboard | dashboard만 |
+| PostgreSQL (Compose) | app-db | Compose 소비자(웹·Airflow·worker)를 먼저 멈춘 후 app-db |
+| MinIO (Compose) | minio | Compose 소비자를 먼저 멈춘 후 minio |
+| Airflow (Compose) | 앱 DB·MinIO·Airflow DB/API/스케줄러/DAG 처리기 | Compose Airflow 구성요소 |
+| Kubernetes (kind) | `solarops` kind 노드 | 해당 kind 노드 |
+
+**완전히 끄기:** 관리 UI의 `SolarOps 작업 환경 → 중지`가 완료되면 `admin.ps1 stop`을 실행합니다. **다시 켜기:** `admin.ps1 start` 후 UI의 `SolarOps 작업 환경 → 시작`을 누릅니다. 이 기본 시작은 보고서 조회에 필요한 3개만 켭니다. Airflow와 Kubernetes는 필요할 때 각각 시작합니다.
+
+Compose와 kind 안에는 **서로 다른 DB·MinIO·Airflow**가 있습니다. Compose DB 중지는 kind 내부 DB를 멈추지 않습니다. Docker Desktop에서 보이는 Compose 그룹과 kind 컨테이너의 수는 내부 서비스 수와 다릅니다. 실제 컨테이너 표는 실행·건강 검사·HTTP 준비 상태를 구분하며 kind 실행 중만으로 API/모든 Pod 준비 완료를 보증하지 않습니다.
+
+제어는 이 체크아웃의 라벨·Compose 경로를 확인한 **이미 생성된 로컬 SolarOps 컨테이너**에 한정됩니다. 없는 컨테이너는 [최초 설치](../guides/setup.md)가 필요합니다. 관리 서버는 Docker 엔진 자체, 다른 프로젝트, 컨테이너 삭제·볼륨 삭제·prune·임의 SQL/명령을 제공하지 않습니다. `127.0.0.1:8504` Host/Origin과 CSRF 토큰을 검사하므로 이 주소 그대로 접속합니다. 사용자 인증/원격 관리 기능은 아닙니다.
+
 ## 8502가 열리지 않을 때
 
 Docker Desktop 엔진이 실행 중이어도 SolarOps 컨테이너는 중지 상태일 수 있습니다. 저장소 루트에서 상태를 확인하고, 기존 컨테이너를 시작합니다.
@@ -19,7 +50,7 @@ docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio 
 
 1. `uv run solarops demo`로 합성 1주 보고서를 생성합니다.
 2. `uv run solarops serve` 후 http://127.0.0.1:8501 에서 월간 리포트를 선택합니다.
-3. 추정 kWh, 관측 슬롯 비율, 유효값 비율, 소스 보간율을 함께 봅니다. 관측 100%라도 NULL이 많을 수 있습니다.
+3. 통합 보고서 본문에서 추정 kWh, 관측 슬롯 비율, 유효값 비율, 소스 보간율을 함께 봅니다. 관측 100%라도 NULL이 많을 수 있습니다. 일별 내역은 펼치고, 인쇄용 HTML은 별도 탭에서 엽니다.
 4. 전체 현황에서 월·자료 구분을 선택하고, 발전소의 관측 보기로 이동해 전력(kW)/POA(W/m²)의 서로 다른 축과 품질 정보를 확인합니다. 시각은 보고서 설정 시간대이며 기본 UTC입니다.
 5. 보고서 CSV와 계보 JSON을 내려받습니다. 출처/규칙/시간대/부분 기간 여부를 함께 전달합니다.
 

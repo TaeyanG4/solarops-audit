@@ -1,6 +1,9 @@
 .git
 .venv*
 .tools
+.agents
+.codex
+.impeccable
 data
 artifacts
 *.zip

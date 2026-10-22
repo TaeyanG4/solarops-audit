@@ -1,0 +1,242 @@
+[
+  {
+    "file": "admin-1440.png",
+    "pixels": [
+      2880,
+      2000
+    ],
+    "source": "http://127.0.0.1:8504/ | 1440 CSS px | document top",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "admin-390.png",
+    "pixels": [
+      780,
+      2000
+    ],
+    "source": "http://127.0.0.1:8504/ | 390 CSS px | document top",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "admin-768.png",
+    "pixels": [
+      1536,
+      2000
+    ],
+    "source": "http://127.0.0.1:8504/ | 768 CSS px | document top",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "before-1440.png",
+    "pixels": [
+      2880,
+      4130
+    ],
+    "source": "Preserved intermediate horizontal Energy Desk capture; see ../energy-desk-20261023/README.md",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "before-390.png",
+    "pixels": [
+      780,
+      9014
+    ],
+    "source": "Preserved intermediate horizontal Energy Desk capture; see ../energy-desk-20261023/README.md",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "before-768.png",
+    "pixels": [
+      1536,
+      6352
+    ],
+    "source": "Preserved intermediate horizontal Energy Desk capture; see ../energy-desk-20261023/README.md",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "chart.png",
+    "pixels": [
+      1528,
+      1543
+    ],
+    "source": "820 CSS px, DOM crop .trend-panel",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "mobile-navigation.png",
+    "pixels": [
+      780,
+      2000
+    ],
+    "source": "Actual Agent Browser capture from workspace-reviewed; see benchmark and commands log",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "month-picker-mobile.png",
+    "pixels": [
+      780,
+      2000
+    ],
+    "source": "Actual Agent Browser capture from workspace-reviewed; see benchmark and commands log",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "overview-1440.png",
+    "pixels": [
+      2880,
+      2000
+    ],
+    "source": "http://127.0.0.1:8502/?view=overview&period=2024-04&source=public | 1440 CSS px",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "overview-390.png",
+    "pixels": [
+      780,
+      2000
+    ],
+    "source": "http://127.0.0.1:8502/?view=overview&period=2024-04&source=public | 390 CSS px",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "overview-768.png",
+    "pixels": [
+      1536,
+      2000
+    ],
+    "source": "http://127.0.0.1:8502/?view=overview&period=2024-04&source=public | 768 CSS px",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "overview.png",
+    "pixels": [
+      1640,
+      2573
+    ],
+    "source": "http://127.0.0.1:8502/?view=overview&period=2024-04&source=public | 820 CSS px",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "plants.png",
+    "pixels": [
+      1528,
+      1331
+    ],
+    "source": "820 CSS px, first plant row",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "print-report-1440.png",
+    "pixels": [
+      2880,
+      2000
+    ],
+    "source": "Actual Agent Browser capture from workspace-reviewed; see benchmark and commands log",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "print-report-390.png",
+    "pixels": [
+      780,
+      2000
+    ],
+    "source": "Actual Agent Browser capture from workspace-reviewed; see benchmark and commands log",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "print-report-768.png",
+    "pixels": [
+      1536,
+      2000
+    ],
+    "source": "Actual Agent Browser capture from workspace-reviewed; see benchmark and commands log",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "quality.png",
+    "pixels": [
+      1528,
+      737
+    ],
+    "source": "820 CSS px, DOM crop .quality-panel",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "report-daily-mobile.png",
+    "pixels": [
+      780,
+      2000
+    ],
+    "source": "Actual Agent Browser capture from workspace-reviewed; see benchmark and commands log",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "report.png",
+    "pixels": [
+      1640,
+      2410
+    ],
+    "source": "http://127.0.0.1:8502/?view=reports&period=2024-04&source=public&plant=PS_001 | 820 CSS px",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "reports-1440.png",
+    "pixels": [
+      2880,
+      2000
+    ],
+    "source": "http://127.0.0.1:8502/?view=reports&period=2024-04&source=public&plant=PS_001 | 1440 CSS px",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "reports-390.png",
+    "pixels": [
+      780,
+      2000
+    ],
+    "source": "http://127.0.0.1:8502/?view=reports&period=2024-04&source=public&plant=PS_001 | 390 CSS px",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "reports-768.png",
+    "pixels": [
+      1536,
+      2000
+    ],
+    "source": "http://127.0.0.1:8502/?view=reports&period=2024-04&source=public&plant=PS_001 | 768 CSS px",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  },
+  {
+    "file": "source-options-mobile.png",
+    "pixels": [
+      780,
+      2000
+    ],
+    "source": "Actual Agent Browser capture from workspace-reviewed; see benchmark and commands log",
+    "description": "Actual Chromium rendering captured with Agent Browser. DPR 2. No resampling or sharpening. 2026-10-23 Asia/Seoul.",
+    "resampled": false
+  }
+]

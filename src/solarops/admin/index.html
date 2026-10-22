@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#172131" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <meta
+      name="description"
+      content="태양광 역사 자료의 추정 에너지와 데이터 품질, 원본 계보를 검토하는 운영 분석 워크스페이스"
+    />
+    <title>SolarOps · 로컬 시스템 관리</title>
+    <link
+      rel="preload"
+      href="/static/fonts/PretendardVariable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/static/dashboard.css?v=workspace-20261023" />
+    <script src="/static/navigation.js?v=workspace-20261023" defer></script>
+    <script src="/static/admin.js?v=workspace-20261023" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#view">본문으로 건너뛰기</a>
+    <aside class="sidebar" aria-label="워크스페이스 탐색">
+      <a
+        class="brand"
+        href="http://127.0.0.1:8502/?view=overview&amp;period=2024-04&amp;source=public"
+        aria-label="SolarOps 처음으로"
+        translate="no"
+      >
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M18 3 5 19h10l-1 10 13-17H17l1-9Z" />
+        </svg>
+        <span>SolarOps<span class="brand-suffix">Audit</span></span>
+      </a>
+      <button
+        class="nav-toggle secondary"
+        aria-expanded="false"
+        aria-controls="workspace-nav"
+      >
+        메뉴 열기
+      </button>
+      <nav id="workspace-nav" aria-label="주 메뉴">
+        <div class="nav-group">
+          <p>분석</p>
+          <a
+            data-view="overview"
+            href="http://127.0.0.1:8502/?period=2024-04&amp;source=public&amp;view=overview"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"
+              /></svg
+            >전체 현황</a
+          >
+          <a
+            data-view="plants"
+            href="http://127.0.0.1:8502/?period=2024-04&amp;source=public&amp;view=plants"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="m5 4-3 12h20L19 4ZM4 10h16M12 4v12M8 21h8M12 16v5"
+              /></svg
+            >발전소</a
+          >
+          <a
+            data-view="quality"
+            href="http://127.0.0.1:8502/?period=2024-04&amp;source=public&amp;view=quality"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6ZM8 12l3 3 5-6" /></svg
+            >데이터 품질</a
+          >
+        </div>
+        <div class="nav-group">
+          <p>감사 자료</p>
+          <a
+            data-view="reports"
+            href="http://127.0.0.1:8502/?period=2024-04&amp;source=public&amp;view=reports"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 3h9l5 5v13H5ZM14 3v5h5M8 12h8M8 16h6" /></svg
+            >월간 보고서</a
+          >
+          <a
+            data-view="runs"
+            href="http://127.0.0.1:8502/?period=2024-04&amp;source=public&amp;view=runs"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7a9 9 0 1 1-1 7M4 3v5h5M12 7v5l3 2" /></svg
+            >실행 이력</a
+          >
+          <a
+            data-view="sources"
+            href="http://127.0.0.1:8502/?period=2024-04&amp;source=public&amp;view=sources"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 5H4v15h16v-5M13 3h8v8M10 14 21 3" /></svg
+            >데이터 출처</a
+          >
+        </div>
+        <div class="nav-group">
+          <p>관리</p>
+          <a data-view="system" href="/" aria-current="page"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3 4h18v6H3zM3 14h18v6H3zM7 7h1M7 17h1M15 7h3M15 17h3"
+              /></svg
+            >시스템 관리</a
+          >
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <span>로컬 워크스페이스</span>
+        <a href="http://127.0.0.1:8502/docs" target="_blank" rel="noopener"
+          >API 문서 (새 탭)</a
+        >
+      </div>
+    </aside>
+    <main>
+      <div class="workspace-bar">
+        <p id="breadcrumb">관리 / 시스템 관리</p>
+        <button id="admin-refresh" class="secondary">상태 새로고침</button>
+      </div>
+      <div id="view" tabindex="-1">
+        <div class="hero">
+          <div>
+            <h1>시스템 관리</h1>
+            <p>이 PC의 SolarOps 서비스를 확인하고 시작·중지합니다.</p>
+          </div>
+          <span class="pill">로컬 관리자</span>
+        </div>
+        <section class="admin-summary" aria-label="실행 환경">
+          <div>
+            <strong id="engine">Docker 확인 중…</strong>
+            <p id="checked-at">상태를 불러오고 있습니다.</p>
+          </div>
+          <div>
+            <strong>관리 서버 · 실행 중</strong>
+            <p>호스트 Python · 8504 · Docker와 독립</p>
+          </div>
+        </section>
+        <p id="admin-error" class="admin-error" role="alert" hidden></p>
+        <section class="operation-status" aria-label="최근 조작 결과">
+          <h2>최근 작업</h2>
+          <p id="operation" role="status">
+            이 관리 서버에서 실행한 작업이 없습니다.
+          </p>
+        </section>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>서비스 제어</h2>
+              <p>
+                기존 자원을 시작·중지합니다. 중지 전에 함께 영향을 받는 서비스를
+                확인하세요.
+              </p>
+            </div>
+          </div>
+          <div id="service-controls" class="service-controls"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>실제 컨테이너 상태</h2>
+              <p>
+                실행 중은 준비 완료와 다릅니다. 건강 검사가 없는 서비스는
+                ‘미설정’으로 표시합니다.
+              </p>
+            </div>
+          </div>
+          <div id="container-list"><p>확인 중…</p></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head">
+            <div><h2>관리 범위와 종료 방법</h2></div>
+          </div>
+          <dl class="definition-list">
+            <div>
+              <dt>작업 환경 시작</dt>
+              <dd>
+                PostgreSQL → MinIO → 대시보드 순서로 준비 상태를 확인합니다.
+                Airflow·Kubernetes는 필요할 때 별도로 시작합니다.
+              </dd>
+            </div>
+            <div>
+              <dt>작업 환경 중지</dt>
+              <dd>
+                SolarOps의 Compose 서비스와 kind 노드를 중지합니다. 진행 중
+                작업은 중단될 수 있으며, 데이터와 볼륨은 보존됩니다.
+              </dd>
+            </div>
+            <div>
+              <dt>Kubernetes</dt>
+              <dd>
+                별도의 DB·MinIO·Airflow를 포함하는 SolarOps kind 환경 전체를
+                시작·중지합니다. 위 개별 DB·저장소·Airflow 버튼은
+                Compose용입니다. 노드 컨테이너 실행은 Kubernetes API·Pod의 준비
+                완료를 보장하지 않습니다.
+              </dd>
+            </div>
+            <div>
+              <dt>관리 서버까지 종료</dt>
+              <dd>
+                이 화면은 별도 Python 프로세스입니다. 실행 터미널의 Ctrl+C 또는
+                프로젝트의 <code>scripts/ops/admin.ps1 stop</code>으로
+                종료하세요. 종료 후에는 화면에서 서비스를 켤 수 없으므로 같은
+                스크립트의 start로 다시 엽니다.
+              </dd>
+            </div>
+            <div>
+              <dt>안전한 제어 범위</dt>
+              <dd>
+                Docker Desktop 엔진과 다른 프로젝트는 유지됩니다. 임의
+                명령·SQL·데이터 삭제는 제공하지 않습니다. 이 PC의 신뢰할 수 있는
+                사용자 전용이며 인터넷에 공개하지 않습니다.
+              </dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+      <footer>
+        <span>SolarOps Audit · 로컬 시스템 관리</span
+        ><a
+          href="http://127.0.0.1:8502/?view=overview&amp;period=2024-04&amp;source=public"
+          >분석 화면으로</a
+        >
+      </footer>
+    </main>
+    <dialog
+      id="action-dialog"
+      aria-labelledby="action-title"
+      aria-describedby="action-impact"
+    >
+      <h2 id="action-title"></h2>
+      <p id="action-impact"></p>
+      <p class="subtext">데이터와 볼륨은 삭제하지 않습니다.</p>
+      <div class="dialog-actions">
+        <button id="cancel-action" class="secondary">취소</button
+        ><button id="confirm-action">확인 후 실행</button>
+      </div>
+    </dialog>
+  </body>
+</html>

@@ -9,3 +9,5 @@ Makefile text eol=lf
 docs/plan/** -text whitespace=-blank-at-eof
 # Preserve the two migrated Windows work-log snapshots exactly.
 docs/worklog/archive/2026-10-23-*.md -text whitespace=cr-at-eol
+# Retain the upstream font license verbatim, including its one trailing space.
+src/solarops/api/static/fonts/OFL.txt -text whitespace=-blank-at-eol

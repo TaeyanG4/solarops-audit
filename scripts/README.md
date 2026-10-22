@@ -7,6 +7,7 @@
 | 폴더 | 파일 / 역할 | 실행 영향 |
 |---|---|---|
 | `ops/` | `bootstrap.py`, `bootstrap-local.sh` | 없는 `.env`의 무작위 secret 생성, 로컬 이미지 빌드·서비스 기동 |
+| `ops/` | `admin.ps1 start/status/stop` | Windows의 별도 8504 관리 서버를 백그라운드 실행/확인/종료. 컨테이너는 UI에서 조작 |
 | `ops/` | `install-k8s-tools.sh`, `k8s-bootstrap.sh` | 도구 다운로드와 로컬 kind 클러스터 준비 |
 | `ops/` | `k8s-deploy.sh`, `k8s-refresh.sh`, `k8s-secrets.py` | 배포/롤아웃, ignored 영역의 비밀 설정 생성 |
 | `ops/` | `k8s-stage-public.py` | 선택 발전소 입력을 PVC에 checksum 확인 후 복사; 덮어쓰기 금지 |
@@ -14,6 +15,8 @@
 | `validation/` | `check_docs.py`, `validate_dags.py` | 링크·스크립트 경로·원본 기획 checksum 검사 / Airflow 이미지 내 DAG 검사 |
 | `validation/` | `service-test.py`, `airflow_checks.py` | 실제 서비스에 격리된 테스트 자료 생성 / 시나리오 DAG 실행 |
 | `validation/` | `benchmark_dashboard.py`, `verify_catalogs.py` | HTTP 조회 측정 / 기존 native·서비스 결과 대조 |
+| `validation/` | `overview_browser.py` | 실행 중인 공개·합성 데모를 Agent Browser로 읽기 검증. null/오류 fixture는 테스트 브라우저에만 주입, 출력은 새 폴더 |
+| `validation/` | `workspace_browser.py --output <새 폴더>` | 7개 탐색·보고서·선택창·8504 검증. `--lifecycle`을 명시하면 실제 SolarOps 전체 중지·복구하므로 처리 작업이 없는 시점에만 실행 |
 | `validation/` | `compare_calculations.py` | 보존한 v1 기준과 v2 전체 일별 지표·원본 SHA·표본 시계열 비교 |
 | `validation/` | `backup_restore_drill.py` | 새 합성 SQLite/파일의 별도 경로 복원·해시·API·재처리 시험; 실제 서비스 백업 도구는 아님 |
 | `validation/` | `service_restore_drill.py` | 로컬 Compose에 합성 전용 DB/버킷 2쌍 생성, dump·객체 복원·API·재처리 검증; 자원은 보존 |

@@ -3,73 +3,127 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#172131" />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="stylesheet" href="/static/report.css?v=workspace-20261023" />
     <meta
       name="description"
-      content="태양광 역사 자료의 품질, 처리 이력, 보고서 출처를 확인하는 읽기 전용 워크스페이스"
+      content="태양광 역사 자료의 추정 에너지와 데이터 품질, 원본 계보를 검토하는 운영 분석 워크스페이스"
     />
-    <title>SolarOps Audit · 운영 데이터 감사</title>
-    <link rel="stylesheet" href="/static/dashboard.css?v=overview-20261023" />
-    <script src="/static/dashboard.js?v=overview-20261023" defer></script>
+    <title>SolarOps Audit · 에너지 분석 워크스페이스</title>
+    <link
+      rel="preload"
+      href="/static/fonts/PretendardVariable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="/static/dashboard.css?v=workspace-20261023" />
+    <script src="/static/controls.js?v=workspace-20261023" defer></script>
+    <script src="/static/navigation.js?v=workspace-20261023" defer></script>
+    <script src="/static/dashboard.js?v=workspace-20261023" defer></script>
   </head>
   <body>
     <a class="skip" href="#view">본문으로 건너뛰기</a>
-    <div class="shell">
-      <aside>
-        <a class="brand" href="/" aria-label="SolarOps 처음으로">
-          <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-            <path d="M6 23 12 9h8l6 14H6Z M9 17h14 M16 9v14" />
-            <path d="M16 2v3 M5 6l3 3 M27 6l-3 3" />
-          </svg>
-          SolarOps<span class="brand-dot">/</span>
-        </a>
-        <p class="wordmark">운영 데이터 감사</p>
-        <nav aria-label="주 메뉴">
-          <button data-view="overview">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
+    <aside class="sidebar" aria-label="워크스페이스 탐색">
+      <a class="brand" href="/" aria-label="SolarOps 처음으로" translate="no">
+        <svg viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M18 3 5 19h10l-1 10 13-17H17l1-9Z" />
+        </svg>
+        <span>SolarOps<span class="brand-suffix">Audit</span></span>
+      </a>
+      <button
+        class="nav-toggle secondary"
+        aria-expanded="false"
+        aria-controls="workspace-nav"
+      >
+        메뉴 열기
+      </button>
+      <nav id="workspace-nav" aria-label="주 메뉴">
+        <div class="nav-group">
+          <p>분석</p>
+          <a data-view="overview" href="?view=overview"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
               <path
-                d="M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z"
+                d="M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z"
               /></svg
-            >전체 현황
-          </button>
-          <button data-view="reports">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7" /></svg
-            >월간 보고서
-          </button>
-          <button data-view="runs">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 8a9 9 0 1 1-1 6 M4 3v5h5 M12 7v5l3 2" /></svg
-            >실행 이력
-          </button>
-        </nav>
-        <div class="sidebar-note">
-          <strong>로컬 워크스페이스</strong>
-          <p>읽기 전용 · 역사 자료<br />결과에서 원본까지 추적합니다.</p>
-          <a href="/docs" target="_blank" rel="noopener">API 문서 ↗</a>
+            >전체 현황</a
+          >
+          <a data-view="plants" href="?view=plants"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="m5 4-3 12h20L19 4ZM4 10h16M12 4v12M8 21h8M12 16v5"
+              /></svg
+            >발전소</a
+          >
+          <a data-view="quality" href="?view=quality"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6ZM8 12l3 3 5-6" /></svg
+            >데이터 품질</a
+          >
         </div>
-      </aside>
-      <main>
-        <header class="topbar">
-          <div>
-            <span class="workspace-label"
-              >워크스페이스 <span aria-hidden="true">/</span></span
-            >
-            <p id="breadcrumb">전체 현황</p>
-          </div>
-          <span class="tag">역사 자료 · 읽기 전용</span>
-        </header>
+        <div class="nav-group">
+          <p>감사 자료</p>
+          <a data-view="reports" href="?view=reports"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M5 3h9l5 5v13H5ZM14 3v5h5M8 12h8M8 16h6" /></svg
+            >월간 보고서</a
+          >
+          <a data-view="runs" href="?view=runs"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M4 7a9 9 0 1 1-1 7M4 3v5h5M12 7v5l3 2" /></svg
+            >실행 이력</a
+          >
+          <a data-view="sources" href="?view=sources"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 5H4v15h16v-5M13 3h8v8M10 14 21 3" /></svg
+            >데이터 출처</a
+          >
+        </div>
+        <div class="nav-group">
+          <p>관리</p>
+          <a data-view="system" href="?view=system"
+            ><svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M3 4h18v6H3zM3 14h18v6H3zM7 7h1M7 17h1M15 7h3M15 17h3"
+              /></svg
+            >시스템 관리</a
+          >
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <span>로컬 워크스페이스</span>
+        <a href="/docs" target="_blank" rel="noopener">API 문서 (새 탭)</a>
+      </div>
+    </aside>
+    <main>
+      <div class="workspace-bar">
+        <p id="breadcrumb">전체 현황</p>
         <div class="toolbar" id="scope-controls">
           <label
             >보고 월<input
               type="month"
               id="period"
+              hidden
+              aria-hidden="true"
+              tabindex="-1"
+              name="period"
+              autocomplete="off"
               value="2024-04"
               min="1900-01"
               max="2199-12"
               required
-          /></label>
+            /><button
+              type="button"
+              id="period-open"
+              class="secondary"
+              aria-haspopup="dialog"
+            >
+              2024년 4월
+            </button></label
+          >
           <label
-            >자료 구분<select id="source">
+            >자료 구분<select id="source" name="source" autocomplete="off">
               <option value="all">전체 · 합성 포함</option>
               <option value="public">BR-PVGen 공개 자료</option>
               <option value="synthetic">합성 데모</option>
@@ -80,14 +134,13 @@
               <path d="M20 7a9 9 0 1 0 1 8 M20 3v5h-5" /></svg
             >새로고침
           </button>
-          <span class="toolbar-note">15분 간격 · UTC 기준</span>
         </div>
-        <div id="view" tabindex="-1" aria-live="polite" aria-busy="false"></div>
-        <footer>
-          SolarOps Audit <span id="version"></span
-          ><span>관측 품질과 판단 가능한 범위를 함께 확인합니다.</span>
-        </footer>
-      </main>
-    </div>
+      </div>
+      <div id="view" tabindex="-1" aria-live="polite" aria-busy="false"></div>
+      <footer>
+        <span translate="no">SolarOps Audit <span id="version"></span></span
+        ><span>역사 자료 · 읽기 전용 · UTC 기준</span>
+      </footer>
+    </main>
   </body>
 </html>

@@ -13,7 +13,7 @@
 | 데이터 출처 | [제작자·범위·라이선스·파일 다운로드](data-sources.md) |
 | 데이터 해석 | [실제 CSV 스키마·품질·에너지 계약](data-contract.md) |
 | 로컬 운영 | [화면·보고서](runbooks/operator.md), [DAG·백필](runbooks/dags.md), [실패·진단](runbooks/recovery.md), [백업·복원 시험](runbooks/backup-restore.md) |
-| 디자인·사용 스킬 | [디자인 시스템](design/overview-system.md), [스킬별 목적·결과물](development/skills.md), [최신 이미지](portfolio/images/readme-hidpi-20261023/README.md) |
+| 디자인·사용 스킬 | [새 디자인 시스템](../DESIGN.md), [워크스페이스·보고서·관리 검증](benchmarks/workspace-20261023.md), [스킬별 목적·결과물](development/skills.md), [최신 이미지](portfolio/images/workspace-20261023/README.md) |
 | 검사·패키징·기여 | [개발 안내](../CONTRIBUTING.md), [스크립트 목록](../scripts/README.md) |
 | 실행 증거 | [공개 전체 처리·Compose·kind](benchmarks/2026-10-22.md), [v0.3 화면·조회 성능](benchmarks/workspace-v0.3.0.md), [v0.3.1 유지보수](benchmarks/maintenance-v0.3.1.md), [v0.4 계산·진단·복원](benchmarks/reliability-v0.4.0.md) |
 | 파일럿 준비 | [수익화 판단](market/revenue-assessment.md), [제안과 범위](market/pilot.md), [측정 양식](market/pilot-scorecard.md), [인터뷰 양식](market/interview-template.md), [스키마 대응표](market/schema-mapping.csv) |
@@ -31,6 +31,6 @@
 
 최신 유지보수 검증은 [v0.4.1 경계·무결성 기록](benchmarks/integrity-v0.4.1.md)을 확인합니다.
 
-전체 현황 UI: [디자인 시스템](design/overview-system.md) · [전후 화면·검증 결과](benchmarks/overview-redesign-20261023.md).
+현재 UI: [방향과 추가 요건](design/workspace-navigation.md) · [전후 화면·검증 결과](benchmarks/workspace-20261023.md). 초기 전체 현황 개선은 [과거 검증](benchmarks/overview-redesign-20261023.md)으로 보존합니다.
 
 `plan/`은 [원본 기획](plan/00_START_HERE.md)과 [SHA-256 목록](plan/MANIFEST.sha256)을 보존하는 영역입니다. 과거 예시 프롬프트·중단 조건·계획은 현재 실행 결과나 사용자의 현재 지시와 구별합니다. 최신 상태는 위 구현 상태 문서가 기준입니다.
