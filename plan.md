@@ -1,21 +1,21 @@
 ## Agent: A
 
 ### H-A-02 — v2 공개 자료 비교와 서비스 전환
-- Sources: D-A-001, D-A-002
+- Sources: D-A-002, D-A-007
 - Hypothesis: v2를 별도 계산 버전으로 적재하고 구버전과 비교한 뒤 화면을 전환하면 기존 결과 보존과 수정 배포를 함께 충족한다.
-- Evidence: D-A-002의 회귀 통과로 선행조건 충족. D-A-001/002 모두 독립 교차 검증 PENDING. 실제 v1 공개 파티션12,572개 기준을 별도 보존함.
+- Evidence: D-A-007의 전체 비교·배포·기능26fdaef CI 성공. 후속18cdf64 CI39794977186의 최종 결과 대기; 자료 재처리는 필요 없음.
 - Improvement: 새 버전의 전체 공개 일별 지표 비교와 null 시계열 확인, 이미지/보고서 전환, CI 성공까지 기록.
 - Impact: 3
 - Information: 3
 - Confidence: 3
 - Unblock: 3
 - Diversity: 1
-- Cost: 2
-- Priority: 20
+- Cost: 0
+- Priority: 22
 - Resource: CPU
 - Parallel: NO
 - Other: NONE
-- Next test: v1 기준 목록 보존 → 51개 서비스 재처리 → 일별 에너지·품질 대조 → v2 보고서·Compose/kind 검증. 기존 원본·v1·볼륨은 삭제하지 않는다.
+- Next test: 후속18cdf64 CI39794977186 완료 결과 확인. 실패면 해당 실패만 수정·검증, 성공이면 근거 기록 후 H-A-02를 완료 로그로 이동. 이미 통과한 전체 자료/배포 검증을 반복하지 않는다.
 
 ### H-A-06 — 승인된 고객 표본과 구매 의사 검증
 - Sources: D-A-001

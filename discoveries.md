@@ -55,3 +55,12 @@
 - Evidence: scripts/validation/service_restore_drill.py; data/service-restore-v040-verified/evidence.json, data/service-restore-v040-verified/backup-manifest.json. 7개 파티션/27객체, 전체 원본 catalog hash와 객체 SHA 보존, 과거 보고서 바이트·복원 raw 재처리 해시 일치. pg_dump16.10/이미지ID 기록. 복원~API 0.797초, 전체3.578초는 소규모 단일 로컬 측정. 모든 생성 DB/버킷/파일 보존.
 - Implication: H-A-07의 격리 논리 복원 완료. 고객 도입 시 별도 호스트/저장소·RTO/RPO·보관 계약은 H-A-06의 실제 요구에 맞춰 범위를 정한다.
 - Reviews:
+
+## D-A-007 — 공개 v2 전환·실제 배포·기능 CI
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 서비스 공개 51개 발전소의 v2 적재와 기존 v1 보존을 검증했다. 12,572개 일별 지표/원본 SHA 일치, 31개 시계열 표본 2,976슬롯 중190개 0→null 수정 외 차이 없음. Compose/kind 0.4.0 배포와 기능 CI 성공.
+- Evidence: docs/benchmarks/reliability-v0.4.0.md; artifacts/public-v1-v2-comparison.json. Windows95/WSL96 오프라인, 서비스1개 통과. Compose 합성/kind 공개 각5시나리오 성공, 재시도 try2 확인, 각4DAG pause. 브라우저 PS_001 4월 v2 보고서/오류0 확인. 기능26fdaef CI39794062156 성공(양OS96 passed,1skipped). 서비스 복원 후속18cdf64 CI39794977186은 아직 최종 결과 대기.
+- Implication: new current best: v0.4.0 / energy-interval-v2 로컬 배포 및 기능 CI 검증. H-A-02는 후속 커밋 CI 확인만 남겨22점으로 재평가; 실제 수익성은 D-A-003/H-A-06의 별도 검증.
+- Reviews:
