@@ -74,12 +74,19 @@ def test_conflict_is_not_last_write_wins():
 
 
 @pytest.mark.parametrize(
-    "interpolated,poa,expected",
-    [("false", "500", 1), ("true", "500", 0), ("false", "0", 0), ("", "500", 0)],
+    "interpolated,poa,minutes,expected",
+    [
+        ("false", "500", (0, 15, 30), 1),
+        ("true", "500", (0, 15, 30), 0),
+        ("false", "0", (0, 15, 30), 0),
+        ("", "500", (0, 15, 30), 0),
+        ("false", "500", (0, 15), 0),
+        ("false", "500", (0, 15, 45), 0),
+    ],
 )
-def test_review_requires_reliable_daylight(interpolated, poa, expected):
+def test_review_requires_reliable_daylight(interpolated, poa, minutes, expected):
     inv, sta = [], []
-    for minute in (0, 15, 30):
+    for minute in minutes:
         ts = f"2024-04-01T12:{minute:02d}:00Z"
         inv.append(record(ts, "10", interpolated=interpolated))
         sta.append(

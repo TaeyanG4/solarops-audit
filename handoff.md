@@ -3,23 +3,25 @@
 ## Shared state
 
 - Active agent(s): A
-- Current project state: v0.4.0 계산·전체 공개 비교·배포·진단·합성 SQLite 및 서비스 논리 복원 완료; 후속 커밋 CI 결과 대기
+- Current project state: v0.4.1 경계 수정·양 OS/서비스 검사 통과. 최종 배포/원격 CI 확인 중.
 - Current best: v0.4.0 / energy-interval-v2, 로컬 배포 및 기능 CI 검증 (D-A-007)
-- Active compute: 로컬 검증 작업 종료, Compose/kind 서비스 유지; 추가 에이전트 없음
+- Active compute: 단일 슬롯 A, Windows/WSL/로컬 Compose·kind
 - Open consistency issues: none
 - Scoring: 0–3점씩 평가. Priority = 2×Impact + 2×Information + Confidence + Unblock + Diversity + (3−Cost), 최대24. 동점은 낮은 Cost, 높은 Information 순. 선행조건 미충족은 이유를 기록하고 다음 실행 가능 항목 진행.
 - Initial order: H-A-01 21점 → H-A-02 20점 → H-A-03 19점 → H-A-04 17점 → H-A-05 17점 → H-A-06 16점(사용자 제공·승인 의존).
 - Scope: 공개/합성 로컬 자료와 private GitHub. 고객 연락/데이터·외부 배포·결제는 이 작업에 포함하지 않음. 삭제는 승인 전 실행하지 않음.
 - Coordination paths: 기존 AGENTS.md를 보존. Windows의 agents.md는 같은 파일로 해석됨; Linux는 AGENTS.md를 읽는다. 별도 대소문자 중복 파일을 만들지 않음.
 
+- Completion gate: 현재 로컬 공개/합성 범위의 재현 결함 수정, 관련 회귀/배포/CI/문서 검증, 실행 가능한 고가치 기술 항목 해소. 완벽·실수익·실고장 정확도를 검증 없이 주장하지 않음.
+
 ## Active handoff
 
 ### Agent: A
-- Current host: released
-- Current thread: H-A-02
-- Resumable state: 기능26fdaef CI39794062156 성공. 후속18cdf64 CI39794977186의 최종 결과만 대기. 서비스 복원/원본 보존은 data/service-restore-v040-verified/evidence.json. UI8502 PS_001·2024년4월 v2 보고서 유지.
-- Blocker: H-A-02는 GitHub 후속 CI 결과 대기; H-A-06은 승인된 고객 표본/대상 없음
-- Next action: H-A-02, H-A-06(승인 표본 의존)
+- Current host: Codex
+- Current thread: H-A-11
+- Resumable state: v0.4.1 기능 완료. Windows112/WSL113/서비스5 통과, 공개 PS_001 하루 replay 해시 일치. 최종 Compose/kind 실행 및 CI 확인 중.
+- Blocker: H-A-06은 승인된 고객 표본/대상 없음. 기술 감사는 실행 가능.
+- Next action: H-A-11, H-A-06(승인 표본 의존)
 
 ## Completed / review log
 
@@ -110,3 +112,48 @@
 - Resource: none
 - Other executor: none
 - New plan items: none — H-A-02와 H-A-06에 남은 의존성이 기록됨
+
+
+### 2026-10-22 23:52 — A — H-A-02
+- Host: Codex
+- Action: 사용자 계속 요청으로 슬롯 A 재개. 후속 두 CI success 확인으로 H-A-02 완료 처리하고 추가 경계 감사 H-A-08 등록.
+- Result: v0.4.0 후속 CI 확인 완료; see D-A-007
+- Artifacts: docs/benchmarks/reliability-v0.4.0.md, plan.md, discoveries.md, handoff.md
+- Discovery updates: D-A-007
+- Review verdict: none
+- Resource: CPU
+- Other executor: none
+- New plan items: H-A-08
+
+### 2026-10-22 23:57 — A — H-A-08
+- Host: Codex
+- Action: 독립 합성 fixture로 일곱 경계 실패를 재현하고 우선순위별 수정/추가감사를 분리.
+- Result: 실제 결함과 남은 감사 범위 기록; see D-A-008
+- Artifacts: tests/test_integrity_boundaries.py, artifacts/integrity-audit-before.log
+- Discovery updates: D-A-008
+- Review verdict: none
+- Resource: CPU
+- Other executor: none
+- New plan items: H-A-09, H-A-10, H-A-11
+
+### 2026-10-23 00:06 — A — H-A-09
+- Host: Codex
+- Action: 원본 스냅샷 처리·metadata 계약·원자적 버전 claim 구현 및 회귀/서비스 검증.
+- Result: 재현 결함 수정 및 경계 통과; see D-A-009
+- Artifacts: tests/test_integrity_boundaries.py, tests/test_services.py, src/solarops/storage/postgres.py, src/solarops/storage/minio.py, src/solarops/api/app.py
+- Discovery updates: D-A-009
+- Review verdict: none
+- Resource: CPU
+- Other executor: none
+- New plan items: none — 나머지 경계와 릴리스는 H-A-11에 포함
+
+### 2026-10-23 00:06 — A — H-A-10
+- Host: Codex
+- Action: 읽기 전용 catalog·조회용 S3 초기화 분리·산출물 SHA 검증 구현 및 실제 서비스 확인.
+- Result: 재현 결함 수정 및 경계 통과; see D-A-010
+- Artifacts: tests/test_integrity_boundaries.py, tests/test_services.py, src/solarops/storage/postgres.py, src/solarops/storage/minio.py, src/solarops/api/app.py
+- Discovery updates: D-A-010
+- Review verdict: none
+- Resource: CPU
+- Other executor: none
+- New plan items: none — 나머지 경계와 릴리스는 H-A-11에 포함

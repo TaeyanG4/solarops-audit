@@ -19,6 +19,8 @@ uv run solarops serve
 
 [대시보드](http://127.0.0.1:8501) · [API 문서](http://127.0.0.1:8501/docs)
 
+v0.4.1부터 `serve`는 저장소를 생성하지 않습니다. 위의 `demo`가 DB와 자료를 준비합니다. 자료 없이 빈 catalog만 준비하려면 같은 환경 설정에서 `uv run solarops db-migrate`를 먼저 실행하세요. `/health`는 프로세스 상태, `/ready`는 catalog 스키마와 설정된 객체 저장소 접근을 확인합니다. DB/스키마/버킷이 없으면 503이며, 전체 파일의 존재·무결성을 전수 검사하는 API는 아닙니다.
+
 기본 데모는 네트워크나 Docker 없이 합성 데이터 1주를 처리합니다. `data/`에 SQLite 카탈로그, 원본, Parquet, 보고서를 보존합니다. 실행 후 출력되는 `report.html`, `metrics.csv`, `manifest.json`은 브라우저·Excel·JSON 도구에서 볼 수 있습니다.
 
 실패와 복구를 포함한 독립 시연은 `uv run python scripts/demo/portfolio_demo.py --serve`로 실행합니다. 새 디렉터리에 정상 처리 → 커밋 중 실패 → 기존 결과 보존 → 동일 결과 재처리를 확인한 뒤 [8503 대시보드](http://127.0.0.1:8503/)를 제공합니다. 공개 데이터 다운로드는 필요 없습니다.

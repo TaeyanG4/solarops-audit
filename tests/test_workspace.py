@@ -90,6 +90,7 @@ def test_fleet_weighting_scope_and_one_query(settings):
 
 
 def test_empty_overview_and_api_validation(settings):
+    Catalog(settings).engine.dispose()
     client = TestClient(create_app(settings))
     result = client.get("/api/v1/overview?period=2024-02").json()
     assert result["summary"]["plant_count"] == 0

@@ -18,6 +18,7 @@ from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import (
     Catalog,
     active,
+    claim,
     events,
     issues,
     metrics,
@@ -108,10 +109,8 @@ def ingest(
     begin_utc = datetime.combine(left, datetime.min.time(), zone).astimezone(UTC).isoformat()
     end_utc = datetime.combine(right, datetime.min.time(), zone).astimezone(UTC).isoformat()
     catalog, objects = Catalog(settings), ObjectStore(settings)
-    meta = read_metadata(metadata_path)
-    if plant not in meta:
-        raise ValueError("UNKNOWN_PLANT")
     source_info = []
+    captured = {}
     for kind, path in (
         ("metadata", metadata_path),
         ("inverter", inverter_path),
@@ -120,6 +119,7 @@ def ingest(
         digest = checksum(path)
         sid = str(uuid.uuid5(uuid.NAMESPACE_URL, settings.org + ":" + digest))
         uri = objects.raw(path, settings.org, digest)
+        captured[kind] = objects.raw_path(settings.org, digest, path.name)
         info = {
             "source_object_id": sid,
             "sha256": digest,
@@ -133,35 +133,30 @@ def ingest(
             "source_preprocessed": True,
             "created_at": now(),
         }
-        with catalog.engine.begin() as conn:
-            # Source IDs are content-addressed within each organization.
-            existing = conn.execute(
-                select(sources).where(sources.c.source_object_id == sid)
-            ).first()
-            if not existing:
-                put(
-                    conn,
-                    sources,
-                    {"source_object_id": sid},
-                    info,
-                    org_id=settings.org,
-                    sha256=digest,
-                )
         source_info.append(info)
+    # Every parser uses the preserved bytes whose digest was recorded above.
+    meta = read_metadata(captured["metadata"])
+    if plant not in meta:
+        raise ValueError("UNKNOWN_PLANT")
+    with catalog.engine.begin() as conn:
+        for info in source_info:
+            claim(
+                conn,
+                sources,
+                {"source_object_id": info["source_object_id"]},
+                info,
+                org_id=settings.org,
+                sha256=info["sha256"],
+            )
     fingerprint = canonical_hash([s["sha256"] for s in source_info])
     version_key = {"org_id": settings.org, "plant_id": plant, "source_version": source_version}
     with catalog.engine.begin() as conn:
-        if conn.dialect.name == "postgresql":
-            conn.execute(
-                text("SELECT pg_advisory_xact_lock(hashtextextended(:key, 0))"),
-                {"key": json.dumps(version_key, sort_keys=True)},
-            )
+        claim(
+            conn, versions, version_key, {"fingerprint": fingerprint, "source_objects": source_info}
+        )
         existing = conn.execute(select(versions).filter_by(**version_key)).mappings().first()
         if existing and existing["payload"]["fingerprint"] != fingerprint:
             raise ValueError("SOURCE_VERSION_CONFLICT: use a new explicit version")
-        put(
-            conn, versions, version_key, {"fingerprint": fingerprint, "source_objects": source_info}
-        )
         put(conn, plants, {"org_id": settings.org, "plant_id": plant}, meta[plant])
     batch_id = str(uuid.uuid4())
     batch_started = time.monotonic()
@@ -187,12 +182,16 @@ def ingest(
         )
     outcomes = []
     try:
-        bounds = source_bounds(inverter_path, plant, meta)
+        bounds = source_bounds(captured["inverter"], plant, meta)
         inv_iter = iter(
-            normalized_days(inverter_path, "inverter", plant, begin_utc, end_utc, settings.timezone)
+            normalized_days(
+                captured["inverter"], "inverter", plant, begin_utc, end_utc, settings.timezone
+            )
         )
         station_iter = iter(
-            normalized_days(station_path, "station", plant, begin_utc, end_utc, settings.timezone)
+            normalized_days(
+                captured["station"], "station", plant, begin_utc, end_utc, settings.timezone
+            )
         )
         inv_day, sta_day = next(inv_iter, None), next(station_iter, None)
         for offset in range((right - left).days):
@@ -351,6 +350,7 @@ def publish_day(
             row_count=len(inv_rows),
             source_objects=source_info,
             series_uri=series_uri,
+            series_sha256=checksum(series_file),
             thresholds={"poa": poa_threshold, "ratio": power_ratio},
             metadata=meta,
         )

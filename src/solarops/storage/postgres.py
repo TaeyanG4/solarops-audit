@@ -1,6 +1,7 @@
 """Shared transactional catalog, PostgreSQL in services; SQLite for offline demos."""
 
 from datetime import UTC, datetime
+from pathlib import Path
 
 from sqlalchemy import (
     JSON,
@@ -13,6 +14,7 @@ from sqlalchemy import (
     select,
     text,
 )
+from sqlalchemy.engine import make_url
 
 from solarops.config import CALCULATION_VERSION
 
@@ -65,7 +67,7 @@ def now():
     return datetime.now(UTC).isoformat()
 
 
-def put(conn, relation, key, payload, **extra):
+def put(conn, relation, key, payload, *, update_if=None, **extra):
     values = dict(key, payload=payload, **extra)
     if conn.dialect.name == "postgresql":
         from sqlalchemy.dialects.postgresql import insert
@@ -74,18 +76,54 @@ def put(conn, relation, key, payload, **extra):
     stmt = insert(relation).values(**values)
     conn.execute(
         stmt.on_conflict_do_update(
-            index_elements=list(key), set_={k: v for k, v in values.items() if k not in key}
+            index_elements=list(key),
+            set_={k: v for k, v in values.items() if k not in key},
+            where=update_if,
         )
     )
 
 
+def claim(conn, relation, key, payload, **extra):
+    """Insert once; a conflict waits for the first writer and never overwrites evidence."""
+    if conn.dialect.name == "postgresql":
+        from sqlalchemy.dialects.postgresql import insert
+    else:
+        from sqlalchemy.dialects.sqlite import insert
+    conn.execute(
+        insert(relation)
+        .values(**key, payload=payload, **extra)
+        .on_conflict_do_nothing(index_elements=list(key))
+    )
+
+
+def read_only_url(database_url):
+    url = make_url(database_url)
+    if url.get_backend_name() == "sqlite":
+        if not url.database or url.database == ":memory:":
+            raise ValueError("Read-only access requires a persistent database")
+        url = url.set(
+            database=Path(url.database).resolve().as_uri(),
+            query={**url.query, "mode": "ro", "uri": "true"},
+        )
+    return url
+
+
 class Catalog:
-    def __init__(self, settings):
+    def __init__(self, settings, read_only=False):
         self.settings = settings
         kwargs = (
             {"connect_args": {"timeout": 60}} if settings.database_url.startswith("sqlite") else {}
         )
-        self.engine = create_engine(settings.database_url, pool_pre_ping=True, **kwargs)
+        url = read_only_url(settings.database_url) if read_only else settings.database_url
+        parsed = make_url(url)
+        if not read_only and parsed.get_backend_name() == "sqlite":
+            if parsed.database and parsed.database != ":memory:":
+                Path(parsed.database).resolve().parent.mkdir(parents=True, exist_ok=True)
+        if read_only and make_url(url).get_backend_name() == "postgresql":
+            kwargs["execution_options"] = {"postgresql_readonly": True}
+        self.engine = create_engine(url, pool_pre_ping=True, **kwargs)
+        if read_only:
+            return
         if self.engine.dialect.name == "sqlite":
             with self.engine.begin() as conn:
                 conn.execute(text("PRAGMA journal_mode=WAL"))

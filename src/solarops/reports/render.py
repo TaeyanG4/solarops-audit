@@ -6,6 +6,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
+from solarops.acquisition.brpvgen import checksum
 from solarops.config import CALCULATION_VERSION
 from solarops.contracts.dates import month_bounds
 from solarops.pipeline import canonical_hash
@@ -20,6 +21,7 @@ env = Environment(
 def build_report(settings, period, plant=None, source_kind=None):
     start, end = month_bounds(period)
     catalog = Catalog(settings)
+    generated_at = now()
     snapshot = catalog.snapshot(settings.org, start, end, plant, source_kind)
     if not snapshot:
         raise ValueError("NO_ACTIVE_PARTITIONS")
@@ -47,7 +49,7 @@ def build_report(settings, period, plant=None, source_kind=None):
         "org_id": settings.org,
         "period": period,
         "scope": plant or ("all-" + source_kind if source_kind else "all"),
-        "generated_at": now(),
+        "generated_at": generated_at,
         "timezone": settings.timezone,
         "calculation_version": CALCULATION_VERSION,
         "source_manifest_hash": canonical_hash(manifests),
@@ -98,6 +100,7 @@ def build_report(settings, period, plant=None, source_kind=None):
         calculation_version=report["calculation_version"],
         status=report["status"],
         artifacts=artifacts,
+        artifact_sha256={p.name: checksum(p) for p in (html, csv_path, manifest_path)},
         local_directory=str(directory.resolve()),
     )
     with catalog.engine.begin() as conn:
@@ -112,6 +115,7 @@ def build_report(settings, period, plant=None, source_kind=None):
                 "report_timezone": settings.timezone,
             },
             payload,
+            update_if=active_reports.c.payload["generated_at"].as_string() <= generated_at,
             report_run_id=report_id,
         )
     return payload

@@ -41,6 +41,7 @@ def test_invalid_series_day_returns_422(settings, day):
 
 @pytest.mark.parametrize("endpoint", ["metrics", "issues", "series?day=2024-04-01"])
 def test_plant_identifier_validation_is_consistent(settings, endpoint):
+    Catalog(settings).engine.dispose()
     client = TestClient(create_app(settings))
     for plant in ("invalid!", "x" * 81):
         assert client.get(f"/api/v1/plants/{plant}/{endpoint}").status_code == 422

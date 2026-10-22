@@ -30,6 +30,5 @@ class Settings:
     def __post_init__(self):
         identifier(self.org)
         ZoneInfo(self.timezone)
-        self.root.mkdir(parents=True, exist_ok=True)
         if not self.database_url:
             self.database_url = "sqlite:///" + (self.root / "solarops.db").as_posix()

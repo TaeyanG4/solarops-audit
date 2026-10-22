@@ -34,7 +34,7 @@ MinIO는 공식 소스 `RELEASE.2025-10-15T17-29-55Z`를 [Dockerfile](../../infr
 | pytest 9.1.1 / Ruff 0.17.1 / GitHub Actions | 실패 보존·중복 충돌·조직 격리·API·패키징 회귀, 두 OS에서 동일 검사 | 오프라인 CI에는 외부 서비스·전체 공개 자료가 없음. 실제 서비스 검사는 별도 수행 |
 | hatchling 1.29.0 | CLI와 템플릿·정적 파일을 wheel로 배포 | wheel 성공만으로 서비스 배포 완료를 뜻하지 않으므로 컨테이너/API 확인을 별도 기록 |
 
-개발 의존성의 httpx 0.28.1은 FastAPI TestClient, psutil 7.2.2는 실제 메모리/실행 측정에 씁니다. Airflow 환경은 자체 의존성 제약이 있으므로 [별도 venv를 복사하는 이미지](../../infra/docker/Dockerfile)로 앱 환경과 분리합니다. 앱은 uv.lock에 잠겨 있지만 Airflow 이미지의 전이 의존성 전체가 같은 lockfile로 잠긴 것은 아닙니다. 이미지 digest를 검증 기록에 남깁니다.
+개발 의존성의 httpx2 2.16.0은 FastAPI TestClient, psutil 7.2.2는 실제 메모리/실행 측정에 씁니다. Airflow 환경은 자체 의존성 제약이 있으므로 [별도 venv를 복사하는 이미지](../../infra/docker/Dockerfile)로 앱 환경과 분리합니다. 앱은 uv.lock에 잠겨 있지만 Airflow 이미지의 전이 의존성 전체가 같은 lockfile로 잠긴 것은 아닙니다. 이미지 digest를 검증 기록에 남깁니다.
 
 ## 사용하지 않은 기술의 판단
 

@@ -12,8 +12,8 @@ jobs:
     env:
       SOLAROPS_DATA_DIR: data/ci
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
         with: {version: "0.11.29", python-version: "3.12"}
       - run: uv sync --frozen
       - run: uv run ruff check src tests scripts dags
@@ -27,7 +27,7 @@ jobs:
       - run: uv build --wheel --out-dir artifacts/dist
       - run: uv run python scripts/release/package_source.py --output artifacts/source.zip
       - run: git diff --exit-code uv.lock
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: synthetic-demo-${{ matrix.os }}
           path: |

@@ -1,5 +1,6 @@
 import os
 import shutil
+import uuid
 from pathlib import Path
 
 import boto3
@@ -9,7 +10,7 @@ from solarops.acquisition.brpvgen import checksum
 
 
 class ObjectStore:
-    def __init__(self, settings):
+    def __init__(self, settings, initialize=True):
         self.root = settings.root
         self.bucket = os.getenv("SOLAROPS_S3_BUCKET", "solarops-demo")
         self.client = None
@@ -21,6 +22,8 @@ class ObjectStore:
                 aws_secret_access_key=os.environ["SOLAROPS_S3_SECRET_KEY"],
                 region_name="us-east-1",
             )
+            if not initialize:
+                return
             try:
                 self.client.head_bucket(Bucket=self.bucket)
             except ClientError as exc:
@@ -38,6 +41,25 @@ class ObjectStore:
 
     def raw(self, path, org, digest):
         key = f"raw/{org}/{digest}/{path.name}"
+        target = self.raw_path(org, digest, path.name)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if not target.exists():
+            staged = self.root / "staging" / org / ("raw-" + uuid.uuid4().hex) / path.name
+            staged.parent.mkdir(parents=True, exist_ok=False)
+            with path.open("rb") as source, staged.open("xb") as out:
+                shutil.copyfileobj(source, out)
+                out.flush()
+                os.fsync(out.fileno())
+            if checksum(staged) != digest:
+                raise ValueError("Immutable raw object checksum differs")
+            # Link a completed file atomically without replacing a concurrent winner.
+            # Keep staging evidence; it shares bytes with the published file on success.
+            try:
+                os.link(staged, target)
+            except FileExistsError:
+                pass
+        if checksum(target) != digest:
+            raise ValueError("Immutable raw object checksum differs")
         if self.client:
             try:
                 obj = self.client.head_object(Bucket=self.bucket, Key=key)
@@ -46,13 +68,9 @@ class ObjectStore:
             except ClientError as exc:
                 if exc.response["Error"]["Code"] not in ("404", "NoSuchKey"):
                     raise
-                self.upload(path, key)
+                self.upload(target, key)
             return f"s3://{self.bucket}/{key}"
-        target = self.root / key
-        target.parent.mkdir(parents=True, exist_ok=True)
-        if not target.exists():
-            with path.open("rb") as source, target.open("xb") as out:
-                shutil.copyfileobj(source, out)
-        if checksum(target) != digest:
-            raise ValueError("Immutable raw object checksum differs")
         return str(target.resolve())
+
+    def raw_path(self, org, digest, name):
+        return self.root / "raw" / org / digest / name

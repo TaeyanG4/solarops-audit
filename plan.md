@@ -1,22 +1,5 @@
 ## Agent: A
 
-### H-A-02 — v2 공개 자료 비교와 서비스 전환
-- Sources: D-A-002, D-A-007
-- Hypothesis: v2를 별도 계산 버전으로 적재하고 구버전과 비교한 뒤 화면을 전환하면 기존 결과 보존과 수정 배포를 함께 충족한다.
-- Evidence: D-A-007의 전체 비교·배포·기능26fdaef CI 성공. 후속18cdf64 CI39794977186의 최종 결과 대기; 자료 재처리는 필요 없음.
-- Improvement: 새 버전의 전체 공개 일별 지표 비교와 null 시계열 확인, 이미지/보고서 전환, CI 성공까지 기록.
-- Impact: 3
-- Information: 3
-- Confidence: 3
-- Unblock: 3
-- Diversity: 1
-- Cost: 0
-- Priority: 22
-- Resource: CPU
-- Parallel: NO
-- Other: NONE
-- Next test: 후속18cdf64 CI39794977186 완료 결과 확인. 실패면 해당 실패만 수정·검증, 성공이면 근거 기록 후 H-A-02를 완료 로그로 이동. 이미 통과한 전체 자료/배포 검증을 반복하지 않는다.
-
 ### H-A-06 — 승인된 고객 표본과 구매 의사 검증
 - Sources: D-A-001
 - Hypothesis: 국내 O&M의 반복 보고 작업 절약과 재구매로 서비스 수익성을 판정할 수 있다.
@@ -33,3 +16,20 @@
 - Parallel: NO
 - Other: NONE
 - Next test: 사용자가 승인한 상대·접촉 방식·표본이 제공되면 단위/간격/시간대 매핑, 1개 유료 파일럿의 전후시간과 기여이익·재구매를 확인한다.
+
+### H-A-11 — 잔여 계산·보고서·의존성·릴리스 감사
+- Sources: D-A-008
+- Hypothesis: 시계열 후보·분모 경계, 보고서 실패/동시성, 의존성·패키징을 점검하면 남은 고가치 로컬 결함을 식별할 수 있다.
+- Evidence: raw/보고서 추가3실패 수정, Windows112·WSL113·서비스5 통과. 최종 이미지/DAG/CI 확인 중. 독립 리뷰 PENDING.
+- Improvement: 이미 통과한 전체자료 반복 대신 아직 미검사인 실패 경계에 집중.
+- Impact: 3
+- Information: 3
+- Confidence: 3
+- Unblock: 2
+- Diversity: 2
+- Cost: 1
+- Priority: 21
+- Resource: CPU
+- Parallel: NO
+- Other: NONE
+- Next test: 연속 후보 임계 미달과 DST/UTC그리드, 보고서 실패 원자성·동시 요청, dependency audit, CI/이미지/문서 일치를 확인하고 실제 문제만 후속 처리.

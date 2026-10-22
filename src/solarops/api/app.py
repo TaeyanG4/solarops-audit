@@ -1,4 +1,6 @@
+import hashlib
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated, Literal
 from uuid import UUID
@@ -6,24 +8,44 @@ from uuid import UUID
 from botocore.exceptions import BotoCoreError, ClientError
 from fastapi import FastAPI, HTTPException, Query
 from fastapi import Path as ApiPath
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select, text
+from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 
 from solarops import __version__
 from solarops.api.readmodels import fleet_overview, run_history
 from solarops.config import Settings
 from solarops.contracts.dates import date_bounds, month_bounds, next_day
 from solarops.storage.minio import ObjectStore
-from solarops.storage.postgres import Catalog, active_reports, plants, reports, runs
+from solarops.storage.postgres import Catalog, active_reports, metadata, plants, reports, runs
 
 PlantId = Annotated[str, ApiPath(pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$")]
 
 
 def create_app(settings=None):
     settings = settings or Settings()
-    catalog = Catalog(settings)
-    app = FastAPI(title="SolarOps Audit — local read-only", version=__version__, docs_url="/docs")
+    catalog = Catalog(settings, read_only=True)
+
+    @asynccontextmanager
+    async def lifespan(app):
+        yield
+        catalog.engine.dispose()
+
+    app = FastAPI(
+        title="SolarOps Audit — local read-only",
+        version=__version__,
+        docs_url="/docs",
+        lifespan=lifespan,
+    )
+
+    @app.exception_handler(SQLAlchemyError)
+    async def database_unavailable(request, exc):
+        return JSONResponse(
+            status_code=503,
+            content={"detail": "Catalog unavailable; initialize or restore storage first"},
+        )
+
     app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
 
     @app.get("/api/v1/overview")
@@ -36,17 +58,34 @@ def create_app(settings=None):
         except ValueError:
             raise HTTPException(422, "Expected a valid YYYY-MM period") from None
 
-    def artifact(uri):
-        if uri.startswith("s3://"):
-            bucket, key = uri[5:].split("/", 1)
-            store = ObjectStore(settings)
-            if bucket != store.bucket:
-                raise HTTPException(404)
-            return store.client.get_object(Bucket=bucket, Key=key)["Body"].read()
-        path = Path(uri).resolve()
-        if not path.is_relative_to(settings.root.resolve()):
-            raise HTTPException(404)
-        return path.read_bytes()
+    def artifact(uri, expected_sha256=None):
+        try:
+            if uri.startswith("s3://"):
+                bucket, key = uri[5:].split("/", 1)
+                store = ObjectStore(settings, initialize=False)
+                if bucket != store.bucket or not store.client:
+                    raise HTTPException(404, "Artifact not found")
+                body = store.client.get_object(Bucket=bucket, Key=key)["Body"]
+                try:
+                    data = body.read()
+                finally:
+                    body.close()
+            else:
+                path = Path(uri).resolve()
+                if not path.is_relative_to(settings.root.resolve()):
+                    raise HTTPException(404, "Artifact not found")
+                data = path.read_bytes()
+        except FileNotFoundError:
+            raise HTTPException(404, "Artifact not found") from None
+        except ClientError as exc:
+            if exc.response["Error"]["Code"] in ("404", "NoSuchKey", "NotFound"):
+                raise HTTPException(404, "Artifact not found") from None
+            raise HTTPException(503, "Artifact storage unavailable") from None
+        except (OSError, BotoCoreError, KeyError, ValueError):
+            raise HTTPException(503, "Artifact storage unavailable") from None
+        if expected_sha256 and hashlib.sha256(data).hexdigest() != expected_sha256:
+            raise HTTPException(503, "Artifact integrity check failed")
+        return data
 
     @app.get("/health")
     def health():
@@ -56,8 +95,9 @@ def create_app(settings=None):
     def ready():
         try:
             with catalog.engine.connect() as conn:
-                conn.execute(text("SELECT 1"))
-            store = ObjectStore(settings)
+                for relation in metadata.sorted_tables:
+                    conn.execute(select(relation).limit(0))
+            store = ObjectStore(settings, initialize=False)
             if store.client:
                 store.client.head_bucket(Bucket=store.bucket)
             return {"status": "ready"}
@@ -124,7 +164,16 @@ def create_app(settings=None):
         except ValueError:
             raise HTTPException(422, "Expected YYYY-MM-DD with a representable next day") from None
         data = catalog.snapshot(settings.org, day, end, plant_id)
-        return {"items": json.loads(artifact(data[0]["payload"]["series_uri"])) if data else []}
+        if not data:
+            return {"items": []}
+        payload = data[0]["payload"]
+        try:
+            items = json.loads(artifact(payload["series_uri"], payload.get("series_sha256")))
+        except (ValueError, UnicodeError):
+            raise HTTPException(503, "Series artifact invalid") from None
+        if not isinstance(items, list):
+            raise HTTPException(503, "Series artifact invalid")
+        return {"items": items}
 
     @app.get("/api/v1/runs")
     def run_list(
@@ -190,7 +239,12 @@ def create_app(settings=None):
                 # Older reports retain their source evidence in the immutable manifest.
                 # Never infer provenance from plant names or rewrite historical artifacts.
                 try:
-                    manifest = json.loads(artifact(payload["artifacts"]["manifest.json"]))
+                    manifest = json.loads(
+                        artifact(
+                            payload["artifacts"]["manifest.json"],
+                            payload.get("artifact_sha256", {}).get("manifest.json"),
+                        )
+                    )
                     payload["source_kinds"] = sorted(
                         {source["source_kind"] for source in manifest["sources"]}
                     )
@@ -237,7 +291,10 @@ def create_app(settings=None):
             "metrics.csv": "text/csv",
             "manifest.json": "application/json",
         }
-        return Response(artifact(info["artifacts"][filename]), media_type=media[filename])
+        return Response(
+            artifact(info["artifacts"][filename], info.get("artifact_sha256", {}).get(filename)),
+            media_type=media[filename],
+        )
 
     @app.get("/", response_class=HTMLResponse)
     def home():

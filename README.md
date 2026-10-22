@@ -36,6 +36,7 @@ uv run python scripts/demo/portfolio_demo.py --serve
 - 같은 CLI를 쓰는 로컬 실행, Airflow 재시도·백필, Kubernetes 작업 Pod
 - 모두 무효인 전력과 실제 0의 구분, 시간대 경계 회귀, v1을 보존하는 별도 계산 v2
 - 읽기 전용 미완료 작업 진단, 합성 SQLite·파일과 PostgreSQL·MinIO의 격리 복원 시험
+- 보존 원본으로 처리하는 계보, 동시 버전 충돌 차단, 파일 SHA 검증과 부작용 없는 조회 API
 
 ```mermaid
 flowchart LR
@@ -57,6 +58,7 @@ Python·uv는 공통 실행과 의존성 재현, DuckDB·Arrow는 CSV 외부 정
 |---|---|
 | 공개 전체 처리 | 51개 발전소 · 인버터 14,400,480행 · 12,572개 일별 파티션. v1 native/서비스 일치, v2 서비스 재처리 후 v1/v2 일별 지표·원본 SHA 일치 ([v0.4 검증](docs/benchmarks/reliability-v0.4.0.md)) |
 | 재처리·복구 | 동일 입력 반복, 중복 충돌, 트랜잭션 실패, Compose/kind DAG 및 Pod 중단 후 재시도 검증 |
+| 장애·동시성 | 입력 변경·복사 경합·동시 버전·보고서 역순 완료·누락/변조 파일 회귀 ([v0.4.1 검증](docs/benchmarks/integrity-v0.4.1.md)) |
 | 화면 조회 | 월별 HTTP 요청 53회→1회, 로컬 5회 중앙값 703.239ms→12.576ms. 응답 범위와 요청 방식이 달라 일반 성능 배수로 해석하지 않음 ([측정 조건](docs/benchmarks/workspace-v0.3.0.md)) |
 | 품질 관리 | Windows·Ubuntu CI: 잠긴 의존성, lint, API/처리 회귀 검사, 합성 복구 데모, wheel 및 문서 링크 검사 ([최신 결과](docs/IMPLEMENTATION_STATUS.md)) |
 

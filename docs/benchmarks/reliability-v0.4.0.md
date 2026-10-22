@@ -49,4 +49,4 @@ Compose/kind 0.4.0 이미지 적용 후 실제 DAG 실행을 확인했다. [이�
 
 로그: `artifacts/airflow-compose-v040.log`, `artifacts/k8s-public-v040-execution.log`, `artifacts/deploy-compose-v040.log`, `artifacts/deploy-kind-v040.log`. 첫 WSL 호출은 PATH 인용 오류로 실행 전에 종료됐고, 제한된 PATH를 env 인수로 전달해 정상 실행했다.
 
-[기능 커밋 26fdaef의 원격 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39794062156)가 성공했다. Ubuntu/Windows 각각 96 passed, 1 skipped이며 잠긴 의존성·lint·문서·JS·합성 데모·SQLite 복원 드릴·wheel·소스 ZIP·아티팩트 업로드까지 통과했다. 제외한 서비스 검사는 로컬에서 별도 통과했다. PostgreSQL·MinIO 복원 스크립트를 추가한 후속 커밋 18cdf64는 로컬 실행·lint·문서 검사를 통과했고 [추가 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39794977186)는 확인 중이다.
+[기능 커밋 26fdaef의 원격 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39794062156)가 성공했다. Ubuntu/Windows 각각 96 passed, 1 skipped이며 잠긴 의존성·lint·문서·JS·합성 데모·SQLite 복원 드릴·wheel·소스 ZIP·아티팩트 업로드까지 통과했다. 제외한 서비스 검사는 로컬에서 별도 통과했다. PostgreSQL·MinIO 복원 스크립트를 추가한 후속 커밋 18cdf64는 로컬 실행·lint·문서 검사를 통과했고 [추가 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39794977186)는 success 확인을 마쳤다. 인계 커밋 aa1ca86의 CI39795527411도 success였다.

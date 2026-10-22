@@ -13,10 +13,13 @@ REQUIRED = {
 def read_metadata(path: Path):
     with path.open(encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
-        if not {"id", "nominal_power_mw"} <= set(reader.fieldnames or []):
+        fields = reader.fieldnames or []
+        if len(fields) != len(set(fields)) or not {"id", "nominal_power_mw"} <= set(fields):
             raise ValueError("Metadata contract mismatch")
         result = {}
         for row in reader:
+            if None in row or any(value is None for value in row.values()):
+                raise ValueError("Metadata contract row width mismatch")
             plant = identifier(row["id"])
             capacity = float(row["nominal_power_mw"]) * 1000
             if not math.isfinite(capacity) or capacity <= 0 or plant in result:

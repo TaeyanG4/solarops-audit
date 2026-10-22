@@ -41,7 +41,7 @@ def test_dry_run_checks_inputs_without_publishing(settings, public_layout):
     plan = public_replay(settings)
     assert plan["dry_run"] is True and plan["days"] == 1
     assert plan["plant_id"] == "PS_001" and plan["report_timezone"] == "UTC"
-    assert not list(settings.root.iterdir())
+    assert not settings.root.exists()
     assert not (settings.root.parent / "catalog.db").exists()
     assert before == {p: p.read_bytes() for p in public_layout.values()}
 

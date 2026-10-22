@@ -1,6 +1,6 @@
 [project]
 name = "solarops-audit"
-version = "0.4.0"
+version = "0.4.1"
 description = "Reproducible photovoltaic data quality audits and estimated-energy reports"
 requires-python = ">=3.12,<3.13"
 dependencies = [
@@ -20,7 +20,12 @@ dependencies = [
 solarops = "solarops.cli:main"
 
 [dependency-groups]
-dev = ["pytest==9.1.1", "ruff==0.17.1", "httpx==0.28.1", "psutil==7.2.2"]
+dev = [
+    "pytest==9.1.1",
+    "ruff==0.17.1",
+    "psutil==7.2.2",
+    "httpx2==2.16.0",
+]
 
 [build-system]
 requires = ["hatchling==1.29.0"]

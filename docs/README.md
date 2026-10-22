@@ -25,5 +25,8 @@
 - [0005: 사업 범위](adr/0005-business-scope.md)
 - [0006: 월별 조회 모델](adr/0006-workspace-read-models.md)
 - [0007: 계산 v2와 기존 결과 보존](adr/0007-calculation-v2.md)
+- [0008: 보존 원본·읽기 전용 조회·보고서 동시성](adr/0008-storage-integrity.md)
+
+최신 유지보수 검증은 [v0.4.1 경계·무결성 기록](benchmarks/integrity-v0.4.1.md)을 확인합니다.
 
 `plan/`은 [원본 기획](plan/00_START_HERE.md)과 [SHA-256 목록](plan/MANIFEST.sha256)을 보존하는 영역입니다. 과거 예시 프롬프트·중단 조건·계획은 현재 실행 결과나 사용자의 현재 지시와 구별합니다. 최신 상태는 위 구현 상태 문서가 기준입니다.

@@ -821,12 +821,12 @@ async function series(signal) {
   root.append(box);
   const records = panel(
     "관측값과 판단 가능 범위",
-    "발전량은 근사치이며 저출력 표시는 사람이 확인할 검토 후보입니다.",
+    "에너지는 추정치입니다. 저출력 슬롯이 3개 연속일 때 검토 사건으로 집계하며, 고장 확정을 뜻하지 않습니다.",
   );
   const labels = {
     normal: "규칙상 일반",
     INSUFFICIENT_DATA: "판단 불가",
-    review_candidate: "검토 후보",
+    review_candidate: "저출력 슬롯 · 연속성 확인 필요",
   };
   records.append(
     table(

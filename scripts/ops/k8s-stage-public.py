@@ -39,7 +39,7 @@ spec = {
         "containers": [
             {
                 "name": "stage",
-                "image": "solarops-worker:0.4.0",
+                "image": "solarops-worker:0.4.1",
                 "imagePullPolicy": "IfNotPresent",
                 "command": [
                     "python",

@@ -27,6 +27,8 @@ def main():
         if path.suffix not in {".md", ".py", ".sh", ".yaml", ".yml"} and name != "Makefile":
             continue
         text = path.read_text(encoding="utf-8")
+        if (path.suffix == ".sh" or name == "Makefile") and b"\r" in path.read_bytes():
+            errors.append(f"{name}: shell/Make files must use LF line endings")
         if path.suffix == ".md":
             for match in re.finditer(r"\]\(([^\s)]+)\)", text):
                 target = urlsplit(match[1].strip("<>"))

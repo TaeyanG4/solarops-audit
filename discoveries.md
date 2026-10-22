@@ -61,6 +61,33 @@
 - Host: Codex
 - Cross-check: PENDING
 - Finding: 서비스 공개 51개 발전소의 v2 적재와 기존 v1 보존을 검증했다. 12,572개 일별 지표/원본 SHA 일치, 31개 시계열 표본 2,976슬롯 중190개 0→null 수정 외 차이 없음. Compose/kind 0.4.0 배포와 기능 CI 성공.
-- Evidence: docs/benchmarks/reliability-v0.4.0.md; artifacts/public-v1-v2-comparison.json. Windows95/WSL96 오프라인, 서비스1개 통과. Compose 합성/kind 공개 각5시나리오 성공, 재시도 try2 확인, 각4DAG pause. 브라우저 PS_001 4월 v2 보고서/오류0 확인. 기능26fdaef CI39794062156 성공(양OS96 passed,1skipped). 서비스 복원 후속18cdf64 CI39794977186은 아직 최종 결과 대기.
-- Implication: new current best: v0.4.0 / energy-interval-v2 로컬 배포 및 기능 CI 검증. H-A-02는 후속 커밋 CI 확인만 남겨22점으로 재평가; 실제 수익성은 D-A-003/H-A-06의 별도 검증.
+- Evidence: docs/benchmarks/reliability-v0.4.0.md; artifacts/public-v1-v2-comparison.json. Windows95/WSL96 오프라인, 서비스1개 통과. Compose 합성/kind 공개 각5시나리오 성공, 재시도 try2 확인, 각4DAG pause. 브라우저 PS_001 4월 v2 보고서/오류0 확인. 기능26fdaef CI39794062156 성공(양OS96 passed,1skipped). 서비스 복원 후속18cdf64 CI39794977186 및 인계aa1ca86 CI39795527411도 success 확인.
+- Implication: new current best: v0.4.0 / energy-interval-v2 로컬 배포 및 기능 CI 검증. H-A-02의 후속 CI까지 완료; 실제 수익성은 D-A-003/H-A-06의 별도 검증.
+- Reviews:
+
+## D-A-008 — 계보·읽기·동시성 결함 재현
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 기록한 원본 이후 입력이 바뀌면 다른 내용으로 결과가 생성되고, SQLite 동시 요청이 서로 다른 내용을 같은 source_version으로 둘 다 커밋한다. metadata 중복/폭 불일치도 통과한다. readiness는 없는 bucket을 생성하고 누락 보고서 파일은 비제어500이다.
+- Evidence: tests/test_integrity_boundaries.py, artifacts/integrity-audit-before.log: 7 failed(메타데이터3, 입력변경1, 읽기부작용1, 누락파일1, 동시성1). 전용 합성 fixture와 fake S3만 사용, 사용자 원본 비변경.
+- Implication: H-A-09 계보/버전22점, H-A-10 읽기API21점, H-A-11 나머지 계산·의존성·배포감사19점으로 후속 분리. 계산식 변경은 아직 없음.
+- Reviews:
+
+## D-A-009 — 보존 원본 처리와 버전 claim
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 처리 입력을 보존 원본으로 고정하고 source_version을 INSERT ON CONFLICT DO NOTHING으로 확보하여 입력 변경 및 같은 버전의 내용 덮어쓰기를 막았다. 메타데이터 중복 열/행 폭 오류도 거부한다.
+- Evidence: tests/test_integrity_boundaries.py의 관련5개와 기존 pipeline/calculation18개 통과, tests/test_services.py 실제 PostgreSQL 동시 버전 포함2개 통과. artifacts/integrity-audit-after-source-verified.log, artifacts/service-integrity-v050.log.
+- Implication: H-A-09 완료. 정상 계산 v2는 유지. 같은 로컬 raw 경로의 복사 도중 접근 경계는 H-A-11에서 추가 검사한다.
+- Reviews:
+
+## D-A-010 — 조회 부작용 제거와 파일 무결성
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 조회 API는 DB/테이블/버킷을 만들지 않는다. 없는 catalog/불완전 schema는503, 없는 파일은404, 새 SHA가 다른 파일은503으로 반환한다. SHA가 없는 기존 산출물은 계속 읽으며 소급 검증을 주장하지 않는다.
+- Evidence: tests/test_integrity_boundaries.py 10 passed, tests/test_services.py 2 passed. SQLite 쓰기 거부·DB 미생성·누락 schema·파일 변조·legacy 호환과 실제 PostgreSQL transaction_read_only=on 및 UPDATE 거부/MinIO series 조회를 확인했다.
+- Implication: H-A-10 완료. 설치 시 db-migrate/적재가 먼저 필요하며 H-A-11 릴리스 문서에 명시한다.
 - Reviews:
