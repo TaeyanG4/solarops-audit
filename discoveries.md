@@ -100,3 +100,12 @@
 - Evidence: docs/benchmarks/integrity-v0.4.1.md. 추가3실패→공개경계5통과, Windows112/6skip·WSL113/5skip·실제서비스5 통과. 앱/개발41 의존성 알려진 취약점0. 공개 PS_001 하루 기존 계산해시 일치. 최종 Compose/kind 각5시나리오 성공·4DAG pause, retry try2. 기능036a27b CI39804115471 양OS113/5skip success. SQLite34파일/서비스27객체 복원과 브라우저·wheel 검증.
 - Implication: new current best: v0.4.1 / energy-interval-v2, 계보·조회·발행 경계 수정 및 로컬 배포/CI 검증. H-A-11 완료. 실행 가능한 기술 항목은 해소했고 승인된 고객 표본/구매 의사 H-A-06만 남는다. 새 근거 없는 기능 확장은 하지 않는다.
 - Reviews:
+
+## D-A-012 — 전체 현황 리디자인과 실제 화면 검증
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 추정 발전량·유효/무효/누락·원본 보간의 의미와 API를 보존하며 전체 현황의 정보 위계·차트 탐색·모바일 발전소 배치를 개선했다. 이전 CSS 캐시 혼합과 모바일 select 잘림을 실제 화면에서 발견하고 수정했다.
+- Evidence: docs/design/overview-system.md, docs/benchmarks/overview-redesign-20261023.md, docs/portfolio/images/overview-redesign/. Agent Browser1440/768/390px, axe각45pass/0위반/0incomplete,79개명령·assertions와 별도0/null/누락fixture·합성터치 확인. 전후 공개overview JSON일치, Windows112/6skip. Impeccable정적[]·exit0. 기능afd6169 CI39812883684 양OS113/5skip 및 합성복원·패키징success.
+- Implication: new current best: v0.4.1 / energy-interval-v2 + overview-20261023, 전체 현황 로컬8502 배포. H-A-12(21점) 완료. 이번범위는 전체현황/공통틀이며 실기기·스크린리더·타브라우저·상세차트 재설계는 미검증/범위외. H-A-06 고객의존16점 유지. 외부서비스/독립리뷰/사용자성과를 검증했다고 주장하지 않음.
+- Reviews:

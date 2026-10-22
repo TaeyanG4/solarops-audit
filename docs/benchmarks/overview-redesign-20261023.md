@@ -78,4 +78,4 @@ $ab = '.tools/ui-review/node_modules/agent-browser/bin/agent-browser-win32-x64.e
 
 worker0.4.1 태그는 UI개발 빌드 중 이동했으므로 `git archive eb3501c`의 별도 경로에서 다시 빌드해 기준 소스로 복원했습니다. 원래 기록 ID `478d7fbf…`는 로컬에서 조회되지 않았고, 복원 빌드 ID는 `d094ef26…`입니다. 소스 복원과 이미지 바이트 동일성은 구분하며 기존 파일·볼륨을 삭제하지 않았습니다.
 
-문서검사169개 로컬링크/50개 스크립트참조/8개 보존checksum 통과, 진행기록 일관성 검사 통과. 원격CI는 기능커밋 push 뒤 확인합니다.
+문서검사169개 로컬링크/50개 스크립트참조/8개 보존checksum 통과, 진행기록 일관성 검사 통과. 기능커밋 `afd6169`의 [CI39812883684](https://github.com/TaeyanG4/solarops-audit/actions/runs/39812883684)는 Windows·Ubuntu 모두 success입니다. 각113passed/5skipped이며 합성 데모·복원·wheel·소스 패키징도 통과했습니다. Windows 로컬의 추가skip1개는 환경별 실행 조건 차이로 CI결과와 구분합니다.
