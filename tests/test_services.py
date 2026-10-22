@@ -3,7 +3,9 @@ import uuid
 from pathlib import Path
 
 import pytest
+from fastapi.testclient import TestClient
 
+from solarops.api.app import create_app
 from solarops.config import Settings
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog
@@ -31,3 +33,11 @@ def test_postgres_minio_transaction(sample, tmp_path):
         store.client.head_object(Bucket=bucket, Key=key)["ContentLength"]
         == Path(sample["metadata"]).stat().st_size
     )
+    client = TestClient(create_app(settings))
+    overview = client.get("/api/v1/overview?period=2024-04&source_kind=synthetic").json()
+    assert overview["summary"]["partition_count"] == 7
+    assert overview["summary"]["plant_count"] == 1
+    history = client.get("/api/v1/runs?level=batch&status=failed").json()
+    assert history["total"] == 1 and history["status_counts"]["committed"] == 2
+    detail = client.get("/api/v1/runs/" + second["batch_id"]).json()
+    assert len(detail["partitions"]) == 7

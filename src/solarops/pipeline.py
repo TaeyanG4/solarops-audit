@@ -164,12 +164,24 @@ def ingest(
         )
         put(conn, plants, {"org_id": settings.org, "plant_id": plant}, meta[plant])
     batch_id = str(uuid.uuid4())
+    batch_started = time.monotonic()
+    batch_payload = {
+        "kind": "ingest",
+        "plant_id": plant,
+        "from": start,
+        "to": end,
+        "started_at": now(),
+        "source_version": source_version,
+        "source_kind": source_kind,
+        "report_timezone": settings.timezone,
+        "calculation_version": CALCULATION_VERSION,
+    }
     with catalog.engine.begin() as conn:
         put(
             conn,
             runs,
             {"run_id": batch_id},
-            {"kind": "ingest", "plant_id": plant, "from": start, "to": end, "started_at": now()},
+            batch_payload,
             org_id=settings.org,
             status="running",
         )
@@ -207,6 +219,7 @@ def ingest(
                         fail_at,
                         poa_threshold,
                         power_ratio,
+                        batch_id=batch_id,
                     )
                 )
             if inv_day and inv_day[0] == day:
@@ -219,12 +232,11 @@ def ingest(
                 runs,
                 {"run_id": batch_id},
                 {
-                    "kind": "ingest",
-                    "plant_id": plant,
-                    "from": start,
-                    "to": end,
+                    **batch_payload,
                     "finished_at": now(),
                     "partitions": len(outcomes),
+                    "rows": sum(r["rows"] for r in outcomes),
+                    "elapsed_ms": round((time.monotonic() - batch_started) * 1000),
                 },
                 org_id=settings.org,
                 status="committed",
@@ -256,6 +268,7 @@ def publish_day(
     fail_at,
     poa_threshold,
     power_ratio,
+    batch_id=None,
 ):
     started = time.monotonic()
     run_id = str(uuid.uuid4())
@@ -269,7 +282,14 @@ def publish_day(
     prefix = f"staging/{settings.org}/{plant}/{day}/{run_id}"
     staging = settings.root / prefix
     staging.mkdir(parents=True, exist_ok=False)
-    run_payload = dict(key, source_version=version, started_at=now(), source_objects=source_info)
+    run_payload = dict(
+        key,
+        kind="partition",
+        batch_id=batch_id,
+        source_version=version,
+        started_at=now(),
+        source_objects=source_info,
+    )
     with catalog.engine.begin() as conn:
         put(conn, runs, {"run_id": run_id}, run_payload, org_id=settings.org, status="running")
     try:

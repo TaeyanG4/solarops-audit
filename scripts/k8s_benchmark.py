@@ -30,7 +30,7 @@ for concurrency in (1, 2, 4):
         "containers": [
             {
                 "name": "worker",
-                "image": "solarops-worker:0.2.0",
+                "image": "solarops-worker:0.3.0",
                 "imagePullPolicy": "IfNotPresent",
                 "command": ["python", "-c", code],
                 "envFrom": [{"secretRef": {"name": "solarops-app"}}],

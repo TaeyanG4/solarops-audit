@@ -4,6 +4,12 @@
 
 태양광 운영 자료의 **누락·무효값·원본의 보간 여부를 구분**하고, 입력 파일까지 추적할 수 있는 월간 HTML/CSV 보고서를 만드는 Python 프로젝트입니다. 공개 BR-PVGen 역사 데이터와 합성 데모를 지원합니다.
 
+**관측률 100%가 유효값 100%를 뜻하지 않습니다.** 입력 품질을 구분하고, 실패해도 이전 결과를 유지하며, 재처리 결과가 같은지 확인하는 데 집중합니다.
+
+![SolarOps 공개 자료 현황](docs/portfolio/images/overview.png)
+
+[프로젝트 사례와 설계 근거](docs/portfolio/CASE_STUDY.md) · [5분 시연](docs/portfolio/DEMO_GUIDE.md) · [성능 측정](docs/benchmarks/workspace-v0.3.0.md)
+
 ## 주요 기능
 
 - 공개 자료의 checksum 확인, 안전한 압축 해제, 원본·추가 컬럼·표본 수 보존
@@ -12,6 +18,8 @@
 - 동일 입력 재처리 시 논리 해시 일치, 실패 시 이전 활성 파티션 유지
 - 읽기 전용 한국어 대시보드/API, PostgreSQL·MinIO, Airflow·Kubernetes 실행
 - 공개/합성 자료의 발전소별 Airflow 재처리, 최대 31일 백필과 실행 전 계획 확인
+- 월별 전체 현황, 슬롯 가중 품질 집계, 자료 없는 날짜와 0 발전량 구분
+- 최신순·상태별 실행 이력, 작업에서 일별 파티션까지 연결되는 실패 근거
 
 ```mermaid
 flowchart LR
@@ -43,6 +51,8 @@ uv run solarops serve
 [대시보드](http://127.0.0.1:8501) · [API 문서](http://127.0.0.1:8501/docs)
 
 기본 데모는 네트워크나 Docker 없이 합성 데이터 1주를 처리합니다. `data/`에 SQLite 카탈로그, 원본, Parquet, 보고서를 보존합니다. 실행 후 출력되는 `report.html`, `metrics.csv`, `manifest.json`은 브라우저·Excel·JSON 도구에서 볼 수 있습니다.
+
+실패와 복구를 포함한 독립 시연은 `uv run python scripts/portfolio_demo.py --serve`로 실행합니다. 새 디렉터리에 정상 처리 → 커밋 중 실패 → 기존 결과 보존 → 동일 결과 재처리를 확인한 뒤 [8503 대시보드](http://127.0.0.1:8503/)를 제공합니다. 공개 데이터 다운로드는 필요 없습니다.
 
 ## WSL2 / Ubuntu
 
@@ -132,7 +142,7 @@ uv run ruff format --check src tests scripts dags
 uv run pytest -q
 ```
 
-[GitHub Actions](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml)는 push/PR마다 잠긴 의존성 설치, lint, 오프라인 테스트, 합성 데모, lockfile 일치를 검사합니다. 공개 데이터 다운로드와 Docker/kind 검증은 별도 실행합니다.
+[GitHub Actions](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml)는 Ubuntu·Windows에서 잠긴 의존성 설치, lint, JavaScript 문법, 오프라인 테스트, 합성 복구 데모, wheel 빌드와 lockfile 일치를 검사합니다. 합성 보고서·복구 증거·테스트 XML·wheel은 7일 동안 CI 아티팩트로 보관합니다. 공개 데이터 다운로드와 Docker/kind 검증은 별도 실행합니다.
 
 2026-10-22 실행 결과와 범위는 [검증 보고서](docs/benchmarks/2026-10-22.md)에 기록합니다.
 
@@ -143,6 +153,7 @@ uv run pytest -q
 - Kubernetes 작업 프로세스 강제 종료 후 Airflow 재시도 성공.
 - 동일한 합성 4일 자료를 1/2/4 Pod로 실행, 결과 해시 일치.
 - v0.2.0: Compose/kind에서 공개 PS_001의 계획 확인·처리·백필·품질·보고서 각 5개 시나리오 성공. 해당 하루의 native/Compose/kind 결과 해시와 모든 지표 일치.
+- v0.3.0: Linux 오프라인 60개 통과. 월별 조회는 단일 SELECT이며, 기존 HTTP 요청 패턴 53회에서 1회로 변경했습니다. 로컬 5회 측정 중앙값 703.239ms → 12.576ms ([조건·한계](docs/benchmarks/workspace-v0.3.0.md)).
 
 위 수치는 같은 구현 세션의 자체 검증입니다. 실행 환경, 측정 한계, 명령과 증거 위치는 검증 보고서를 참고하세요.
 
@@ -159,7 +170,7 @@ uv run pytest -q
 
 로컬 개발/검증용입니다. 고객 인증, 고객 CSV 업로드, 외부 알림, 결제, 원격 설비 제어는 구현하지 않았습니다. 보고서는 생성 시점의 스냅샷이므로 새 데이터를 처리한 뒤 다시 생성해야 합니다. `.env`, 원본 데이터, 실행 로그, 생성된 비밀 설정은 Git에서 제외합니다.
 
-다음 개발 범위는 실행 관측성 개선, 승인된 고객 스키마 어댑터입니다. 고객 자료 연결과 사업 검증은 별도 승인이 필요합니다.
+다음 개발 범위는 중단된 실행 상태의 자동 조정, 보존·백업 정책, 승인된 고객 스키마 어댑터입니다. 고객 자료 연결과 사업 검증은 별도 승인이 필요합니다.
 
 ## 출처
 

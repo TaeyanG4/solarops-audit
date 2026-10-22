@@ -1,11 +1,15 @@
 import json
 from pathlib import Path
+from typing import Literal
 from uuid import UUID
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import HTMLResponse, Response
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, text
 
+from solarops import __version__
+from solarops.api.readmodels import fleet_overview, run_history
 from solarops.config import Settings, identifier
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog, active_reports, plants, reports, runs
@@ -14,7 +18,18 @@ from solarops.storage.postgres import Catalog, active_reports, plants, reports, 
 def create_app(settings=None):
     settings = settings or Settings()
     catalog = Catalog(settings)
-    app = FastAPI(title="SolarOps Audit — local read-only", docs_url="/docs")
+    app = FastAPI(title="SolarOps Audit — local read-only", version=__version__, docs_url="/docs")
+    app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")
+
+    @app.get("/api/v1/overview")
+    def overview(
+        period: str = Query(pattern=r"^\d{4}-\d{2}$"),
+        source_kind: Literal["public", "synthetic"] | None = None,
+    ):
+        try:
+            return fleet_overview(catalog, period, source_kind)
+        except ValueError:
+            raise HTTPException(422, "Expected a valid YYYY-MM period") from None
 
     def artifact(uri):
         if uri.startswith("s3://"):
@@ -30,7 +45,7 @@ def create_app(settings=None):
 
     @app.get("/health")
     def health():
-        return {"status": "ok", "mode": "local-read-only"}
+        return {"status": "ok", "mode": "local-read-only", "version": __version__}
 
     @app.get("/ready")
     def ready():
@@ -107,22 +122,53 @@ def create_app(settings=None):
         return {"items": json.loads(artifact(data[0]["payload"]["series_uri"])) if data else []}
 
     @app.get("/api/v1/runs")
-    def run_list(limit: int = Query(50, ge=1, le=200)):
+    def run_list(
+        limit: int = Query(50, ge=1, le=200),
+        offset: int = Query(0, ge=0),
+        level: Literal["all", "batch", "partition"] = "all",
+        status: Literal["running", "validated", "committed", "failed"] | None = None,
+        plant: str | None = Query(None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"),
+    ):
+        return run_history(catalog, level, status, plant, offset, limit)
+
+    @app.get("/api/v1/runs/{run_id}")
+    def run_detail(run_id: UUID):
         with catalog.engine.connect() as conn:
-            data = conn.execute(
-                select(runs).where(runs.c.org_id == settings.org).limit(limit)
+            row = (
+                conn.execute(
+                    select(runs).where(runs.c.org_id == settings.org, runs.c.run_id == str(run_id))
+                )
+                .mappings()
+                .first()
+            )
+            if not row:
+                raise HTTPException(404, "Run not found")
+            children = conn.execute(
+                select(runs)
+                .where(
+                    runs.c.org_id == settings.org,
+                    runs.c.payload["batch_id"].as_string() == str(run_id),
+                )
+                .order_by(runs.c.payload["partition_id"].as_string())
+                .limit(500)
             ).mappings()
-            return {
-                "items": [
-                    dict(run_id=r["run_id"], status=r["status"], **r["payload"]) for r in data
-                ]
-            }
+            return dict(
+                row["payload"],
+                run_id=row["run_id"],
+                status=row["status"],
+                partitions=[
+                    dict(r["payload"], run_id=r["run_id"], status=r["status"]) for r in children
+                ],
+            )
 
     @app.get("/api/v1/reports")
     def report_list():
         with catalog.engine.connect() as conn:
             data = conn.execute(
-                select(active_reports).where(active_reports.c.org_id == settings.org)
+                select(active_reports).where(
+                    active_reports.c.org_id == settings.org,
+                    active_reports.c.report_timezone == settings.timezone,
+                )
             ).mappings()
             return {"items": [r["payload"] for r in data]}
 
