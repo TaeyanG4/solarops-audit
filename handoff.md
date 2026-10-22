@@ -3,8 +3,8 @@
 ## Shared state
 
 - Active agent(s): A
-- Current project state: v0.4.1 경계 수정·양 OS/서비스 검사 통과. 최종 배포/원격 CI 확인 중.
-- Current best: v0.4.0 / energy-interval-v2, 로컬 배포 및 기능 CI 검증 (D-A-007)
+- Current project state: v0.4.1 로컬 기술 검증과 기능 CI 완료. 고객 검증은 승인/표본 의존.
+- Current best: v0.4.1 / energy-interval-v2, 계보·조회·발행 경계 및 로컬 배포/CI 검증 (D-A-011)
 - Active compute: 단일 슬롯 A, Windows/WSL/로컬 Compose·kind
 - Open consistency issues: none
 - Scoring: 0–3점씩 평가. Priority = 2×Impact + 2×Information + Confidence + Unblock + Diversity + (3−Cost), 최대24. 동점은 낮은 Cost, 높은 Information 순. 선행조건 미충족은 이유를 기록하고 다음 실행 가능 항목 진행.
@@ -17,11 +17,11 @@
 ## Active handoff
 
 ### Agent: A
-- Current host: Codex
-- Current thread: H-A-11
-- Resumable state: v0.4.1 기능 완료. Windows112/WSL113/서비스5 통과, 공개 PS_001 하루 replay 해시 일치. 최종 Compose/kind 실행 및 CI 확인 중.
-- Blocker: H-A-06은 승인된 고객 표본/대상 없음. 기술 감사는 실행 가능.
-- Next action: H-A-11, H-A-06(승인 표본 의존)
+- Current host: released
+- Current thread: H-A-06
+- Resumable state: 기능036a27b와 CI39804115471 success. 8502는 PS_001/2024년4월 공개 보고서. 최종 문서·버전별 소스 패키지로 인계하며 실행 중 실험 없음.
+- Blocker: H-A-06은 승인된 고객 표본/대상 없음. 현재 범위의 실행 가능한 고가치 기술 작업 없음.
+- Next action: H-A-06은 승인 표본/대상이 제공될 때 재개. 새 결함/요구가 생기면 근거와 점수로 새 항목 등록.
 
 ## Completed / review log
 
@@ -157,3 +157,14 @@
 - Resource: CPU
 - Other executor: none
 - New plan items: none — 나머지 경계와 릴리스는 H-A-11에 포함
+
+### 2026-10-23 00:25 — A — H-A-11
+- Host: Codex
+- Action: raw/보고서 경계 재현·수정, 계산 회귀·의존성 감사·복원·양OS 검사, v0.4.1 Compose/kind·공개 replay·화면·기능 CI 검증 완료. README/설계/운영/상태 문서를 동기화하고 슬롯 해제.
+- Result: 현재 로컬 기술 범위 완료, 고객 검증과 분리; see D-A-011
+- Artifacts: docs/benchmarks/integrity-v0.4.1.md, docs/adr/0008-storage-integrity.md, docs/image-versions.json, artifacts/report-v041.png, artifacts/ci-v041-feature.log, plan.md, handoff.md
+- Discovery updates: D-A-011
+- Review verdict: none
+- Resource: CPU
+- Other executor: none
+- New plan items: none — 확인된 고가치 기술 결함은 해소; 실제 고객 근거는 H-A-06에 유지

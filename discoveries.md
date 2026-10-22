@@ -91,3 +91,12 @@
 - Evidence: tests/test_integrity_boundaries.py 10 passed, tests/test_services.py 2 passed. SQLite 쓰기 거부·DB 미생성·누락 schema·파일 변조·legacy 호환과 실제 PostgreSQL transaction_read_only=on 및 UPDATE 거부/MinIO series 조회를 확인했다.
 - Implication: H-A-10 완료. 설치 시 db-migrate/적재가 먼저 필요하며 H-A-11 릴리스 문서에 명시한다.
 - Reviews:
+
+## D-A-011 — v0.4.1 추가 경계와 배포 검증
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 복사 도중 raw 노출/변경 캡처의 잘못된 파일 공개와 오래된 보고서의 역순 active 전환을 수정했다. 업로드/DB 실패는 이전 보고서를 유지한다. Settings의 디렉터리 생성도 쓰기 초기화로 이동해 조회/dry-run 부작용을 제거했다. 연속성 미달 슬롯은 사건이 아니며 화면 표현을 분리했다.
+- Evidence: docs/benchmarks/integrity-v0.4.1.md. 추가3실패→공개경계5통과, Windows112/6skip·WSL113/5skip·실제서비스5 통과. 앱/개발41 의존성 알려진 취약점0. 공개 PS_001 하루 기존 계산해시 일치. 최종 Compose/kind 각5시나리오 성공·4DAG pause, retry try2. 기능036a27b CI39804115471 양OS113/5skip success. SQLite34파일/서비스27객체 복원과 브라우저·wheel 검증.
+- Implication: new current best: v0.4.1 / energy-interval-v2, 계보·조회·발행 경계 수정 및 로컬 배포/CI 검증. H-A-11 완료. 실행 가능한 기술 항목은 해소했고 승인된 고객 표본/구매 의사 H-A-06만 남는다. 새 근거 없는 기능 확장은 하지 않는다.
+- Reviews:
