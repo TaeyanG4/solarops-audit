@@ -18,7 +18,11 @@
 - 합성 복원: 7개 일별 파티션, DB 포함 31파일의 SHA 확인, SQLite integrity 정상, 손상 사본 거부, 새 경로의 현황·시계열·과거 보고서 API 성공, 복원 raw 재처리 해시 일치와 새 보고서 생성. 원본/백업 보존.
 - 첫 복원 시도는 검증 스크립트의 보고서 URL 오타로 중단됐다. 올바른 `/reports/...`로 고친 뒤 **새 폴더**에서 성공했다. 실패 증거 `artifacts/restore-v040.log`도 보존했다.
 
-복원 범위는 쓰기가 끝난 전용 합성 SQLite/로컬 파일이며 PostgreSQL·MinIO, 동시 생산자, 다른 호스트의 재해복구는 미검증이다. [복원 계약과 다음 조건](../runbooks/backup-restore.md). 성공 증거: `data/restore-v040-verified/evidence.json`, `data/restore-v040-verified/backup-manifest.json`.
+로컬 복원 성공 증거: `data/restore-v040-verified/evidence.json`, `data/restore-v040-verified/backup-manifest.json`.
+
+후속 서비스 시험은 같은 Compose 서버에 전용 합성 DB 2개/버킷 2개를 만들고, 생산 완료 후 pg_dump와 27객체를 저장해 새 DB/버킷으로 복원했다. 전체 원본 카탈로그 해시·객체 SHA 보존, 복원 API·과거 보고서 바이트·7개 raw 재처리 해시·새 보고서 생성을 확인했다. pg_dump 16.10과 이미지 ID도 manifest에 기록했다. 복원 시작~API 확인 0.797초, 생성·백업·재처리를 포함한 전체 시험 3.578초는 작은 합성 자료 한 번의 로컬 측정이며 운영 RTO/RPO가 아니다.
+
+증거: `data/service-restore-v040-verified/evidence.json`, `data/service-restore-v040-verified/backup-manifest.json`, `artifacts/service-restore-v040-verified.log`. 실행 중 생산자나 다른 호스트의 재해복구는 미검증이다. [복원 계약과 다음 조건](../runbooks/backup-restore.md).
 
 ## 실행 결과
 

@@ -5,7 +5,7 @@
 - 계산 `energy-interval-v2`: 모두 무효인 전력 슬롯은 null, 비UTC 날짜 경계의 불필요한 빈 파티션 방지. 에너지 산식은 유지하고 파생 품질·후보·시계열도 논리 해시에 포함.
 - 서비스 공개 51개 발전소를 별도 v2로 처리. v1 활성 결과 보존, 12,572개 일별 지표·원본 SHA 일치와 31개 시계열 표본 비교.
 - 읽기 전용 `inspect-runs` 진단: 조직/페이지/active 연결/시간 이상 조회, 자동 실패·삭제 없음.
-- 합성 SQLite/파일의 별도 경로 백업·복원·손상 탐지·API·재처리 시험 및 CI 추가. PostgreSQL·MinIO 재해복구 검증은 별도 과제.
+- 합성 SQLite/파일의 별도 경로 백업·복원·손상 탐지·API·재처리 시험 및 CI 추가. PostgreSQL·MinIO도 전용 DB/버킷에 dump·객체 복원을 검증. 별도 호스트 재해복구는 후속 범위.
 - 점수 기반 `plan.md`, 결과 `discoveries.md`, 진행·인계 `handoff.md` 도입. 수익화 판단·파일럿 범위·원가·실측 양식 정리.
 - [검증 범위](docs/benchmarks/reliability-v0.4.0.md).
 

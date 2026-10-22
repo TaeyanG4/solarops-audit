@@ -19,7 +19,7 @@
 - Current thread: H-A-02
 - Resumable state: v2 서비스 전체 비교 완료, Compose/kind 0.4.0 적용. 실제 Compose 합성/kind 공개 DAG 검증 실행 중. H-A-03/04/05 완료; 브라우저·패키징·CI 결과를 H-A-02에 기록 예정.
 - Blocker: none
-- Next action: H-A-02, H-A-06(승인 표본 의존), H-A-07
+- Next action: H-A-02, H-A-06(승인 표본 의존)
 
 ## Completed / review log
 
@@ -77,3 +77,14 @@
 - Resource: CPU
 - Other executor: none
 - New plan items: H-A-07
+
+### 2026-10-22 23:20 — A — H-A-07
+- Host: Codex
+- Action: CI 대기 중 다음 실행 가능 작업으로 PostgreSQL·MinIO 합성 격리 복원 실행. 기존 서비스는 유지하고 신규 DB/버킷으로 논리 복원 범위를 검증함.
+- Result: 서비스 자료 논리 복원 범위 확인; see D-A-006
+- Artifacts: scripts/validation/service_restore_drill.py, data/service-restore-v040-verified/evidence.json, data/service-restore-v040-verified/backup-manifest.json, artifacts/service-restore-v040-verified.log
+- Discovery updates: D-A-006
+- Review verdict: none
+- Resource: CPU
+- Other executor: none
+- New plan items: none — 실제 고객 운영 요구·범위는 H-A-06에서 정하며 공개 배포를 추가하지 않음

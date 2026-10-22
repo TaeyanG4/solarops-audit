@@ -46,3 +46,12 @@
 - Evidence: scripts/validation/backup_restore_drill.py, data/restore-v040-verified/evidence.json, backup-manifest.json. 7개 활성 파티션/DB 포함31파일, integrity ok, 손상 사본 거부, 복원 API/과거 보고서/원본 재처리 해시/새 보고서 확인. 최초 URL 오타 실패 로그 artifacts/restore-v040.log도 보존.
 - Implication: H-A-05의 별도 합성 복원 시험 완료. PostgreSQL/MinIO의 생산자 일관성 경계와 격리 복원은 H-A-07에서 별도 검증한다.
 - Reviews:
+
+## D-A-006 — PostgreSQL·MinIO 합성 논리 복원
+- Source: A
+- Host: Codex
+- Cross-check: PENDING
+- Finding: 생산 완료된 합성 서비스 자료는 같은 서버의 별도 DB/버킷에 pg_dump와 객체 파일을 복원하고 카탈로그 버킷 URI를 재배치해 조회·보고서·재처리할 수 있다. 별도 호스트 재해복구/동시 생산자/RTO·RPO 보장은 아니다.
+- Evidence: scripts/validation/service_restore_drill.py; data/service-restore-v040-verified/evidence.json, data/service-restore-v040-verified/backup-manifest.json. 7개 파티션/27객체, 전체 원본 catalog hash와 객체 SHA 보존, 과거 보고서 바이트·복원 raw 재처리 해시 일치. pg_dump16.10/이미지ID 기록. 복원~API 0.797초, 전체3.578초는 소규모 단일 로컬 측정. 모든 생성 DB/버킷/파일 보존.
+- Implication: H-A-07의 격리 논리 복원 완료. 고객 도입 시 별도 호스트/저장소·RTO/RPO·보관 계약은 H-A-06의 실제 요구에 맞춰 범위를 정한다.
+- Reviews:
