@@ -1,0 +1,13 @@
+# Upstream removed public prebuilt images. Build its pinned AGPLv3 source release.
+FROM golang:1.24.8-bookworm AS build
+WORKDIR /src
+ADD https://github.com/minio/minio/archive/refs/tags/RELEASE.2025-10-15T17-29-55Z.tar.gz /tmp/minio.tar.gz
+RUN tar -xzf /tmp/minio.tar.gz --strip-components=1 -C /src
+RUN CGO_ENABLED=0 go build -trimpath -o /minio .
+FROM debian:bookworm-20251020-slim
+COPY --from=build /minio /usr/local/bin/minio
+COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=build /src/LICENSE /licenses/MinIO-LICENSE
+EXPOSE 9000 9001
+ENTRYPOINT ["minio"]
+CMD ["server", "/data", "--console-address", ":9001"]

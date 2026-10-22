@@ -1,0 +1,90 @@
+name: solarops-audit
+x-app-env: &app-env
+  SOLAROPS_DATA_DIR: /data
+  SOLAROPS_DATABASE_URL: postgresql+psycopg://solarops:${APP_DB_PASSWORD:?run bootstrap}@app-db:5432/solarops
+  SOLAROPS_S3_ENDPOINT: http://minio:9000
+  SOLAROPS_S3_ACCESS_KEY: ${MINIO_ROOT_USER:?run bootstrap}
+  SOLAROPS_S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?run bootstrap}
+  SOLAROPS_S3_BUCKET: solarops-demo
+x-airflow: &airflow
+  image: solarops-airflow:0.1.0
+  build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: airflow}
+  user: "50000:0"
+  environment: &airflow-env
+    <<: *app-env
+    AIRFLOW__CORE__EXECUTOR: LocalExecutor
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:${AIRFLOW_DB_PASSWORD:?run bootstrap}@airflow-db:5432/airflow
+    AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY:?run bootstrap}
+    AIRFLOW__API_AUTH__JWT_SECRET: ${AIRFLOW_JWT_SECRET:?run bootstrap}
+    AIRFLOW__CORE__EXECUTION_API_SERVER_URL: http://airflow-api:8080/execution/
+    AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
+    AIRFLOW__CORE__AUTH_MANAGER: airflow.api_fastapi.auth.managers.simple.simple_auth_manager.SimpleAuthManager
+    SOLAROPS_EXECUTION_MODE: local
+  volumes: ["app-data:/data", "airflow-logs:/opt/airflow/logs"]
+  depends_on:
+    airflow-db: {condition: service_healthy}
+    app-db: {condition: service_healthy}
+    minio: {condition: service_started}
+  profiles: [airflow]
+services:
+  app-db:
+    image: postgres:16.10-bookworm
+    environment: {POSTGRES_USER: solarops, POSTGRES_PASSWORD: "${APP_DB_PASSWORD:?run bootstrap}", POSTGRES_DB: solarops}
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["app-db:/var/lib/postgresql/data"]
+    healthcheck: {test: [CMD-SHELL, "pg_isready -U solarops -d solarops"], interval: 5s, timeout: 5s, retries: 20}
+  minio:
+    image: solarops-minio:2025-10-15
+    build: {context: ../.., dockerfile: infra/docker/Dockerfile.minio}
+    command: server /data --console-address :9001
+    environment: {MINIO_ROOT_USER: "${MINIO_ROOT_USER:?run bootstrap}", MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:?run bootstrap}"}
+    ports: ["127.0.0.1:59000:9000", "127.0.0.1:59001:9001"]
+    volumes: ["minio:/data"]
+  worker:
+    image: solarops-worker:0.1.0
+    user: "50000:0"
+    build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
+    environment: *app-env
+    volumes: ["app-data:/data"]
+    profiles: [jobs]
+    depends_on:
+      app-db: {condition: service_healthy}
+      minio: {condition: service_started}
+  dashboard:
+    image: solarops-worker:0.1.0
+    user: "50000:0"
+    build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
+    command: [serve, --host, 0.0.0.0, --port, "8501"]
+    environment: *app-env
+    ports: ["127.0.0.1:8502:8501"]
+    volumes: ["app-data:/data"]
+    depends_on:
+      app-db: {condition: service_healthy}
+  airflow-db:
+    image: postgres:16.10-bookworm
+    environment: {POSTGRES_USER: airflow, POSTGRES_PASSWORD: "${AIRFLOW_DB_PASSWORD:?run bootstrap}", POSTGRES_DB: airflow}
+    volumes: ["airflow-db:/var/lib/postgresql/data"]
+    healthcheck: {test: [CMD-SHELL, "pg_isready -U airflow -d airflow"], interval: 5s, timeout: 5s, retries: 20}
+    profiles: [airflow]
+  airflow-init:
+    <<: *airflow
+    user: "0:0"
+    entrypoint: /bin/bash
+    command: ["-c", "mkdir -p /data /opt/airflow/logs && chmod 1777 /data && chown -R 50000:0 /opt/airflow/logs && exec /entrypoint airflow db migrate"]
+  airflow-api:
+    <<: *airflow
+    command: api-server
+    ports: ["127.0.0.1:8080:8080"]
+  airflow-scheduler:
+    <<: *airflow
+    command: scheduler
+  airflow-dag-processor:
+    <<: *airflow
+    command: dag-processor
+volumes:
+  app-db:
+  minio:
+  app-data:
+  airflow-db:
+  airflow-logs:

@@ -1,0 +1,17 @@
+# 운영자가 확인할 순서
+
+1. `uv run solarops demo`로 합성 1주 보고서를 생성합니다.
+2. `uv run solarops serve` 후 http://127.0.0.1:8501 에서 월간 리포트를 선택합니다.
+3. 추정 kWh, 관측 슬롯 비율, 유효값 비율, 소스 보간율을 함께 봅니다. 관측 100%라도 NULL이 많을 수 있습니다.
+4. 발전소 현황 → 시계열 보기에서 UTC 시각의 전력/POA와 `INSUFFICIENT_DATA`를 확인합니다.
+5. 보고서 CSV와 계보 JSON을 내려받습니다. 출처/규칙/시간대/부분 기간 여부를 함께 전달합니다.
+
+전체 실자료를 처리한 현재 작업 공간에는 PS_001~PS_051과 합성 DEMO_01이 있습니다. 보고서 선택에서 PS_001은 공개 자료, DEMO_01은 합성입니다. `all-public`은 공개 자료만 포함합니다.
+
+새 파일: 별도 폴더에서 `solarops source checksum`으로 확인 후 `solarops ingest`의 metadata/inverter/station 경로를 지정합니다. 공개 자료는 `--source-kind public`, 테스트는 synthetic. 데이터가 수정됐다면 새 버전을 주어야 합니다. 원본 파일을 직접 덮어써서 수정하지 않습니다.
+
+보고서 월: `solarops report --period 2024-04 --plant PS_001 --source-kind public`. 생성된 보고서는 불변 UUID 경로를 가지며 최신 보고서 포인터만 변경됩니다. 이미 발행한 보고서는 후속 적재로 자동 수정되지 않으므로 월간 보고서를 다시 생성해야 합니다.
+
+읽기 API는 프로세스 설정의 한 조직만 노출합니다. 사용자 입력으로 다른 org를 선택하는 기능은 없습니다. 127.0.0.1 이외 공개 배포는 인증/HTTPS/보존정책/백업/동의를 갖춘 별도 작업입니다.
+
+정리 시에는 `make down-local`로 서비스를 중지합니다. raw/staging/PVC/볼륨을 자동 삭제하지 않습니다. 저장 공간이 부족하면 실제 사용 중인 active manifest를 확인하고 사용자 승인 후 정리 정책을 결정합니다.

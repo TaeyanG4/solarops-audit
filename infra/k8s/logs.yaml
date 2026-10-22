@@ -1,0 +1,4 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: airflow-logs-rwo, namespace: solarops}
+spec: {accessModes: [ReadWriteOnce], resources: {requests: {storage: 2Gi}}}

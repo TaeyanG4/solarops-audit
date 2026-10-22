@@ -1,0 +1,8 @@
+source_column,target_column,source_unit,target_unit,timezone,required,validation,approval_status
+TO_CONFIRM,ps_id,text,text,not_applicable,true,anonymized string identifier,pending
+TO_CONFIRM,inverter_id,integer,integer,not_applicable,true,unique within plant,pending
+TO_CONFIRM,datetime,ISO8601,UTC,TO_CONFIRM,true,explicit timezone and 15 minute grid,pending
+TO_CONFIRM,total_active_power_w,TO_CONFIRM,W,not_applicable,true,unit conversion requires evidence,pending
+TO_CONFIRM,poa_irradiance_wm2,W/m2,W/m2,not_applicable,false,missing means insufficient performance data,pending
+TO_CONFIRM,interpolated_keys_total_active_power_w,boolean,boolean,not_applicable,false,unknown must remain unknown,pending
+TO_CONFIRM,document_count_total_active_power_w,integer,integer,not_applicable,false,nonnegative count or unknown,pending

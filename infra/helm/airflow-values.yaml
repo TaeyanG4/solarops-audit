@@ -1,0 +1,38 @@
+executor: LocalExecutor
+airflowVersion: "3.3.2"
+defaultAirflowRepository: solarops-airflow
+defaultAirflowTag: "0.1.0"
+images:
+  airflow: {repository: solarops-airflow, tag: "0.1.0", pullPolicy: IfNotPresent}
+postgresql: {enabled: false}
+redis: {enabled: false}
+statsd: {enabled: false}
+triggerer: {enabled: false}
+flower: {enabled: false}
+createUserJob: {enabled: false}
+data:
+  metadataSecretName: airflow-metadata
+fernetKeySecretName: airflow-fernet
+jwtSecretName: airflow-jwt
+webserverSecretKeySecretName: airflow-webserver
+env:
+  - {name: SOLAROPS_EXECUTION_MODE, value: kubernetes}
+  - {name: AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS, value: "true"}
+config:
+  core:
+    load_examples: "False"
+    auth_manager: airflow.api_fastapi.auth.managers.simple.simple_auth_manager.SimpleAuthManager
+  logging:
+    colored_console_log: "False"
+scheduler:
+  serviceAccount: {create: true, name: airflow-scheduler}
+  resources: {requests: {cpu: 250m, memory: 512Mi}, limits: {cpu: "2", memory: 2Gi}}
+apiServer:
+  replicas: 1
+  resources: {requests: {cpu: 250m, memory: 512Mi}, limits: {cpu: "2", memory: 2Gi}}
+dagProcessor:
+  resources: {requests: {cpu: 250m, memory: 512Mi}, limits: {cpu: "2", memory: 2Gi}}
+logs:
+  persistence: {enabled: true, existingClaim: airflow-logs-rwo}
+dags:
+  gitSync: {enabled: false}

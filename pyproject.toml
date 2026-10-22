@@ -1,0 +1,42 @@
+[project]
+name = "solarops-audit"
+version = "0.1.0"
+description = "Reproducible photovoltaic data quality audits and estimated-energy reports"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "duckdb==2.0.0",
+  "pyarrow==26.0.0",
+  "sqlalchemy==2.1.6",
+  "psycopg[binary]==3.3.6",
+  "boto3==1.43.117",
+  "jinja2==3.1.6",
+  "fastapi==0.159.1",
+  "uvicorn==0.54.0",
+  "tzdata==2026.2",
+  "pytz==2026.5",
+]
+
+[project.scripts]
+solarops = "solarops.cli:main"
+
+[dependency-groups]
+dev = ["pytest==9.1.1", "ruff==0.17.1", "httpx==0.28.1", "psutil==7.2.2"]
+
+[build-system]
+requires = ["hatchling==1.29.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/solarops"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["services: requires Postgres and MinIO", "k8s: requires kind and Airflow"]

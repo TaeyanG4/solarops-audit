@@ -1,0 +1,5 @@
+{
+  "solarops-worker:0.1.0": "sha256:ead07e63f2f7c3688950f2cf94414ec4e1f06e313eac925a3e3f46f7239ea2da",
+  "solarops-airflow:0.1.0": "sha256:4caa59bfe5ed63d803a1386838f9836873c66d6f4e97c53713000fdc6eaa3990",
+  "solarops-minio:2025-10-15": "sha256:2f115a675087ecf700126be7e34aba5a320cafc890f674c62f6a6a00ef92182a"
+}
