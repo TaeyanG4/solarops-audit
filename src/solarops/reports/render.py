@@ -25,13 +25,7 @@ def month_bounds(period):
 def build_report(settings, period, plant=None, source_kind=None):
     start, end = month_bounds(period)
     catalog = Catalog(settings)
-    snapshot = catalog.snapshot(settings.org, start, end, plant)
-    if source_kind:
-        snapshot = [
-            r
-            for r in snapshot
-            if all(s["source_kind"] == source_kind for s in r["payload"]["source_objects"])
-        ]
+    snapshot = catalog.snapshot(settings.org, start, end, plant, source_kind)
     if not snapshot:
         raise ValueError("NO_ACTIVE_PARTITIONS")
     report_id = str(uuid.uuid4())

@@ -8,7 +8,17 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--mode", choices=["compose", "k8s"], default="compose")
+parser.add_argument("--source-kind", choices=["synthetic", "public"], default="synthetic")
+parser.add_argument("--plant")
+parser.add_argument("--from", dest="start")
+parser.add_argument("--to", dest="end")
+parser.add_argument("--source-version")
+parser.add_argument("--period")
 args = parser.parse_args()
+if args.source_kind == "public" and not all(
+    (args.plant, args.start, args.end, args.source_version, args.period)
+):
+    parser.error("Public checks require --plant, --from, --to, --source-version and --period")
 root = Path(__file__).resolve().parents[1]
 stamp = str(int(time.time()))
 if args.mode == "compose":
@@ -45,7 +55,8 @@ def command(*argv):
     return p.stdout
 
 
-log = root / "artifacts" / f"airflow-{args.mode}-checks.jsonl"
+log = root / "artifacts" / f"airflow-{args.mode}-{args.source_kind}-checks.jsonl"
+log.parent.mkdir(parents=True, exist_ok=True)
 cases = [
     ("solarops_ingest_daily", "normal", {}),
     ("solarops_ingest_daily", "retry", {"fault_marker": "retry-" + stamp}),
@@ -57,24 +68,42 @@ cases = [
     ("solarops_quality_daily", "quality", {}),
     ("solarops_report_monthly", "report", {}),
 ]
+if args.source_kind == "public":
+    common = {
+        "source_kind": "public",
+        "plant": args.plant,
+        "from_date": args.start,
+        "to_date": args.end,
+        "source_version": args.source_version,
+        "period": args.period,
+    }
+    cases = [
+        ("solarops_backfill_manual", "plan", dict(common, dry_run="true")),
+        ("solarops_ingest_daily", "normal", dict(common, dry_run="false")),
+        ("solarops_backfill_manual", "backfill", dict(common, dry_run="false")),
+        ("solarops_quality_daily", "quality", common),
+        ("solarops_report_monthly", "report", common),
+    ]
 for dag, scenario, conf in cases:
-    run_id = f"{args.mode}-{scenario}-{stamp}"
+    run_id = f"{args.mode}-{args.source_kind}-{scenario}-{stamp}"
     command("dags", "unpause", dag)
-    command("dags", "trigger", dag, "--run-id", run_id, "--conf", json.dumps(conf))
-    print(json.dumps({"started": run_id}), flush=True)
-    deadline = time.monotonic() + 900
-    while time.monotonic() < deadline:
-        runs = json.loads(command("dags", "list-runs", dag, "--output", "json"))
-        row = next((r for r in runs if r.get("run_id", r.get("dag_run_id")) == run_id), None)
-        if row and row["state"] in ("success", "failed"):
-            with log.open("a", encoding="utf-8") as out:
-                out.write(json.dumps(dict(scenario=scenario, **row)) + "\n")
-            print(json.dumps(row), flush=True)
-            if row["state"] != "success":
-                raise RuntimeError(f"Failed scenario {run_id}")
-            break
-        time.sleep(10)
-    else:
-        raise TimeoutError(run_id)
-    command("dags", "pause", dag)
-print("Completed normal, injected retry, backfill, quality and report", flush=True)
+    try:
+        command("dags", "trigger", dag, "--run-id", run_id, "--conf", json.dumps(conf))
+        print(json.dumps({"started": run_id}), flush=True)
+        deadline = time.monotonic() + 900
+        while time.monotonic() < deadline:
+            runs = json.loads(command("dags", "list-runs", dag, "--output", "json"))
+            row = next((r for r in runs if r.get("run_id", r.get("dag_run_id")) == run_id), None)
+            if row and row["state"] in ("success", "failed"):
+                with log.open("a", encoding="utf-8") as out:
+                    out.write(json.dumps(dict(scenario=scenario, **row)) + "\n")
+                print(json.dumps(row), flush=True)
+                if row["state"] != "success":
+                    raise RuntimeError(f"Failed scenario {run_id}")
+                break
+            time.sleep(10)
+        else:
+            raise TimeoutError(run_id)
+    finally:
+        command("dags", "pause", dag)
+print(f"Completed {args.source_kind}: " + ", ".join(case[1] for case in cases), flush=True)

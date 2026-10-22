@@ -11,6 +11,7 @@
 - 15분 전력으로 추정한 에너지, 품질 지표, 저출력 검토 후보와 월간 보고서
 - 동일 입력 재처리 시 논리 해시 일치, 실패 시 이전 활성 파티션 유지
 - 읽기 전용 한국어 대시보드/API, PostgreSQL·MinIO, Airflow·Kubernetes 실행
+- 공개/합성 자료의 발전소별 Airflow 재처리, 최대 31일 백필과 실행 전 계획 확인
 
 ```mermaid
 flowchart LR
@@ -97,6 +98,15 @@ uv run solarops report --period 2024-04 --plant PS_001 --source-kind public
 
 51개 전체 처리: `uv run python scripts/full_dataset.py`. PostgreSQL/MinIO 전체 처리: `uv run python scripts/full_dataset.py --services`. 이미 다운로드한 파일의 checksum이 다르면 덮어쓰지 않습니다. 수정한 입력은 새 `--source-version`을 지정해야 합니다.
 
+Airflow와 같은 제한을 사용하는 재처리 명령:
+
+```bash
+uv run solarops replay --source-kind public --plant PS_001 \
+  --from 2024-04-03 --to 2024-04-04 --source-version brpvgen-v1
+```
+
+기본은 계획 확인이며 `--dry-run false`를 붙이면 실행합니다. 최대 31일, `--to` 미포함이며 경로·발전소·입력 범위를 먼저 확인합니다. Compose의 읽기 전용 원본 마운트, kind의 파일 복사, Airflow Params 예시는 [DAG 운영 안내](docs/runbooks/dags.md)에 있습니다.
+
 ## Kubernetes
 
 Compose와 별도 DB/MinIO를 갖는 로컬 kind 클러스터입니다. 작은 메모리 환경에서는 Compose를 중지하고 진행하세요.
@@ -126,7 +136,7 @@ uv run pytest -q
 
 2026-10-22 실행 결과와 범위는 [검증 보고서](docs/benchmarks/2026-10-22.md)에 기록합니다.
 
-- 오프라인 계약/단위/통합 검사 41개 통과, PostgreSQL·MinIO 통합 검사 별도 통과.
+- 초기 오프라인 검사 41개 통과. v0.2.0에서 재처리 검사를 추가하여 Linux 55개 통과, PostgreSQL·MinIO 통합 검사 별도 통과.
 - 공개 51개 발전소 14,400,480행, 12,572개 일별 파티션 처리.
 - 동일 입력 3회 재실행 해시 일치, 버전 충돌 차단, 트랜잭션 실패 시 기존 결과 유지.
 - Compose와 kind에서 4개 DAG 실제 실행 및 재시도/백필 검증.
@@ -148,7 +158,7 @@ uv run pytest -q
 
 로컬 개발/검증용입니다. 고객 인증, 고객 CSV 업로드, 외부 알림, 결제, 원격 설비 제어는 구현하지 않았습니다. 보고서는 생성 시점의 스냅샷이므로 새 데이터를 처리한 뒤 다시 생성해야 합니다. `.env`, 원본 데이터, 실행 로그, 생성된 비밀 설정은 Git에서 제외합니다.
 
-다음 개발 범위는 공개 자료의 Airflow 재처리, 실행 관측성 개선, 승인된 고객 스키마 어댑터입니다. 고객 자료 연결과 사업 검증은 별도 승인이 필요합니다.
+다음 개발 범위는 실행 관측성 개선, 승인된 고객 스키마 어댑터입니다. 고객 자료 연결과 사업 검증은 별도 승인이 필요합니다.
 
 ## 출처
 

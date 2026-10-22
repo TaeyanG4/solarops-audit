@@ -1,13 +1,14 @@
 name: solarops-audit
 x-app-env: &app-env
   SOLAROPS_DATA_DIR: /data
+  SOLAROPS_SOURCE_DIR: /source
   SOLAROPS_DATABASE_URL: postgresql+psycopg://solarops:${APP_DB_PASSWORD:?run bootstrap}@app-db:5432/solarops
   SOLAROPS_S3_ENDPOINT: http://minio:9000
   SOLAROPS_S3_ACCESS_KEY: ${MINIO_ROOT_USER:?run bootstrap}
   SOLAROPS_S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?run bootstrap}
   SOLAROPS_S3_BUCKET: solarops-demo
 x-airflow: &airflow
-  image: solarops-airflow:0.1.0
+  image: solarops-airflow:0.2.0
   build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: airflow}
   user: "50000:0"
   environment: &airflow-env
@@ -21,7 +22,10 @@ x-airflow: &airflow
     AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_ALL_ADMINS: "true"
     AIRFLOW__CORE__AUTH_MANAGER: airflow.api_fastapi.auth.managers.simple.simple_auth_manager.SimpleAuthManager
     SOLAROPS_EXECUTION_MODE: local
-  volumes: ["app-data:/data", "airflow-logs:/opt/airflow/logs"]
+  volumes:
+    - "app-data:/data"
+    - "airflow-logs:/opt/airflow/logs"
+    - "${SOLAROPS_SOURCE_HOST_DIR:-../../data/source}:/source:ro"
   depends_on:
     airflow-db: {condition: service_healthy}
     app-db: {condition: service_healthy}
@@ -42,17 +46,17 @@ services:
     ports: ["127.0.0.1:59000:9000", "127.0.0.1:59001:9001"]
     volumes: ["minio:/data"]
   worker:
-    image: solarops-worker:0.1.0
+    image: solarops-worker:0.2.0
     user: "50000:0"
     build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
     environment: *app-env
-    volumes: ["app-data:/data"]
+    volumes: ["app-data:/data", "${SOLAROPS_SOURCE_HOST_DIR:-../../data/source}:/source:ro"]
     profiles: [jobs]
     depends_on:
       app-db: {condition: service_healthy}
       minio: {condition: service_started}
   dashboard:
-    image: solarops-worker:0.1.0
+    image: solarops-worker:0.2.0
     user: "50000:0"
     build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
     command: [serve, --host, 0.0.0.0, --port, "8501"]

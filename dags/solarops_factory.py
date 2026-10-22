@@ -12,7 +12,7 @@ def cli_task(task_id, arguments, fault=False):
         from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
         from kubernetes.client import models as k8s
 
-        env = {"SOLAROPS_DATA_DIR": "/data"}
+        env = {"SOLAROPS_DATA_DIR": "/data", "SOLAROPS_SOURCE_DIR": "/data/source"}
         if fault:
             env["SOLAROPS_FAIL_ONCE_MARKER"] = "{{ params.fault_marker }}"
             env["SOLAROPS_TEST_DELAY"] = "{{ params.test_delay }}"
@@ -20,7 +20,7 @@ def cli_task(task_id, arguments, fault=False):
             task_id=task_id,
             name="solarops-" + task_id.replace("_", "-"),
             namespace="solarops",
-            image="solarops-worker:0.1.0",
+            image="solarops-worker:0.2.0",
             image_pull_policy="IfNotPresent",
             cmds=["solarops"],
             arguments=arguments,
@@ -72,6 +72,8 @@ def cli_task(task_id, arguments, fault=False):
 
 def make_dag(dag_id, schedule=None, mode="ingest"):
     params = {
+        "source_kind": Param("synthetic", enum=["synthetic", "public"]),
+        "plant": Param("DEMO_01", type="string", pattern="^(DEMO_01|PS_[0-9]{3})$"),
         "from_date": Param("2024-04-01", type="string", format="date"),
         "to_date": Param("2024-04-08", type="string", format="date"),
         "source_version": Param("synthetic-v1", type="string", pattern="^[A-Za-z0-9_-]{1,80}$"),
@@ -94,16 +96,20 @@ def make_dag(dag_id, schedule=None, mode="ingest"):
             "execution_timeout": timedelta(minutes=20),
         },
         params=params,
-        tags=["solarops", "historical-replay", "synthetic-demo"],
+        tags=["solarops", "historical-replay"],
         is_paused_upon_creation=True,
-        description="Explicit historical synthetic replay. Never a live source feed.",
+        description="Bounded public BR-PVGen or synthetic replay. Never a live source feed.",
     ) as dag:
         if mode in ("ingest", "backfill"):
             inspect = cli_task("validate_runtime", ["doctor"])
             publish = cli_task(
                 "replay_validate_publish",
                 [
-                    "demo",
+                    "replay",
+                    "--source-kind",
+                    "{{ params.source_kind }}",
+                    "--plant",
+                    "{{ params.plant }}",
                     "--from",
                     "{{ params.from_date }}",
                     "--to",
@@ -119,16 +125,42 @@ def make_dag(dag_id, schedule=None, mode="ingest"):
         elif mode == "quality":
             cli_task(
                 "verify_published_metrics",
-                ["analyze", "--from", "{{ params.from_date }}", "--to", "{{ params.to_date }}"],
+                [
+                    "analyze",
+                    "--from",
+                    "{{ params.from_date }}",
+                    "--to",
+                    "{{ params.to_date }}",
+                    "--plant",
+                    "{{ params.plant }}",
+                    "--source-kind",
+                    "{{ params.source_kind }}",
+                ],
             )
         else:
             validated = cli_task(
                 "await_validated_data",
-                ["analyze", "--from", "{{ params.from_date }}", "--to", "{{ params.to_date }}"],
+                [
+                    "analyze",
+                    "--period",
+                    "{{ params.period }}",
+                    "--plant",
+                    "{{ params.plant }}",
+                    "--source-kind",
+                    "{{ params.source_kind }}",
+                ],
             )
             report = cli_task(
                 "generate_check_lineage_publish_report",
-                ["report", "--period", "{{ params.period }}"],
+                [
+                    "report",
+                    "--period",
+                    "{{ params.period }}",
+                    "--plant",
+                    "{{ params.plant }}",
+                    "--source-kind",
+                    "{{ params.source_kind }}",
+                ],
             )
             validated >> report
     return dag

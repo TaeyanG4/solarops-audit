@@ -23,6 +23,9 @@ class Settings:
     org: str = field(default_factory=lambda: os.getenv("SOLAROPS_ORG", "demo"))
     timezone: str = field(default_factory=lambda: os.getenv("SOLAROPS_REPORT_TIMEZONE", "UTC"))
     s3_endpoint: str | None = field(default_factory=lambda: os.getenv("SOLAROPS_S3_ENDPOINT"))
+    source_root: Path = field(
+        default_factory=lambda: Path(os.getenv("SOLAROPS_SOURCE_DIR", "data/source")).resolve()
+    )
 
     def __post_init__(self):
         identifier(self.org)

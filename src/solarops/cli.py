@@ -1,10 +1,8 @@
 import argparse
 import json
-import os
 import platform
 import shutil
 import sys
-import time
 from pathlib import Path
 
 from solarops.config import Settings
@@ -59,10 +57,21 @@ def main(argv=None):
     demo.add_argument("--to", dest="end", default="2024-04-08")
     demo.add_argument("--source-version", default="synthetic-v1")
     demo.add_argument("--dry-run", choices=["true", "false"], default="false")
+    p = sub.add_parser(
+        "replay", help="Bounded public/synthetic historical replay; dry-run by default"
+    )
+    p.add_argument("--source-kind", choices=["public", "synthetic"], required=True)
+    p.add_argument("--plant", required=True)
+    p.add_argument("--from", dest="start", required=True)
+    p.add_argument("--to", dest="end", required=True)
+    p.add_argument("--source-version", required=True)
+    p.add_argument("--dry-run", choices=["true", "false"], default="true")
     p = sub.add_parser("analyze")
     p.add_argument("--plant")
     p.add_argument("--from", dest="start")
     p.add_argument("--to", dest="end")
+    p.add_argument("--source-kind", choices=["public", "synthetic"])
+    p.add_argument("--period", help="Analyze the report month instead of --from/--to")
     p = sub.add_parser("report")
     p.add_argument("--period", required=True)
     p.add_argument("--plant")
@@ -95,7 +104,6 @@ def main(argv=None):
 
 def execute(args):
     from solarops.acquisition.brpvgen import checksum, fetch, inspect_source, safe_extract
-    from solarops.fixtures import generate
     from solarops.pipeline import ingest
     from solarops.reports.render import build_report
     from solarops.storage.postgres import Catalog
@@ -113,6 +121,18 @@ def execute(args):
             case "extract":
                 return safe_extract(args.archive, args.destination)
     settings = Settings()
+    if args.command == "replay":
+        from solarops.replay import replay
+
+        return replay(
+            settings,
+            args.source_kind,
+            args.plant,
+            args.start,
+            args.end,
+            args.source_version,
+            args.dry_run == "true",
+        )
     if args.command == "db-migrate":
         Catalog(settings)
         return {"status": "ready", "schema_version": "1"}
@@ -132,31 +152,9 @@ def execute(args):
                 "source_version": args.source_version,
             }
     if args.command == "demo":
-        paths = generate(settings.root / "fixtures" / "synthetic-v1")
-        delay = int(os.getenv("SOLAROPS_TEST_DELAY", "0"))
-        if delay:
-            time.sleep(min(delay, 120))
-        fail_at = None
-        marker = os.getenv("SOLAROPS_FAIL_ONCE_MARKER")
-        if marker:
-            path = settings.root / "fault-markers" / Path(marker).name
-            path.parent.mkdir(parents=True, exist_ok=True)
-            if not path.exists():
-                path.write_text("injected", encoding="utf-8")
-                fail_at = "during_commit"
-        result = ingest(
-            settings,
-            paths["metadata"],
-            paths["inverter"],
-            paths["station"],
-            "DEMO_01",
-            args.start,
-            args.end,
-            args.source_version,
-            fail_at=fail_at,
-        )
-        result["report"] = build_report(settings, args.start[:7], "DEMO_01")
-        return result
+        from solarops.replay import run_demo
+
+        return run_demo(settings, args.start, args.end, args.source_version)
     if args.command in ("ingest", "backfill"):
         return ingest(
             settings,
@@ -171,7 +169,15 @@ def execute(args):
             args.fail_at,
         )
     if args.command == "analyze":
-        result = Catalog(settings).snapshot(settings.org, args.start, args.end, args.plant)
+        if args.period:
+            from solarops.reports.render import month_bounds
+
+            if args.start or args.end:
+                raise ValueError("Use --period or --from/--to, not both")
+            args.start, args.end = month_bounds(args.period)
+        result = Catalog(settings).snapshot(
+            settings.org, args.start, args.end, args.plant, args.source_kind
+        )
         if not result:
             raise ValueError("NO_ACTIVE_PARTITIONS")
         return {

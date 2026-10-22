@@ -91,7 +91,7 @@ class Catalog:
                 conn.execute(text("PRAGMA journal_mode=WAL"))
         metadata.create_all(self.engine)
 
-    def snapshot(self, org, start=None, end=None, plant=None):
+    def snapshot(self, org, start=None, end=None, plant=None, source_kind=None):
         # One SELECT is a consistent statement snapshot even during a concurrent commit.
         stmt = (
             select(
@@ -116,12 +116,20 @@ class Catalog:
         if plant:
             stmt = stmt.where(active.c.plant_id == plant)
         with self.engine.connect() as conn:
-            return [
+            result = [
                 dict(r)
                 for r in conn.execute(
                     stmt.order_by(active.c.plant_id, active.c.partition_id)
                 ).mappings()
             ]
+        if source_kind:
+            result = [
+                row
+                for row in result
+                if row["payload"].get("source_objects")
+                and all(s["source_kind"] == source_kind for s in row["payload"]["source_objects"])
+            ]
+        return result
 
     def fail(self, run_id, code):
         with self.engine.begin() as conn:

@@ -35,7 +35,7 @@ airflow-up:
 	$(COMPOSE) --profile airflow run --rm airflow-init
 	$(COMPOSE) --profile airflow up -d airflow-api airflow-scheduler airflow-dag-processor
 dag-validate:
-	docker run --rm -v "$(CURDIR)/scripts/validate_dags.py:/tmp/validate_dags.py:ro" --entrypoint python solarops-airflow:0.1.0 /tmp/validate_dags.py
+	docker run --rm -v "$(CURDIR)/scripts/validate_dags.py:/tmp/validate_dags.py:ro" --entrypoint python solarops-airflow:0.2.0 /tmp/validate_dags.py
 test-services:
 	$(UV) run python scripts/service-test.py
 k8s-bootstrap:
