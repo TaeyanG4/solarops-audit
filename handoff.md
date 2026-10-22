@@ -7,7 +7,7 @@
 - 앱 v0.4.1 / 계산 `energy-interval-v2`. 공개·합성 자료의 엔지니어링 MVP와 로컬 시연을 구현·검증했습니다.
 - 전체 현황 리디자인 완료. [공개 2024년 4월 화면](http://127.0.0.1:8502/?view=overview&period=2024-04&source=public), [GitHub](https://github.com/TaeyanG4/solarops-audit) 비공개 유지.
 - UI 기능 `afd6169`의 [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39812883684): Windows/Ubuntu 각각 113통과·5제외. 로컬 Windows 112통과·6제외와 구분합니다.
-- 이번 작업은 README·출처·스킬·이미지와 기록 구조 개선입니다. 최종 검증·전달 결과는 [2026-10-23 기록](docs/worklog/2026-10-23.md)에 남깁니다.
+- README·출처·스킬·이미지와 기록 구조 개선 완료. `dbbe744` GitHub 반영, CI 양 OS 각각 113통과·5제외, 문서·복원·패키징 성공. [상세 근거](docs/worklog/2026-10-23.md).
 - 앞선 운영 확인 시 Compose app-db·minio·dashboard 실행, Airflow/kind 및 별도 8501/8503 서버 중지였습니다. 현재 실행 상태가 필요하면 다시 조회합니다. [시작·종료 안내](README.md#빠른-실행).
 - 실제 고객 계약·매출·현장 고장 정확도·외부 운영 SLO는 검증하지 않았습니다.
 
