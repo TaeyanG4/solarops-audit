@@ -92,14 +92,24 @@ def timestamp_utc(value):
 def normalize(raw, kind):
     dt = timestamp_utc(raw.get("datetime"))
     field = "total_active_power_w" if kind == "inverter" else "poa_irradiance_wm2"
+    prefix = "INVERTER" if kind == "inverter" else "STATION"
     numeric = raw.get(field)
-    numeric = float(numeric) if numeric not in (None, "") else None
+    try:
+        numeric = float(numeric) if numeric not in (None, "") else None
+    except ValueError:
+        raise ValueError(prefix + "_VALUE_NOT_NUMERIC") from None
     valid = numeric is not None and math.isfinite(numeric) and numeric >= 0
     if numeric is not None and not math.isfinite(numeric):
         numeric = None
-    interpolation = flag(raw.get("interpolated_keys_" + field))
+    try:
+        interpolation = flag(raw.get("interpolated_keys_" + field))
+    except ValueError:
+        raise ValueError(prefix + "_INTERPOLATION_INVALID") from None
     count = raw.get("document_count_" + field)
-    count = int(count) if count not in (None, "") else None
+    try:
+        count = int(count) if count not in (None, "") else None
+    except ValueError:
+        raise ValueError(prefix + "_DOCUMENT_COUNT_INVALID") from None
     if count is not None and count < 0:
         raise ValueError("NEGATIVE_DOCUMENT_COUNT")
     inv = inverter_id(raw.get("inverter_id")) if kind == "inverter" else 0

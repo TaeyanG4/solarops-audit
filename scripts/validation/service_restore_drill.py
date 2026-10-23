@@ -97,7 +97,7 @@ def _run_drill(output, isolated_target, target_containers):
             (
                 s3_name,
                 9000,
-                "solarops-minio:2025-10-15",
+                "solarops-minio:2025-10-15-pinned",
                 {
                     "MINIO_ROOT_USER": target_credentials["MINIO_ROOT_USER"],
                     "MINIO_ROOT_PASSWORD": target_credentials["MINIO_ROOT_PASSWORD"],
@@ -301,7 +301,7 @@ def _run_drill(output, isolated_target, target_containers):
             for name in (
                 "solarops-worker:" + __version__,
                 "postgres:16.10-bookworm",
-                "solarops-minio:2025-10-15",
+                "solarops-minio:2025-10-15-pinned",
             )
         },
     }

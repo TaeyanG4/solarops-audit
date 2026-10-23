@@ -85,13 +85,14 @@ kind: Deployment
 metadata: {name: minio, namespace: solarops}
 spec:
   replicas: 1
+  strategy: {type: Recreate}
   selector: {matchLabels: {app: minio}}
   template:
     metadata: {labels: {app: minio}}
     spec:
       containers:
         - name: minio
-          image: solarops-minio:2025-10-15
+          image: solarops-minio:2025-10-15-pinned
           imagePullPolicy: IfNotPresent
           args: [server, /data, --console-address, ':9001']
           env:

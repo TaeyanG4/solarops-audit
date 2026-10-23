@@ -9,7 +9,7 @@ x-app-env: &app-env
   SOLAROPS_S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?run bootstrap}
   SOLAROPS_S3_BUCKET: solarops-demo
 x-airflow: &airflow
-  image: solarops-airflow:0.5.3
+  image: solarops-airflow:0.5.4
   build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: airflow}
   user: "50000:0"
   environment: &airflow-env
@@ -40,14 +40,14 @@ services:
     volumes: ["app-db:/var/lib/postgresql/data"]
     healthcheck: {test: [CMD-SHELL, "pg_isready -U solarops -d solarops"], interval: 5s, timeout: 5s, retries: 20}
   minio:
-    image: solarops-minio:2025-10-15
+    image: solarops-minio:2025-10-15-pinned
     build: {context: ../.., dockerfile: infra/docker/Dockerfile.minio}
     command: server /data --console-address :9001
     environment: {MINIO_ROOT_USER: "${MINIO_ROOT_USER:?run bootstrap}", MINIO_ROOT_PASSWORD: "${MINIO_ROOT_PASSWORD:?run bootstrap}"}
     ports: ["127.0.0.1:59000:9000", "127.0.0.1:59001:9001"]
     volumes: ["minio:/data"]
   worker:
-    image: solarops-worker:0.5.3
+    image: solarops-worker:0.5.4
     user: "50000:0"
     build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
     environment: *app-env
@@ -57,7 +57,7 @@ services:
       app-db: {condition: service_healthy}
       minio: {condition: service_started}
   dashboard:
-    image: solarops-worker:0.5.3
+    image: solarops-worker:0.5.4
     user: "50000:0"
     build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
     command: [serve, --host, 0.0.0.0, --port, "8501"]

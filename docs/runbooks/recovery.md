@@ -57,3 +57,9 @@ kubectl --kubeconfig artifacts/kubeconfig -n solarops logs POD_NAME --tail=80
 ```
 
 작업이 살아 있으면 기다립니다. 종료가 확인되면 기존 Airflow 재시도/수동 Trigger 또는 같은 환경의 월별 `ons-sync --period`를 사용합니다. 새 시도가 성공해도 과거 running을 성공으로 덮어쓰지 않습니다. 최근20회 밖 기록은 해당 DAG 실행 이력과 보존 로그로 추적하며, 자동 TTL/강제 실패 조정기는 없습니다.
+
+## 실패 기록 자체가 실패한 경우
+
+`FAILURE_RECORD_WRITE_FAILED` 경고는 run_id·대상 저장소·원래 안전 코드를 남깁니다. 실패 기록만 best effort이며 정상 게시 트랜잭션 오류를 숨기지 않습니다. CLI는 원래 원인으로 종료하고 기존 active/cursor는 유지합니다. DB에 실패 기록을 남기지 못한 시도는 running으로 남을 수 있으므로 Airflow/Pod/CLI 로그와 기존 진단 절차를 대조합니다. 경과 시간만으로 실행 중인 작업을 실패로 바꾸지 않습니다.
+
+BR 입력 코드에서 `INVERTER`는 `total_active_power_w`, `STATION`은 `poa_irradiance_wm2`를 뜻합니다. `_VALUE_NOT_NUMERIC`는 해당 값, `_INTERPOLATION_INVALID`는 `interpolated_keys_` 접두 컬럼, `_DOCUMENT_COUNT_INVALID`는 `document_count_` 접두 컬럼의 파싱 실패입니다. 원문 값/경로/접속 정보는 로그에 포함하지 않습니다. 정렬 후 검증이므로 원본 레코드 번호는 제공하지 않습니다. raw 계보의 해당 파일·필드를 조사하세요.

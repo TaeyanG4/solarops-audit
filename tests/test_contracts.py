@@ -106,6 +106,19 @@ def test_identifier_rejects_paths(bad):
 @pytest.mark.parametrize("value,expected", [("true", True), ("0", False), (None, None), ("", None)])
 def test_flags(value, expected):
     assert flag(value) is expected
+    from solarops.contracts.brpvgen import failure_code
+
+    for kind, field in (("inverter", "total_active_power_w"), ("station", "poa_irradiance_wm2")):
+        for column, suffix in (
+            (field, "VALUE_NOT_NUMERIC"),
+            ("interpolated_keys_" + field, "INTERPOLATION_INVALID"),
+            ("document_count_" + field, "DOCUMENT_COUNT_INVALID"),
+        ):
+            raw = {"datetime": "2024-04-01T00:00:00Z", field: "1", column: "private-bad-value"}
+            with pytest.raises(ValueError) as error:
+                normalize(raw, kind)
+            assert failure_code(error.value) == kind.upper() + "_" + suffix
+            assert "private" not in str(error.value)
 
 
 @pytest.mark.parametrize(

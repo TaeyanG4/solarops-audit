@@ -105,6 +105,39 @@ def test_failure_keeps_published_partition(settings, sample, failure, monkeypatc
     error = capsys.readouterr().err
     assert sentinel not in error and json.loads(error)["error_code"] == "BR_INPUT_INVALID"
     assert hashes(settings) == before
+    # Failure diagnostics are best effort: a second I/O/DB failure must not
+    # replace the original exception or change a previously published result.
+    from pathlib import Path
+
+    original_write = Path.write_text
+    original_fail = Catalog.fail
+    recorded = []
+
+    def unavailable_record(self, run_id, code):
+        recorded.append(code)
+        raise RuntimeError("private-secondary-database-error")
+
+    def unavailable_quarantine(self, *args, **kwargs):
+        if self.name == "quarantine.json":
+            raise OSError("private-secondary-path")
+        return original_write(self, *args, **kwargs)
+
+    def record_failure(self, run_id, code):
+        recorded.append(code)
+        return original_fail(self, run_id, code)
+
+    for destination in ("catalog", "quarantine"):
+        recorded.clear()
+        with monkeypatch.context() as patch:
+            patch.setattr(
+                Catalog, "fail", unavailable_record if destination == "catalog" else record_failure
+            )
+            if destination == "quarantine":
+                patch.setattr(Path, "write_text", unavailable_quarantine)
+            with pytest.raises(ValueError, match=sentinel):
+                run(settings, sample, version="failed-diagnostic-" + destination)
+        assert recorded == ["BR_INPUT_INVALID", "BR_INPUT_INVALID"]
+        assert hashes(settings) == before
 
 
 def test_targeted_replay_preserves_other_days(settings, sample):

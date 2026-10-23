@@ -1,12 +1,29 @@
 """Release and allowlisted execution identity, never arbitrary environment data."""
 
 import json
+import logging
 import os
 import subprocess
+from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
 
 RELEASE = json.loads(Path(__file__).with_name("release.json").read_text(encoding="utf-8"))
+
+
+@contextmanager
+def failure_recording(run_id, code, destination):
+    """Only failure diagnostics are best effort; callers re-raise the original error."""
+    try:
+        yield
+    except Exception:
+        # Never log exception strings/tracebacks: they may contain input or DSNs.
+        logging.getLogger(__name__).warning(
+            "FAILURE_RECORD_WRITE_FAILED run_id=%s destination=%s original_code=%s",
+            run_id,
+            destination,
+            code,
+        )
 
 
 @lru_cache(maxsize=1)

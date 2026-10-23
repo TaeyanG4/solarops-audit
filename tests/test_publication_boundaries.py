@@ -354,3 +354,16 @@ def test_ons_conditional_download_and_failure_preserve_success(settings, tmp_pat
     assert result["last_success"] == second
     empty = client.get("/api/v1/sources/ons?period=2026-09").json()
     assert empty["last_success"] is None and empty["partitions"] == []
+    # Secondary DB errors must not mask the download/validation error.
+    original_put = ons.put
+
+    def unavailable_failure_record(conn, relation, key, payload, **kwargs):
+        if relation is collection_runs and payload.get("status") == "failed":
+            raise RuntimeError("private-secondary-database-error")
+        return original_put(conn, relation, key, payload, **kwargs)
+
+    monkeypatch.setattr(ons, "download", failure)
+    monkeypatch.setattr(ons, "put", unavailable_failure_record)
+    with pytest.raises(OSError, match="offline"):
+        ons.sync_month(settings, "2026-10")
+    assert ons.cursor(catalog, "2026-10") == second

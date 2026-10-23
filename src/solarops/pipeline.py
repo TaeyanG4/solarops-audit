@@ -22,7 +22,7 @@ from solarops.normalize.parquet import (
     timestamp_utc,
     write_parquet,
 )
-from solarops.runtime import execution_context, release_info
+from solarops.runtime import execution_context, failure_recording, release_info
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import (
     Catalog,
@@ -308,7 +308,8 @@ def ingest(
                 status="committed",
             )
     except Exception as exc:
-        catalog.fail(batch_id, failure_code(exc))
+        with failure_recording(batch_id, failure_code(exc), "batch_catalog"):
+            catalog.fail(batch_id, failure_code(exc))
         raise
     return {
         "batch_id": batch_id,
@@ -501,8 +502,10 @@ def publish_day(
             "estimated_energy_kwh": metric["estimated_energy_kwh"],
         }
     except Exception as exc:
-        (staging / "quarantine.json").write_text(
-            json.dumps({"error_code": failure_code(exc), "run_id": run_id}), encoding="utf-8"
-        )
-        catalog.fail(run_id, failure_code(exc))
+        with failure_recording(run_id, failure_code(exc), "quarantine"):
+            (staging / "quarantine.json").write_text(
+                json.dumps({"error_code": failure_code(exc), "run_id": run_id}), encoding="utf-8"
+            )
+        with failure_recording(run_id, failure_code(exc), "partition_catalog"):
+            catalog.fail(run_id, failure_code(exc))
         raise

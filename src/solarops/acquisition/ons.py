@@ -20,7 +20,7 @@ from pathlib import Path
 from sqlalchemy import func, literal, select, update
 
 from solarops.acquisition.brpvgen import checksum
-from solarops.runtime import execution_context, release_info
+from solarops.runtime import execution_context, failure_recording, release_info
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import (
     Catalog,
@@ -397,7 +397,10 @@ def sync_month(settings, period):
             result = publish(catalog, store, path, period, expected, run_id, provenance)
         return result
     except Exception as exc:
-        with catalog.engine.begin() as conn:
+        with (
+            failure_recording(run_id, failure_code(exc), "ons_catalog"),
+            catalog.engine.begin() as conn,
+        ):
             put(
                 conn,
                 collection_runs,

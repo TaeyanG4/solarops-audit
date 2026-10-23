@@ -1,0 +1,38 @@
+{
+  "release": "0.5.4",
+  "baseline_review_commit": "dbfb04ca4a3a9bf7c0f9e2b7de552079b2312cf5",
+  "normal_input": {
+    "normal_days": 7,
+    "normal_rows": 1342,
+    "logical_hashes_unchanged": true,
+    "inverter_removal_expected_slots": {
+      "before": 1344,
+      "after": 672
+    },
+    "limitation": "Per-inverter disappearance is accepted by source-bound denominator contract; not equipment inventory."
+  },
+  "checks": {
+    "offline": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "14",
+      "tests": "154",
+      "time": "33.170",
+      "timestamp": "2026-10-23T18:08:51.928038+09:00",
+      "hostname": "DESKTOP-BKFCA3T"
+    },
+    "services": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "13",
+      "time": "22.950",
+      "timestamp": "2026-10-23T18:09:23.672467+09:00",
+      "hostname": "DESKTOP-BKFCA3T"
+    }
+  },
+  "deployment": "pending",
+  "minio_binary_sha256": "fbc76569ea811e9c8602fd9993e9c854d0f543e50696ab12c11cdfc0ff8457b1"
+}
