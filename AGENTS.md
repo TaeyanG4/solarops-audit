@@ -1,3 +1,5 @@
+**언어 규칙 (사용자 요청, 최우선): 사용자에게 보여주는 모든 출력(응답, 진행 상황, 요약, 질문)은 반드시 한국어로 작성합니다.** 코드, 명령어, 파일 경로, 식별자는 원문 그대로 둡니다.
+
 # SolarOps Audit
 
 The user's current request authorizes completing the project and installing required
