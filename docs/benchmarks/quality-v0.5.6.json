@@ -1,0 +1,50 @@
+{
+  "release": "0.5.6",
+  "calculation_version": "energy-interval-v2",
+  "checks": {
+    "offline": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "14",
+      "tests": "154",
+      "time": "35.028",
+      "timestamp": "2026-10-23T19:01:27.402982+09:00",
+      "hostname": "DESKTOP-BKFCA3T"
+    },
+    "services": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "13",
+      "time": "25.456",
+      "timestamp": "2026-10-23T19:02:40.694932+09:00",
+      "hostname": "DESKTOP-BKFCA3T"
+    }
+  },
+  "parity": {
+    "rows": 1342,
+    "days": 7,
+    "logical_hashes_unchanged": true,
+    "report_selections": 8,
+    "legacy_row_retained": true,
+    "old_artifacts_unchanged": true
+  },
+  "browser": {
+    "widths": [
+      1440,
+      768,
+      390
+    ],
+    "selection_and_back_verified": true,
+    "axe": {
+      "violations": 0,
+      "passes": 36,
+      "incomplete": 1,
+      "manual": "aria-controls target IDs exist; native hidden popovers"
+    },
+    "stopped": true
+  },
+  "deployment": "pending"
+}

@@ -86,7 +86,7 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 
 ## 실행 근거와 한계
 
-최신 구현은 **v0.5.5 · energy-interval-v2**입니다. 원본 체크섬 오류를 구별하고 새 보고서에 원본 인버터 개수·범위를 기록해 품질 분모 변화를 조사할 수 있습니다. [최신 검증](docs/benchmarks/quality-v0.5.5.md)과 [v0.5.3의 정상 입력 동등성·비용](docs/benchmarks/quality-v0.5.3.md)을 구분해 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
+최신 구현은 **v0.5.6 · energy-interval-v2**입니다. 발전소·전체·자료 필터별 보고서를 독립적으로 보존하고 총 품질 이슈와 분석 경고를 구별합니다. [최신 검증](docs/benchmarks/quality-v0.5.6.md) · [재계산 가능한 성능 표본](docs/benchmarks/evidence/technical-20261023/README.md)과 [v0.5.3의 정상 입력 동등성·비용](docs/benchmarks/quality-v0.5.3.md)을 구분해 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
 
 | 확인한 항목 | 결과 | 범위와 근거 |
 |---|---|---|

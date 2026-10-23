@@ -4,9 +4,10 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 
-from solarops.config import CALCULATION_VERSION, identifier
+from solarops.config import CALCULATION_VERSION
 from solarops.contracts.dates import month_bounds
 from solarops.pipeline import canonical_hash
+from solarops.reports.identity import display_scope, selection_key
 from solarops.storage.postgres import active, now
 
 
@@ -18,13 +19,10 @@ def compare_report(catalog, report):
         return result
     try:
         plant, kind = selection["plant_id"], selection["source_kind"]
-        if plant is not None:
-            identifier(plant)
-        if kind not in (None, "public", "synthetic"):
-            raise ValueError("Unknown source kind")
+        selection_key(selection)
         if report["org_id"] != catalog.settings.org:
             raise ValueError("Report organization mismatch")
-        if report["scope"] != (plant or ("all-" + kind if kind else "all")):
+        if report["scope"] != display_scope(plant, kind):
             raise ValueError("Report selection mismatch")
         ZoneInfo(report["timezone"])
         start, end = month_bounds(report["period"])

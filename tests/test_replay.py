@@ -166,3 +166,9 @@ def test_cli_plan_and_scoped_month_analysis(settings, public_layout, monkeypatch
     assert "NO_ACTIVE_PARTITIONS" in capsys.readouterr().err
     assert main([*args, "--from", "2024-04-01"]) == 1
     assert "Use --period or" in capsys.readouterr().err
+    # A read-only analyze command must not silently create an empty catalog.
+    absent = settings.root / "absent-analyze.db"
+    monkeypatch.setenv("SOLAROPS_DATABASE_URL", "sqlite:///" + absent.as_posix())
+    assert main(args) == 1
+    capsys.readouterr()
+    assert not absent.exists()

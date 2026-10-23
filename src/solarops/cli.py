@@ -256,9 +256,13 @@ def execute(args):
             if args.start or args.end:
                 raise ValueError("Use --period or --from/--to, not both")
             args.start, args.end = month_bounds(args.period)
-        result = Catalog(settings).snapshot(
-            settings.org, args.start, args.end, args.plant, args.source_kind
-        )
+        catalog = Catalog(settings, read_only=True)
+        try:
+            result = catalog.snapshot(
+                settings.org, args.start, args.end, args.plant, args.source_kind
+            )
+        finally:
+            catalog.engine.dispose()
         if not result:
             raise ValueError("NO_ACTIVE_PARTITIONS")
         return {

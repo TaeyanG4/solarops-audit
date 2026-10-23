@@ -11,6 +11,7 @@ from solarops.acquisition.brpvgen import checksum
 from solarops.config import CALCULATION_VERSION
 from solarops.contracts.dates import month_bounds
 from solarops.pipeline import canonical_hash
+from solarops.reports.identity import display_scope, selection_key
 from solarops.runtime import execution_context, release_info
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog, active_reports, now, put, reports
@@ -22,6 +23,8 @@ env = Environment(
 
 def build_report(settings, period, plant=None, source_kind=None):
     start, end = month_bounds(period)
+    selection = {"plant_id": plant, "source_kind": source_kind}
+    identity = selection_key(selection)
     catalog = Catalog(settings)
     generated_at = now()
     snapshot = catalog.snapshot(settings.org, start, end, plant, source_kind)
@@ -36,6 +39,7 @@ def build_report(settings, period, plant=None, source_kind=None):
     metrics = [
         dict(
             r["metric"],
+            quality_issue_count=len(r["issues"]["items"]),
             source_inverter_count=len(r["payload"]["source_inverter_bounds"])
             if "source_inverter_bounds" in r["payload"]
             else None,
@@ -61,8 +65,8 @@ def build_report(settings, period, plant=None, source_kind=None):
         "report_id": report_id,
         "org_id": settings.org,
         "period": period,
-        "scope": plant or ("all-" + source_kind if source_kind else "all"),
-        "selection": {"plant_id": plant, "source_kind": source_kind},
+        "scope": display_scope(plant, source_kind),
+        "selection": selection,
         "generated_at": generated_at,
         "timezone": settings.timezone,
         "calculation_version": CALCULATION_VERSION,
@@ -130,6 +134,7 @@ def build_report(settings, period, plant=None, source_kind=None):
         report_id=report_id,
         period=period,
         scope=report["scope"],
+        selection=selection,
         generated_at=report["generated_at"],
         source_manifest_hash=report["source_manifest_hash"],
         source_kinds=report["source_kinds"],
@@ -147,7 +152,7 @@ def build_report(settings, period, plant=None, source_kind=None):
             {
                 "org_id": settings.org,
                 "period": period,
-                "scope": report["scope"],
+                "scope": identity,
                 "report_timezone": settings.timezone,
             },
             payload,

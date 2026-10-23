@@ -1,0 +1,16 @@
+{
+  "historical": true,
+  "date": "2026-10-23",
+  "source_sha256": {
+    "load_probe.py": "d2e475d230ce7ca867ab20ce6aa69f4c714f56b3aa1b2cac93df0efd2b5fbeb6",
+    "load_after.py": "fdbb5b77ae11a583359d87ff1e8e1bea288a14c6cfd6aff4dbe05aab7703509a",
+    "load-probe-v2/measurements.json": "dc3031a48ec85ed4908b18f6cba13854ac5666e68c5e0c1ae28d65bc31ca10dd",
+    "load-after/measurements.json": "fdf3d1ce128e0950829ce3e0d3726c0d7f2aeaf6f78ed16a022b04e7e6ff2221"
+  },
+  "sample_count": 1080,
+  "errors": 0,
+  "p50": "median",
+  "p95": "sorted(samples)[ceil(.95*n)-1]",
+  "round_digits": 2,
+  "conditions": "technical-20261023.md; 40 samples/case, 2 excluded warmups, fixed concurrency; synthetic read-only run history"
+}

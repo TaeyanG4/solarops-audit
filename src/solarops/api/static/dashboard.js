@@ -9,6 +9,7 @@ function readURLState() {
     period: query.get("period") || "2024-04",
     source: query.get("source") || "all",
     plant: query.get("plant") || "PS_001",
+    reportId: query.get("report") || "",
     day: query.get("day") || "",
     status: query.get("status") || "",
     level: query.get("level") || "batch",
@@ -57,6 +58,8 @@ function readURLState() {
     next.run = "";
   if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(next.runPlant))
     next.runPlant = "";
+  if (!/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(next.reportId))
+    next.reportId = "";
   return next;
 }
 const state = readURLState();
@@ -117,6 +120,9 @@ function link(text, href) {
 }
 function workspaceURL(changes = {}) {
   const next = { ...state, ...changes };
+  if (!Object.hasOwn(changes, "reportId") &&
+      ["plant", "period", "source", "view"].some((key) => Object.hasOwn(changes, key) && changes[key] !== state[key]))
+    next.reportId = "";
   if (next.view === "system")
     return `http://127.0.0.1:8504/?${new URLSearchParams({ period: next.period, source: next.source })}`;
   const params = new URLSearchParams({
@@ -126,6 +132,7 @@ function workspaceURL(changes = {}) {
   });
   if (["reports", "series"].includes(next.view))
     params.set("plant", next.plant);
+  if (next.view === "reports" && next.reportId) params.set("report", next.reportId);
   if (next.view === "sources" && next.sourceTab === "ons") {
     params.set("source_tab", "ons");
     params.set("ons_period", next.onsPeriod);
@@ -331,10 +338,13 @@ async function periodRecovery(signal, reportMode = false) {
   return box;
 }
 function navigate(changes) {
+  if (!Object.hasOwn(changes, "reportId") &&
+      ["plant", "period", "source", "view"].some((key) => Object.hasOwn(changes, key) && changes[key] !== state[key]))
+    changes = { ...changes, reportId: "" };
   if (changes.view && changes.view !== state.view)
     window.scrollTo({ top: 0, behavior: "instant" });
   if (
-    ["runs", "sources"].includes(state.view) &&
+    ["runs", "sources", "reports"].includes(state.view) &&
     (!changes.view || changes.view === state.view) &&
     workspaceURL(changes) !== workspaceURL()
   )
@@ -983,7 +993,14 @@ async function reports(signal) {
     );
     return root;
   }
-  if (state.plant && !reports.some((r) => r.scope === state.plant)) {
+  const explicit = reports.find((r) => r.report_id === state.reportId);
+  if (state.reportId && !explicit) {
+    root.append(empty("현재 목록에 없는 발행본입니다",
+      "보고 월·자료 구분이 다르거나 새 보고서로 교체되었을 수 있습니다. 기존 다운로드 URL의 발행본은 보존됩니다.",
+      button("사용 가능한 보고서 보기", () => navigate({ plant: "", reportId: "" }))));
+    return root;
+  }
+  if (!explicit && state.plant && !reports.some((r) => r.scope === state.plant)) {
     root.append(
       empty(
         `${state.plant}의 보고서가 없습니다`,
@@ -993,11 +1010,13 @@ async function reports(signal) {
     );
     return root;
   }
-  const preferred = reports.find((r) => r.scope === state.plant) || reports[0];
+  const preferred = explicit || reports.find((r) => r.selection?.plant_id === state.plant) ||
+    reports.find((r) => r.scope === state.plant) || reports[0];
   const toolbar = node("div", undefined, "filters");
   const downloads = node("div", undefined, "inline-actions");
   const id = encodeURIComponent(preferred.report_id);
   state.plant = preferred.scope;
+  state.reportId = preferred.report_id;
   syncURL();
   const printLink = link("인쇄용 보고서 (새 탭)", `/reports/${id}/report.html`);
   printLink.target = "_blank";
@@ -1012,11 +1031,11 @@ async function reports(signal) {
       "보고서 선택",
       reports.map((r) => [
         r.report_id,
-        `${r.period} · ${r.scope} · ${r.status === "complete" ? "월 전체" : "부분 기간"}`,
+        `${r.period} · ${reportSelectionLabel(r)} · ${r.status === "complete" ? "월 전체" : "부분 기간"}`,
       ]),
       preferred.report_id,
       (id) =>
-        navigate({ plant: reports.find((r) => r.report_id === id).scope }),
+        navigate({ plant: reports.find((r) => r.report_id === id).scope, reportId: id }),
     ),
     downloads,
   );
@@ -1031,17 +1050,24 @@ async function reports(signal) {
   return root;
 }
 
+function reportSelectionLabel(report) {
+  if (!report.selection) return `${report.scope} · 선택 조건 미기록`;
+  const selection = report.selection;
+  const plant = selection.plant_id == null ? "전체 발전소" : `발전소 ${selection.plant_id}`;
+  const kind = { public: "공개 자료", synthetic: "합성 데모" }[selection.source_kind] || "자료 필터 없음";
+  return `${plant} · ${kind}`;
+}
 function reportDocument(report, freshness) {
   const sheet = node("article", undefined, "report-sheet");
   sheet.setAttribute(
     "aria-label",
-    `${report.period} ${report.scope} 월간 보고서`,
+    `${report.period} ${reportSelectionLabel(report)} 월간 보고서`,
   );
   const band = node("section", undefined, "report-band"),
     title = node("div"),
     energy = node("div", undefined, "report-energy");
   title.append(
-    node("h2", `${report.period} · ${report.scope}`),
+    node("h2", `${report.period} · ${reportSelectionLabel(report)}`),
     node(
       "p",
       `${report.plant_count}개 발전소 · ${report.days}개 일별 파티션 · ${report.timezone}`,

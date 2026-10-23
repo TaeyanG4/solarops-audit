@@ -235,6 +235,13 @@ def test_report_api_and_lineage(settings, sample):
     assert client.post(freshness_path).status_code == 405
     original_bytes = client.get(path + "manifest.json").content
     manifest = json.loads(original_bytes)
+    first_metric = manifest["metrics"][0]
+    first_issues = [q for q in manifest["issues"] if q["local_date"] == "2024-04-01"]
+    assert any(q["rule_id"] == "DQ-DUPLICATE-IDENTICAL" for q in first_issues)
+    assert first_metric["quality_issue_count"] == len(first_issues) == 1
+    assert first_metric["warning_count"] == 0  # v2 analysis-rule subset, not all input issues.
+    metric_api = client.get("/api/v1/plants/DEMO_01/metrics?limit=1").json()["items"][0]
+    assert metric_api["quality_issue_count"] == first_metric["quality_issue_count"]
     assert all(m["source_inverter_count"] == 2 for m in manifest["metrics"])
     assert all(set(m["source_inverter_bounds"]) == {"1", "2"} for m in manifest["partitions"])
     assert all(

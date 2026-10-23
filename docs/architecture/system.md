@@ -4,7 +4,7 @@
 
 SolarOps는 **역사 CSV 분석과 갱신 원천의 증분 수집을 수행하는 배치 시스템**입니다. Python CLI가 처리와 쓰기를 담당하고 FastAPI 대시보드는 저장된 결과를 읽습니다. 같은 CLI를 네이티브, Compose, Airflow, Kubernetes 작업 Pod에서 실행합니다. ONS의 원문 단위·시각은 BR-PVGen의 추정 에너지와 분리합니다.
 
-설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 코드 v0.5.5 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
+설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 코드 v0.5.6 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
 
 **v0.4.2:** 독립 검토에서 재현한 입력 ID·추출·metadata·역순 게시 경계를 수정했습니다. 배치 시작 때 기대한 active와 비교해 교체하고 metadata도 같은 트랜잭션에 게시합니다. 충돌은 이전 결과를 유지한 채 명시적으로 실패하며 의도적 과거 복원은 `--restore`가 필요합니다. [실제 SQLite/PostgreSQL 검증](../benchmarks/integrity-v0.4.2.md).
 
@@ -105,7 +105,7 @@ sequenceDiagram
 
 DB와 객체 저장소 전체를 하나의 분산 트랜잭션으로 묶지는 않습니다. 객체가 먼저 저장되어도 DB 커밋 전에는 active 조회에 나타나지 않습니다. 실패하면 이전 포인터가 유지되고 고아 staging은 증거로 남습니다. 공개 단위는 **조직/발전소/현지 일자/시각대/계산 버전**입니다. 여러 날짜 중 뒤의 날짜가 실패해도 이미 커밋한 날짜는 남습니다.
 
-파일 SHA-256은 입력 바이트를, 논리 해시는 정렬된 자연키·정규화 값·원본 필드·지표·규칙을 확인합니다. 실행 UUID와 시각은 논리 해시에서 제외됩니다. 같은 입력 버전 이름에 다른 내용을 넣으면 중단합니다. 보고서는 생성 시점의 active snapshot을 UUID 경로에 고정하므로 새 적재 후 자동으로 바뀌지 않습니다.
+파일 SHA-256은 입력 바이트를, 논리 해시는 정렬된 자연키·정규화 값·원본 필드·지표·규칙을 확인합니다. 실행 UUID와 시각은 논리 해시에서 제외되지만 source_version 라벨·조직/발전소/시간대/계산 버전·규칙은 포함됩니다. 같은 라벨/설정 안의 동등성 지표이며 라벨 변경만으로도 hash는 달라집니다. 같은 입력 버전 이름에 다른 내용을 넣으면 중단합니다. 보고서는 생성 시점의 active snapshot을 UUID 경로에 고정하므로 새 적재 후 자동으로 바뀌지 않습니다.
 
 보고서 발행도 객체 저장 후 DB의 보고서 정보·최신 포인터를 전환합니다. 업로드나 DB 커밋에 실패하면 이전 보고서를 유지하고, 늦게 끝난 오래된 생성 작업이 더 최신 snapshot을 대체하지 않도록 검사합니다. 보고서 HTML/CSV/manifest는 기존 UUID 경로에서 수정하지 않습니다. [무결성·동시성 계약](../adr/0008-storage-integrity.md).
 
@@ -135,7 +135,7 @@ DB와 객체 저장소 전체를 하나의 분산 트랜잭션으로 묶지는 �
 
 ## 구현·배포·검증의 범위
 
-최신 코드0.5.5는 원본 체크섬 진단과 인버터ID/범위 계보·보고서 개수를 추가했습니다. 계산 v2·과거산출물은 유지합니다. [검사와 배포 상태](../benchmarks/quality-v0.5.5.md) · [현재 실행 환경](../../handoff.md). ONS 상태 UI의0.5.1 실행은 [이전 근거](../benchmarks/portfolio-finish-20261023.md)로 보존합니다.
+최신 코드0.5.6은 보고서 선택키·품질이슈총계·읽기분석을 보완했습니다. 계산 v2·과거산출물은 유지합니다. [검사와 배포 상태](../benchmarks/quality-v0.5.6.md) · [현재 실행 환경](../../handoff.md). ONS 상태 UI의0.5.1 실행은 [이전 근거](../benchmarks/portfolio-finish-20261023.md)로 보존합니다.
 
 v0.5.0에서 Compose dashboard/worker/Airflow와 kind Airflow/KPO를 갱신했습니다. [단일 명세](../../src/solarops/release.json)와 [v0.5.0 커밋·이미지 ID](../releases/0.5.0.json)를 연결하고 CI에서 선언 드리프트를 검사합니다. Compose Airflow는 중지 상태이며 과거 완료 Pod·보고서는 보존합니다. v0.4.2 당시의 환경별 동일 표본·재시도 검증은 [역사 근거](../benchmarks/integrity-v0.4.2.md)로 유지합니다.
 
@@ -155,3 +155,5 @@ v0.5.0에서 Compose dashboard/worker/Airflow와 kind Airflow/KPO를 갱신했�
 원천의 offset 없는 시각을 UTC라고 가정하지 않습니다. MWmed·verified/forecast/unspecified를 보존하고 기존 energy-v2 지표와 분리합니다. 원본과 metadata를 보존한 뒤 날짜별 내용 hash가 달라진 결과만 업로드하고, 기대 cursor가 일치할 때 월의 변경 manifest와 cursor를 함께 전환합니다. HTTP304는 날짜 재처리 없이 확인 이력만 남깁니다. [출처·실패/철회 계약과 조회 API](../ons-source-contract.md).
 
 실제 KPO 병렬 측정은 별도 PostgreSQL DB·MinIO 버킷·PVC 하위 경로를 사용합니다. 동일 PS_001 공개4일을 max_active_tasks=1/2로 실행하며 신규 기술스택을 추가하지 않습니다. 단일 kind 노드의 공유 RWO PVC이므로 다중 물리 노드 확장 검증이 아닙니다. [실행 기록](../worklog/2026-10-23-incremental.md).
+
+보고서의 표시 scope와 active 선택 identity는 v0.5.6부터 분리합니다. [호환 계약](../data-contract.md#보고서-선택과-품질-건수-v056). metric/issues 조회의 응답 limit은 DB 물질화 한도가 아니며, 장기 이력/대형 자료의 메모리·객체 I/O는 별도 측정이 필요합니다. 실행 이력의 SQL 페이지 성능을 다른 API에 일반화하지 않습니다.

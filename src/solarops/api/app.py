@@ -19,6 +19,7 @@ from solarops.config import Settings
 from solarops.contracts.dates import date_bounds, month_bounds, next_day
 from solarops.diagnostics import inspect_runs
 from solarops.reports.freshness import compare_report
+from solarops.reports.identity import selection_key
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog, active_reports, metadata, now, plants, reports, runs
 
@@ -179,6 +180,7 @@ def create_app(settings=None):
             "items": [
                 dict(
                     r["metric"],
+                    quality_issue_count=len(r["issues"]["items"]),
                     run_id=r["run_id"],
                     logical_hash=r["payload"]["logical_content_hash"],
                 )
@@ -287,9 +289,9 @@ def create_app(settings=None):
             statement = statement.where(active_reports.c.period == period)
         with catalog.engine.connect() as conn:
             payloads = [dict(r["payload"]) for r in conn.execute(statement).mappings()]
-        items = []
+        latest = {}
         for payload in payloads:
-            if "source_kinds" not in payload:
+            if "source_kinds" not in payload or "selection" not in payload:
                 # Older reports retain their source evidence in the immutable manifest.
                 # Never infer provenance from plant names or rewrite historical artifacts.
                 try:
@@ -299,9 +301,11 @@ def create_app(settings=None):
                             payload.get("artifact_sha256", {}).get("manifest.json"),
                         )
                     )
-                    payload["source_kinds"] = sorted(
-                        {source["source_kind"] for source in manifest["sources"]}
-                    )
+                    if "source_kinds" not in payload:
+                        payload["source_kinds"] = sorted(
+                            {source["source_kind"] for source in manifest["sources"]}
+                        )
+                    payload.setdefault("selection", manifest.get("selection"))
                 except (
                     OSError,
                     ValueError,
@@ -311,12 +315,29 @@ def create_app(settings=None):
                     ClientError,
                     HTTPException,
                 ):
-                    payload["source_kinds"] = None
+                    payload.setdefault("source_kinds", None)
+                    payload.setdefault("selection", None)
             payload["source_metadata_status"] = (
                 "available" if payload["source_kinds"] else "unavailable"
             )
-            if source_kind is None or source_kind in (payload["source_kinds"] or []):
-                items.append(payload)
+            # Preserve legacy catalog rows/artifacts. Collapse only proven identical
+            # selections; never guess plant/fleet or requested filters from labels.
+            try:
+                identity = selection_key(payload["selection"])
+            except (KeyError, TypeError, ValueError):
+                identity = payload["report_id"]
+            key = (payload["period"], identity)
+            previous = latest.get(key)
+            if previous is None or (payload["generated_at"], payload["report_id"]) > (
+                previous["generated_at"],
+                previous["report_id"],
+            ):
+                latest[key] = payload
+        items = [
+            payload
+            for payload in latest.values()
+            if source_kind is None or source_kind in (payload["source_kinds"] or [])
+        ]
         return {"items": items}
 
     @app.get("/api/v1/reports/{report_id}")

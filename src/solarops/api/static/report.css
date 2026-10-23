@@ -32,8 +32,11 @@
   gap: 32px;
   align-items: center;
 }
+.report-band h1,
 .report-band h2 {
   font-size: 30px;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
 }
 .report-band p {
   color: #c0cbdc;

@@ -12,7 +12,7 @@ from solarops.fixtures import generate
 from solarops.reports import render
 from solarops.storage import minio
 from solarops.storage.minio import ObjectStore
-from solarops.storage.postgres import Catalog, active_reports, plants, reports
+from solarops.storage.postgres import Catalog, active_reports, plants, put, reports
 from tests.test_pipeline import run
 
 
@@ -197,6 +197,80 @@ def test_slow_old_report_does_not_replace_newer_snapshot(settings, sample, monke
             )["report_id"]
             == report["report_id"]
         )
+    check_report_selection_identity(settings, sample)
+
+
+def check_report_selection_identity(settings, sample):
+    """Used by the existing SQLite and PostgreSQL report publication checks."""
+    from fastapi.testclient import TestClient
+
+    from solarops.api.app import create_app
+
+    published = []
+    for plant in ("all", "all-public", "all-synthetic"):
+        paths = {}
+        for kind, path in sample.items():
+            target = settings.root / "selection-input" / plant / path.name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(path.read_text(encoding="utf-8").replace("DEMO_01", plant))
+            paths[kind] = target
+        pipeline.ingest(
+            settings,
+            paths["metadata"],
+            paths["inverter"],
+            paths["station"],
+            plant,
+            "2024-04-01",
+            "2024-04-02",
+            "selection-v1",
+        )
+        for kind in (None, "synthetic"):
+            published.append(render.build_report(settings, "2024-04", plant, kind))
+    for kind in (None, "synthetic"):
+        published.append(render.build_report(settings, "2024-04", source_kind=kind))
+    client = TestClient(create_app(settings))
+    url = "/api/v1/reports?period=2024-04"
+    expected = {p["report_id"] for p in published}
+    assert {p["report_id"] for p in client.get(url).json()["items"]} == expected
+    original = {
+        p["report_id"]: client.get(f"/reports/{p['report_id']}/manifest.json").content
+        for p in published
+    }
+    # Old display-key row is retained, but its recorded selection is resolved
+    # from the immutable artifact and appears only once beside the new key.
+    legacy = dict(published[-2])
+    legacy.pop("selection")
+    with Catalog(settings).engine.begin() as conn:
+        put(
+            conn,
+            active_reports,
+            dict(
+                org_id=settings.org,
+                period="2024-04",
+                scope="all",
+                report_timezone=settings.timezone,
+            ),
+            legacy,
+            report_run_id=legacy["report_id"],
+        )
+    newest = render.build_report(settings, "2024-04")
+    expected.remove(legacy["report_id"])
+    expected.add(newest["report_id"])
+    items = client.get(url).json()["items"]
+    assert {p["report_id"] for p in items} == expected
+    assert len(items) == len(expected) == 8
+    assert len({json.dumps(p["selection"], sort_keys=True) for p in items}) == 8
+    for report_id, content in original.items():
+        assert client.get(f"/reports/{report_id}/manifest.json").content == content
+        assert client.get(f"/api/v1/reports/{report_id}/freshness").json()["status"] == "unchanged"
+    with Catalog(settings).engine.connect() as conn:
+        old = conn.execute(
+            select(active_reports.c.payload).where(
+                active_reports.c.org_id == settings.org,
+                active_reports.c.scope == "all",
+            )
+        ).scalar_one()
+        assert "selection" not in old  # Reading never migrates catalog or files.
 
 
 def test_ons_incremental_correction_withdrawal_and_atomic_cursor(settings, tmp_path):
