@@ -262,6 +262,46 @@ setInterval(() => {
   if (!document.hidden) refreshStatus();
 }, 5000);
 const adminQuery = new URLSearchParams(location.search);
+const adminTabs = Array.from(document.querySelectorAll('[role="tab"]'));
+function selectAdminTab(id, focus = false) {
+  const selected =
+    adminTabs.find((tab) => tab.getAttribute("aria-controls") === id) ||
+    adminTabs[0];
+  for (const tab of adminTabs) {
+    const active = tab === selected;
+    tab.setAttribute("aria-selected", String(active));
+    tab.tabIndex = active ? 0 : -1;
+    document.getElementById(tab.getAttribute("aria-controls")).hidden = !active;
+  }
+  if (focus) selected.focus();
+}
+for (const [index, tab] of adminTabs.entries()) {
+  tab.onclick = () => {
+    const id = tab.getAttribute("aria-controls");
+    history.replaceState(
+      null,
+      "",
+      `${location.pathname}${location.search}#${id}`,
+    );
+    selectAdminTab(id);
+  };
+  tab.onkeydown = (event) => {
+    const next = {
+      ArrowRight: (index + 1) % adminTabs.length,
+      ArrowLeft: (index + adminTabs.length - 1) % adminTabs.length,
+      Home: 0,
+      End: adminTabs.length - 1,
+    }[event.key];
+    if (next === undefined) return;
+    event.preventDefault();
+    adminTabs[next].click();
+    adminTabs[next].focus();
+  };
+}
+window.addEventListener("hashchange", () =>
+  selectAdminTab(location.hash.slice(1)),
+);
+selectAdminTab(location.hash.slice(1));
 for (const anchor of document.querySelectorAll(
   "nav a:not([data-view=system]), footer a",
 )) {

@@ -75,3 +75,9 @@ npx --yes skills@1.7.4 add vercel-labs/agent-skills --skill web-design-guideline
 설치 결과는 `.agents/skills/`와 로컬 `.codex/hooks.json`에 있습니다. 이 도구 파일·실행 바이너리는 Git과 Docker context에서 제외하고 [skills-lock.json](../../skills-lock.json)에 두 Vercel 스킬의 source/hash를 남겼습니다. 다른 CLI 버전은 이 문서에 고정했습니다. 브라우저 설치는 당시 Chrome 156을 받았으며 앱 런타임에 추가하지 않았습니다. AGENTS.md는 설치 전후 SHA-256이 일치합니다.
 
 새 디자인은 사용자가 자율 구현과 이후 수정을 맡긴 code-led 작업입니다. 별도 concept-seed 선택·승인 이미지 비교를 수행한 것으로 기록하지 않습니다. Impeccable의 별도 리뷰는 코드와 제공한 캡처에 대한 검수이며 실제 고객 평가가 아닙니다.
+
+## 선택창·관리 탭·관측 차트 후속 수정
+
+2026-10-23 UI-04에서는 UI UX Pro Max의 dropdown/scroll/keyboard·missing/time series 검색을 적용했습니다. Impeccable의 harden·craft-floor·polish로 상호작용과 실제 캡처를 자체 검수하고, Web Design Guidelines로 직접 링크·탭 URL·포커스·키보드 스크롤을 확인했습니다. 별도 에이전트 리뷰는 수행하지 않았습니다.
+
+Agent Browser 회귀는 1440/768/390px, 303명령·axe18회 위반0입니다. Impeccable detector는 27건(권고26·경고1)이었으며 정적 HTML의 CSS 경로를 해석하지 못한 제목 크기 경고는 실제 computed style과 대조했습니다. 이전 작업의 detector 결과를 이번 결과로 재사용하지 않습니다. [수정·검수·한계](../benchmarks/interactions-20261023.md) · [실제 캡처 출처](../portfolio/images/interactions-20261023/README.md).

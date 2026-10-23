@@ -84,6 +84,8 @@ function link(text, href) {
 }
 function workspaceURL(changes = {}) {
   const next = { ...state, ...changes };
+  if (next.view === "system")
+    return `http://127.0.0.1:8504/?${new URLSearchParams({ period: next.period, source: next.source })}`;
   const params = new URLSearchParams({
     view: next.view,
     period: next.period,
@@ -143,6 +145,9 @@ function table(headers, rows, className = "") {
     head = node("thead"),
     tr = node("tr"),
     body = node("tbody");
+  wrap.tabIndex = 0;
+  wrap.setAttribute("role", "region");
+  wrap.setAttribute("aria-label", `${headers.join(" · ")} 표`);
   for (const title of headers) {
     const th = node("th", title);
     th.scope = "col";
@@ -1277,6 +1282,236 @@ async function runs(signal) {
   return root;
 }
 
+function observationChart(items, signal) {
+  const root = node("div", undefined, "observation-chart-wrap");
+  const svg = svgNode("svg", {
+    class: "chart observation-chart",
+    role: "img",
+    "aria-label":
+      "관측 전력과 일사량. 실선은 전력, 점선은 POA. 아래 두 띠는 유효 관측값이 없는 시각이며 정확한 값은 관측값 표에서 확인할 수 있습니다.",
+  });
+  const series = [
+    {
+      key: "power_kw",
+      label: "전력",
+      unit: "kW",
+      color: "var(--green)",
+      side: "left",
+    },
+    {
+      key: "poa_wm2",
+      label: "POA",
+      unit: "W/m²",
+      color: "var(--amber)",
+      side: "right",
+    },
+  ];
+  const valid = (row, key) => Number.isFinite(row[key]);
+  const times = items.map((row) => Date.parse(row.ts_utc));
+  const step = 15 * 60 * 1000;
+  const groups = (key) => {
+    const ranges = [];
+    items.forEach((row, index) => {
+      if (valid(row, key)) return;
+      const last = ranges.at(-1);
+      if (
+        last &&
+        last.at(-1) === index - 1 &&
+        times[index] - times[index - 1] === step
+      )
+        last.push(index);
+      else ranges.push([index]);
+    });
+    return ranges;
+  };
+  const gaps = new Map(series.map(({ key }) => [key, groups(key)]));
+  const summary = node("p", undefined, "observation-summary");
+  summary.append(node("strong", "유효 관측값 없음"));
+  for (const { key, label } of series)
+    summary.append(
+      node(
+        "span",
+        `${label} ${number(items.filter((row) => !valid(row, key)).length)} / ${number(items.length)}개 시각`,
+      ),
+    );
+  const legendRow = node("div", undefined, "observation-legend");
+  for (const { key, label, unit, side } of series)
+    legendRow.append(
+      node(
+        "span",
+        `${label} · ${side === "left" ? "왼쪽" : "오른쪽"} ${unit}`,
+        `series-label ${key}`,
+      ),
+    );
+  root.append(legendRow, svg, summary);
+  root.append(
+    node(
+      "p",
+      "빈 구간은 0이 아닙니다. 원본 누락 또는 무효값으로 표시할 유효값이 없으며, 선을 잇거나 보간하지 않습니다. 선이 있는 구간도 원본 보간·표본 수에 따라 판단 불가일 수 있습니다.",
+      "subtext",
+    ),
+  );
+  if (series.some(({ key }) => gaps.get(key).length)) {
+    const details = node("details", undefined, "observation-gaps");
+    details.append(node("summary", "빈 구간 시각 확인 (UTC)"));
+    const list = node("dl", undefined, "definition-list");
+    for (const { key, label } of series) {
+      const entry = node("div");
+      entry.append(
+        node("dt", label),
+        node(
+          "dd",
+          gaps
+            .get(key)
+            .map((range) => {
+              const first = items[range[0]].ts_utc.slice(11, 16),
+                last = items[range.at(-1)].ts_utc.slice(11, 16);
+              return `${first}${first === last ? "" : `–${last}`} (${range.length}개 시각)`;
+            })
+            .join(" · ") || "모든 시각에 유효값이 있습니다.",
+        ),
+      );
+      list.append(entry);
+    }
+    details.append(list);
+    root.append(details);
+  }
+  function draw() {
+    const width = svg.clientWidth;
+    if (!width) return;
+    const left = 60,
+      right = width - 64,
+      top = 32,
+      bottom = 208;
+    const duration = Math.max(step, times.at(-1) - times[0]);
+    const x = (index) =>
+      left + ((times[index] - times[0]) / duration) * (right - left);
+    svg.setAttribute("viewBox", `0 0 ${width} 304`);
+    svg.replaceChildren();
+    series.forEach(({ key, label, unit, color, side }, seriesIndex) => {
+      const values = items
+        .filter((row) => valid(row, key))
+        .map((row) => row[key]);
+      const max = Math.max(1, ...values);
+      [0, 0.5, 1].forEach((ratio) => {
+        const y = bottom - ratio * (bottom - top);
+        if (side === "left")
+          svg.append(
+            svgNode("line", {
+              x1: left,
+              x2: right,
+              y1: y,
+              y2: y,
+              class: "grid",
+            }),
+          );
+        svg.append(
+          svgNode(
+            "text",
+            {
+              x: side === "left" ? left - 10 : right + 10,
+              y: y + 4,
+              "text-anchor": side === "left" ? "end" : "start",
+            },
+            values.length ? number(max * ratio, 1) : "—",
+          ),
+        );
+      });
+      svg.append(
+        svgNode(
+          "text",
+          {
+            x: side === "left" ? left : right,
+            y: 16,
+            "text-anchor": side === "left" ? "start" : "end",
+          },
+          unit,
+        ),
+      );
+      let points = [];
+      const flush = () => {
+        if (points.length === 1)
+          svg.append(
+            svgNode("circle", {
+              cx: points[0][0],
+              cy: points[0][1],
+              r: 3,
+              fill: color,
+              "data-series": key,
+            }),
+          );
+        else if (points.length)
+          svg.append(
+            svgNode("polyline", {
+              points: points.map((p) => p.join(",")).join(" "),
+              stroke: color,
+              "stroke-width": 2,
+              "stroke-dasharray": seriesIndex ? "6 3" : "none",
+              fill: "none",
+              "data-series": key,
+            }),
+          );
+        points = [];
+      };
+      items.forEach((row, index) => {
+        if (index && times[index] - times[index - 1] > step) flush();
+        if (!valid(row, key)) {
+          flush();
+          return;
+        }
+        points.push([x(index), bottom - (row[key] / max) * (bottom - top)]);
+      });
+      flush();
+      const y = 251 + seriesIndex * 24;
+      svg.append(
+        svgNode(
+          "text",
+          { x: left - 10, y: y + 10, "text-anchor": "end" },
+          label,
+        ),
+      );
+      svg.append(
+        svgNode("rect", {
+          x: left,
+          y,
+          width: Math.max(0, right - left),
+          height: 12,
+          class: "observation-rail",
+        }),
+      );
+      for (const range of gaps.get(key)) {
+        const half = ((right - left) * step) / duration / 2;
+        const begin = Math.max(left, x(range[0]) - half),
+          end = Math.min(right, x(range.at(-1)) + half);
+        svg.append(
+          svgNode("rect", {
+            x: begin,
+            y,
+            width: Math.max(1, end - begin),
+            height: 12,
+            class: "observation-gap",
+            "data-gap-series": key,
+          }),
+        );
+      }
+    });
+    [...new Set([0, Math.floor(items.length / 2), items.length - 1])].forEach(
+      (index) =>
+        svg.append(
+          svgNode(
+            "text",
+            { x: x(index), y: 232, "text-anchor": "middle" },
+            items[index].ts_utc.slice(11, 16),
+          ),
+        ),
+    );
+  }
+  const observer = new ResizeObserver(draw);
+  observer.observe(svg);
+  signal.addEventListener("abort", () => observer.disconnect(), { once: true });
+  return root;
+}
+
 async function series(signal) {
   const root = node("div");
   root.append(
@@ -1316,84 +1551,10 @@ async function series(signal) {
   }
   const box = panel(
     "관측 전력과 일사량",
-    "빈 관측값은 선으로 연결하지 않습니다. 판단 불가 상태는 원본 품질을 함께 확인하세요.",
+    "유효 관측값이 없는 시각은 선을 끊어 표시합니다. 아래 빈 구간 표시와 원본 품질을 함께 확인하세요.",
   );
-  const svg = svgNode("svg", {
-    viewBox: "0 0 1000 280",
-    class: "chart",
-    role: "img",
-    "aria-label":
-      "왼쪽 전력 kW, 오른쪽 POA W/m². 정확한 값과 데이터 판단은 아래 표에 있습니다.",
-  });
+  box.append(observationChart(data.items, signal));
   const items = data.items;
-  for (const [key, color, side, unit] of [
-    ["power_kw", "#236f50", "left", "kW"],
-    ["poa_wm2", "#b47d20", "right", "W/m²"],
-  ]) {
-    const max = Math.max(1, ...items.map((row) => row[key] ?? 0));
-    [0, 0.5, 1].forEach((ratio) => {
-      const y = 225 - ratio * 180;
-      if (side === "left")
-        svg.append(
-          svgNode("line", { x1: 70, x2: 920, y1: y, y2: y, class: "grid" }),
-        );
-      svg.append(
-        svgNode(
-          "text",
-          {
-            x: side === "left" ? 58 : 932,
-            y: y + 4,
-            "text-anchor": side === "left" ? "end" : "start",
-          },
-          number(max * ratio, 1),
-        ),
-      );
-    });
-    svg.append(svgNode("text", { x: side === "left" ? 25 : 932, y: 20 }, unit));
-    let points = [];
-    const draw = () => {
-      if (points.length)
-        svg.append(
-          svgNode("polyline", {
-            points: points.join(" "),
-            stroke: color,
-            "stroke-width": 2,
-            fill: "none",
-          }),
-        );
-      points = [];
-    };
-    items.forEach((row, index) => {
-      if (row[key] === null) {
-        draw();
-        return;
-      }
-      points.push(
-        `${70 + (index * 850) / Math.max(1, items.length - 1)},${225 - (row[key] / max) * 180}`,
-      );
-    });
-    draw();
-  }
-  [0, Math.floor(items.length / 2), items.length - 1].forEach((index) =>
-    svg.append(
-      svgNode(
-        "text",
-        {
-          x: 70 + (index * 850) / Math.max(1, items.length - 1),
-          y: 255,
-          "text-anchor": "middle",
-        },
-        items[index].ts_utc.slice(11, 16),
-      ),
-    ),
-  );
-  box.append(
-    svg,
-    legend([
-      ["전력 · 왼쪽 kW", "#236f50"],
-      ["POA · 오른쪽 W/m²", "#b47d20"],
-    ]),
-  );
   root.append(box);
   const records = panel(
     "관측값과 판단 가능 범위",
@@ -1546,62 +1707,12 @@ async function sources(signal) {
   return root;
 }
 
-async function system() {
-  const root = node("div", undefined, "system-view");
-  root.append(
-    hero(
-      "시스템 관리",
-      "분석 화면과 독립된 로컬 관리 화면에서 SolarOps 서비스를 시작하고 중지합니다.",
-    ),
-  );
-  const controls = panel(
-    "로컬 관리 콘솔",
-    "대시보드가 중지되어도 8504 포트의 관리 화면은 유지됩니다.",
-  );
-  const open = link(
-    "시스템 관리 열기",
-    `http://127.0.0.1:8504/?${new URLSearchParams({ period: state.period, source: state.source })}`,
-  );
-  open.className = "text-button";
-  controls.append(
-    node(
-      "p",
-      "PostgreSQL·MinIO·대시보드·Airflow·SolarOps kind의 실제 상태와 시작·중지 버튼을 제공합니다. 관리자 화면은 이 PC에서만 접근할 수 있습니다.",
-      "subtext",
-    ),
-    open,
-  );
-  root.append(controls);
-  const help = panel(
-    "관리 화면이 열리지 않을 때",
-    "프로젝트 폴더에서 아래 명령을 실행한 뒤 다시 여세요.",
-  );
-  help.append(node("pre", "uv run solarops admin --project-root .", "code"));
-  help.append(
-    definitionList([
-      [
-        "분석 화면 · 8502",
-        "Docker 안에서 실행합니다. 기본 구동에는 대시보드·PostgreSQL·MinIO가 필요합니다.",
-      ],
-      [
-        "관리 화면 · 8504",
-        "호스트 Python에서 별도로 실행합니다. 이 터미널에서 Ctrl+C를 누르면 관리 서버만 종료됩니다.",
-      ],
-      [
-        "전체 중지",
-        "관리 콘솔의 ‘SolarOps 작업 환경 → 중지’로 프로젝트 컨테이너와 kind를 멈춥니다. 관리 서버까지 끄려면 마지막에 Ctrl+C를 누르세요.",
-      ],
-      [
-        "제어 범위",
-        "기존 SolarOps 컨테이너만 시작·중지합니다. Docker Desktop 자체와 다른 프로젝트는 조작하지 않으며 데이터·볼륨 삭제 기능은 없습니다.",
-      ],
-    ]),
-  );
-  root.append(help);
-  return root;
-}
-
 async function render() {
+  // Preserve old bookmarks while removing the intermediate management page.
+  if (state.view === "system") {
+    location.replace(workspaceURL());
+    return;
+  }
   const ticket = ++revision;
   controller?.abort();
   controller = new AbortController();
@@ -1634,7 +1745,6 @@ async function render() {
       plants,
       quality,
       sources,
-      system,
       reports,
       runs,
       series,

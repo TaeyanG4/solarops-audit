@@ -8,6 +8,8 @@
 
 **현재 화면:** 분석·감사 자료·관리로 묶은 사이드바, 본문 16px·보조 14px, 공통 월/목록 선택창을 적용했습니다. 월간 보고서는 화면 안의 iframe 없이 본문에서 바로 읽습니다. [화면·전후 비교](docs/benchmarks/workspace-20261023.md).
 
+**최근 수정:** 스크롤할 때 목록이 떠 있는 문제를 수정했습니다. 시스템 관리는 사이드바에서 바로 열고 세 탭으로 구분합니다. 관측 차트의 실제 빈값은 연결하지 않고 구간·개수를 설명합니다. [전후 화면·31개 테스트·3너비 검증](docs/benchmarks/interactions-20261023.md).
+
 **데이터 출처:** [BR-PVGen / Zenodo](https://zenodo.org/records/21511487) · 브라질 51개 발전소의 공개 역사 자료 · CC BY 4.0. 합성 데모는 별도로 표시하며 화면의 발전량은 추정치입니다.
 
 **실제로 작동하는가?** 2026-10-23 실행 서비스·DB·객체를 직접 점검했습니다. 원본 4개는 Zenodo 게시 체크섬과 일치하고, 대표 하루의 독립 계산값이 DB·API·보고서·Kubernetes 결과와 일치합니다. Airflow/KPO 실행 이력도 확인했으며, 합성 장애 시험과 공개 데이터 처리를 구분합니다. [기술스택·데이터 실사와 한계](docs/benchmarks/stack-authenticity-20261023.md).
@@ -60,13 +62,13 @@
 | 월간 보고서 | 본문에서 요약·품질·일별 내역·계보 조회, CSV/JSON 및 별도 인쇄용 HTML |
 | 실행 이력 | 작업 상태·실패 원인·입력 버전·하위 일별 파티션 추적 |
 | 데이터 출처 | BR-PVGen 원문·라이선스·파일별 역할, 공개/합성 자료의 차이 |
-| 시스템 관리 | 독립 로컬 관리 서버에서 기존 SolarOps Compose·kind 자원의 상태와 시작·중지 |
+| 시스템 관리 | 사이드바에서 독립 관리 서버로 바로 이동. 서비스 제어 / 컨테이너 상태 / 운영 안내 탭 |
 
 ![월간 보고서: 통합 본문, 추정 에너지와 품질 지표](docs/portfolio/images/workspace-20261023/report.png)
 
 *PS_001 공개 2024년 4월 보고서. 관측 슬롯 100%와 유효값 74.9%는 다른 지표입니다. 일별 내역은 필요할 때 펼쳐 보고 페이지 전체를 한 번에 스크롤합니다. 기존 보고서 UUID는 보존합니다. [보고서 원본 확대](docs/portfolio/images/workspace-20261023/report.png?raw=1).*
 
-[390px 목록 선택창](docs/portfolio/images/workspace-20261023/source-options-mobile.png) · [월 선택창](docs/portfolio/images/workspace-20261023/month-picker-mobile.png) · [시스템 관리](docs/portfolio/images/workspace-20261023/admin-1440.png) · [5분 시연 순서](docs/portfolio/DEMO_GUIDE.md)
+[390px 목록 선택창](docs/portfolio/images/interactions-20261023/reports-open-390.png) · [월 선택창](docs/portfolio/images/workspace-20261023/month-picker-mobile.png) · [시스템 관리 탭](docs/portfolio/images/interactions-20261023/admin-services-1440.png) · [관측 차트의 빈 구간](docs/portfolio/images/interactions-20261023/series-768.png) · [5분 시연 순서](docs/portfolio/DEMO_GUIDE.md)
 
 [일별 차트 확대](docs/portfolio/images/workspace-20261023/chart.png?raw=1) · [품질 분류 확대](docs/portfolio/images/workspace-20261023/quality.png?raw=1) · [합성 실패 근거](docs/portfolio/images/readme-hidpi-20261023/run-evidence.png). GitHub가 본문 너비에 맞춰 표시하므로 작은 수치는 원본 링크에서 확대할 수 있습니다.
 
@@ -153,6 +155,7 @@ flowchart LR
 | 전체 공개 자료 | 51개 발전소·인버터 14,400,480행·일별 파티션 12,572개, v1/v2 일별 지표·원본 SHA 일치 | [v0.4 검증](docs/benchmarks/reliability-v0.4.0.md) |
 | 실패·동시성·복구 | 입력 변경·동시 버전·보고서 역순 완료·파일 누락/변조·격리 복원 | [v0.4.1 검증](docs/benchmarks/integrity-v0.4.1.md) |
 | 화면·보고서·관리 | 1440/768/390px, overview 107명령·workspace 195명령, axe 3+23회 위반 0, API 동일 | [최신 UI 검증](docs/benchmarks/workspace-20261023.md) |
+| 선택창·관리 탭·관측 차트 | 후속 303명령·axe 18회 위반 0, Python 31통과, 원본 빈값 대조·API 동일 | [상호작용 회귀](docs/benchmarks/interactions-20261023.md) |
 | 서비스 제어 | 실제 전체 중지→기본 3서비스 시작→kind 시작, 독립 관리 서버 유지·다른 프로젝트 보존 | [관리 검증과 한계](docs/benchmarks/workspace-20261023.md) |
 | 최신 로컬 회귀 | Python 126통과·6제외, Ruff·4개 JS 문법·wheel 정적 자산 확인 | [최신 수행 기록](docs/worklog/2026-10-23-workspace.md) |
 | 회귀·전달 | 최신 기능 커밋 `0618ce1`의 Windows/Ubuntu 각각 **127통과·5제외**, 합성 복원·wheel·소스 패키징 성공 | [검증 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39841897047) |

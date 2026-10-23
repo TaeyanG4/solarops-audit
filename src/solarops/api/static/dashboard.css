@@ -1062,6 +1062,85 @@ footer {
     sans-serif;
   fill: var(--muted);
 }
+.observation-chart {
+  height: 304px;
+  max-height: none;
+}
+.observation-legend,
+.observation-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  font-size: 14px;
+}
+.observation-legend {
+  margin-bottom: 20px;
+}
+.series-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.series-label::before {
+  content: "";
+  width: 24px;
+  border-top: 2px solid var(--green);
+}
+.series-label.poa_wm2::before {
+  border-top: 2px dashed var(--amber);
+}
+.observation-rail {
+  fill: var(--subtle);
+}
+.observation-gap {
+  fill: var(--line);
+  stroke: var(--missing);
+  stroke-dasharray: 3 2;
+}
+.observation-summary {
+  margin: 16px 0 8px;
+}
+.observation-gaps summary {
+  cursor: pointer;
+  padding-block: 12px;
+  color: var(--accent);
+}
+.observation-gaps .definition-list {
+  margin-bottom: 0;
+}
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+  margin: 24px 0;
+  padding-bottom: 8px;
+}
+.admin-tabs [role="tab"] {
+  background: transparent;
+  color: var(--muted);
+  border-color: transparent;
+}
+.admin-tabs [aria-selected="true"] {
+  color: var(--accent);
+  background: var(--surface);
+  border-color: var(--control-line);
+}
+.admin-tab-panel[hidden] {
+  display: none;
+}
+@media (max-width: 600px) {
+  .admin-tabs {
+    gap: 4px;
+  }
+  .admin-tabs [role="tab"] {
+    padding-inline: 10px;
+    font-size: 14px;
+    flex: 1;
+    white-space: nowrap;
+  }
+}
 @media (min-width: 1500px) {
   .app-header {
     padding-inline: max(40px, calc((100vw - 1480px) / 2));

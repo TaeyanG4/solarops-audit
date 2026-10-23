@@ -60,7 +60,15 @@
         row.classList.toggle("is-highlighted", i === active),
       );
       trigger.setAttribute("aria-activedescendant", options[active]?.id || "");
-      options[active]?.scrollIntoView({ block: "nearest" });
+      // Scroll only the options, never the page behind a top-layer popover.
+      const row = options[active];
+      if (row) {
+        const top = row.offsetTop,
+          bottom = top + row.offsetHeight;
+        if (top < list.scrollTop) list.scrollTop = top;
+        else if (bottom > list.scrollTop + list.clientHeight)
+          list.scrollTop = bottom - list.clientHeight;
+      }
     }
     function sync() {
       value.textContent =
@@ -93,6 +101,8 @@
     }
     function close() {
       if (list.matches(":popover-open")) list.hidePopover();
+      trigger.setAttribute("aria-expanded", "false");
+      trigger.removeAttribute("aria-activedescendant");
     }
     function commit(index) {
       if (select.options[index]?.disabled) return;
@@ -222,6 +232,23 @@
     }
   }).observe(document.body, { childList: true, subtree: true });
   window.addEventListener("resize", () => enhanced.forEach((c) => c.close()));
+  // Fixed popovers must not stay behind when their trigger moves. Internal list
+  // scrolling remains open, including keyboard navigation through long lists.
+  document.addEventListener(
+    "scroll",
+    (event) => {
+      for (const control of enhanced.values()) {
+        if (!control.list.contains(event.target)) control.close();
+      }
+    },
+    { capture: true, passive: true },
+  );
+  window.visualViewport?.addEventListener("resize", () =>
+    enhanced.forEach((c) => c.close()),
+  );
+  window.visualViewport?.addEventListener("scroll", () =>
+    enhanced.forEach((c) => c.close()),
+  );
 
   const period = document.querySelector("#period");
   if (period) {

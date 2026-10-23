@@ -102,7 +102,6 @@ def main():
             ("plants", ".plant-table"),
             ("quality", ".quality-table"),
             ("sources", ".lineage-steps"),
-            ("system", ".system-view"),
             ("reports", ".report-sheet"),
         ]:
             run("open", base + f"?view={page}&period=2024-04&source=public")

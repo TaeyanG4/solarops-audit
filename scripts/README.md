@@ -17,6 +17,7 @@
 | `validation/` | `benchmark_dashboard.py`, `verify_catalogs.py` | HTTP 조회 측정 / 기존 native·서비스 결과 대조 |
 | `validation/` | `overview_browser.py` | 실행 중인 공개·합성 데모를 Agent Browser로 읽기 검증. null/오류 fixture는 테스트 브라우저에만 주입, 출력은 새 폴더 |
 | `validation/` | `workspace_browser.py --output <새 폴더>` | 7개 탐색·보고서·선택창·8504 검증. `--lifecycle`을 명시하면 실제 SolarOps 전체 중지·복구하므로 처리 작업이 없는 시점에만 실행 |
+| `validation/` | `interaction_browser.py --output <새 폴더>` | 준비된8502/8504의 선택창 스크롤·관리 직접 탐색/탭·관측 빈값을 3너비에서 읽기 검증. 관리 요청 제출 없음; fixture는 브라우저에만 주입 |
 | `validation/` | `compare_calculations.py` | 보존한 v1 기준과 v2 전체 일별 지표·원본 SHA·표본 시계열 비교 |
 | `validation/` | `backup_restore_drill.py` | 새 합성 SQLite/파일의 별도 경로 복원·해시·API·재처리 시험; 실제 서비스 백업 도구는 아님 |
 | `validation/` | `service_restore_drill.py` | 로컬 Compose에 합성 전용 DB/버킷 2쌍 생성, dump·객체 복원·API·재처리 검증; 자원은 보존 |
