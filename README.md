@@ -8,6 +8,8 @@
 
 현재 버전은 **v0.5.1 · 계산 energy-interval-v2**입니다. 제출 자료부터 읽으려면 [한 쪽 요약](docs/portfolio/SUBMISSION.md), [3~5분 시연](docs/portfolio/DEMO_GUIDE.md), [핵심 설계 질문 5개](docs/portfolio/DESIGN_QUESTIONS.md)를 참고하세요.
 
+[Fable·Astra 독립 모의 면접 평가](docs/reviews/2026-10-23-interview.md)에는 강점·면접 질문과 코드 재현으로 확인한 보완점이 있습니다. 실제 채용 평가와 구별하며, 새로 발견한 세 항목의 수정 순서는 [현재 계획](plan.md)에 기록했습니다.
+
 - **실제 데이터:** BR-PVGen 역사 자료 51개 발전소와 별도 ONS 갱신 수집. 합성 자료는 실패·복구 시연에만 구분해서 사용합니다.
 - **운영 경계:** 원본 보존 → 검증 → 원자 게시. 실패·중복 충돌·동시 게시·재처리·보고서 계보를 실행 검사로 확인합니다.
 - **ONS 화면:** 데이터 출처 안의 ONS 탭에서 현재 저장소·월·최근 시도·마지막 성공·변경 날짜를 확인합니다. Compose와 kind를 구분하고 MWmed를 추정 kWh에 합산하지 않습니다.

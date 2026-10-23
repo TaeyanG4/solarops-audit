@@ -18,7 +18,8 @@
 
 ## 다음 재개 지점
 
-- [plan](plan.md)의 PORT-01~04 모두 완료. [최종 근거](docs/benchmarks/portfolio-finish-20261023.md), [한 쪽 요약](docs/portfolio/SUBMISSION.md), [시연](docs/portfolio/DEMO_GUIDE.md), [설계 질문5개](docs/portfolio/DESIGN_QUESTIONS.md). 제출 범위100%이며 BIZ-01은 계속 후순위입니다. 추가 필수 기술 과제는 만들지 않습니다.
+- PORT-01~04 제출 마무리는 완료. 이후 [Fable·Astra 독립 모의 면접 평가](docs/reviews/2026-10-23-interview.md)는 77/83점으로 모두 주니어 면접을 권고했습니다. 주관적 점수이며 개인 역량·합격 확률을 뜻하지 않습니다.
+- 다음은 [plan](plan.md)의 **INT-01 시각 계약(21) → INT-02 보고서 unknown(19) → INT-03 ONS 오류 코드(16)**. 세 경계는 격리 합성 입력으로 재현했고 수정 미착수입니다. 공개 원본 발생 여부는 미확인. 기존 제출 체크리스트 완료와 새 결함을 구분하며 BIZ-01은 후순위입니다.
 - ONS는 이전/현재 월을 재확인하며 그보다 오래된 정정은 `ons-sync --period YYYY-MM`. 실패 시 월별 성공 cursor 유지, 충돌은 최신 상태에서 재시도. 원문 시간대를 추측해 UTC로 변환하지 않습니다.
 - kind 중지 시 정기 수집도 멈춥니다. ONS만 멈추려면 DAG pause. 현재 실행 중인 Pod까지 강제 종료하는 명령은 아닙니다. 두 환경 자료는 독립입니다.
 - 릴리스는 `scripts/release/release.py sync`→`uv lock`→`check`→구현커밋→`build`. 추가 테이블은 새 읽기 API 배포 전 `db-migrate`. 원본/과거 보고서 필드를 소급 변경하지 않습니다.
@@ -29,6 +30,7 @@
 
 | 일자 | 수행 영역과 결과 | 상세 |
 |---|---|---|
+| 10-23 | Fable·Astra 면접 평가·합성 경계 3개 재현·후속 21/19/16점 등록 | [평가·재현·전달](docs/worklog/2026-10-23-interview.md) |
 | 10-23 | PORT-01~04완료·ONS상태UI·0.5.1배포·격리재현·제출자료·최신CI | [최종 수행](docs/worklog/2026-10-23-portfolio-finish.md) |
 | 10-23 | ONS 실제 증분·정기 KPO·공개 DAG 동시 2개 비교, 0.5.0 배포·문서 갱신 | [수행·전달](docs/worklog/2026-10-23-incremental.md) |
 | 10-23 | 입력/게시 4경계 수정·0.4.2 정렬·실제 KPO 재시도/추적·세 환경 7일 일치 | [구현·배포](docs/worklog/2026-10-23-integrity-delivery.md) |
@@ -36,6 +38,5 @@
 | 10-23 | 실제 수집/스케줄·환경별 아키텍처·README 정리 | [문서·상태](docs/worklog/2026-10-23-data-architecture.md) |
 | 10-23 | 서비스 CI·보고서 비교·격리 복원·합성 10만 건 조회 부하 | [전달기록](docs/worklog/2026-10-23-technical-delivery.md) |
 | 10-23 | 영업 후순위·MVP와 남은 기술 범위 구분 | [평가](docs/worklog/2026-10-23-technical-roadmap.md) |
-| 10-23 | 문구·등록 월·보고서 기준·진단·발전소 조회 최적화 | [기록](docs/worklog/2026-10-23-usability.md) |
 
 100줄 이내·최근 요약 최대 8개. 이전 handoff/discoveries는 [원문 보관](docs/worklog/archive/README.md)이며 현재 지침이 아닙니다.

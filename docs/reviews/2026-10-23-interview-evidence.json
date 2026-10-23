@@ -1,0 +1,105 @@
+{
+  "date": "2026-10-23",
+  "timezone": "Asia/Seoul",
+  "baseline": "66d63486722dfb7bc83418667c90db1cecfadbf6",
+  "rubric": {
+    "data_engineering": 25,
+    "reliability": 25,
+    "architecture": 20,
+    "reproducibility": 15,
+    "communication": 15
+  },
+  "disclaimer": "AI mock-interviewer judgments; not hiring decisions or probabilities; scores are not comparable benchmark measurements",
+  "astra": {
+    "model": "gpt-6-astra",
+    "agent": "/root/astra_interviewer",
+    "score": 83,
+    "components": [
+      22,
+      21,
+      16,
+      12,
+      12
+    ],
+    "execution": "3 existing contract functions called directly in memory; no full suite",
+    "review_sha256": "78e32d56491fc7b6974789ccc8b5e69143fe68de75acd7b8a3860a389b57fdda"
+  },
+  "fable": {
+    "provider_cli": "Claude Code",
+    "cli_version": "2.1.287",
+    "requested_alias": "fable",
+    "resolved_model": "claude-fable-5-1",
+    "session_id": "2c9f8b53-0a1e-4630-a410-8a9ee5e83efb",
+    "score": 77,
+    "components": [
+      20,
+      20,
+      15,
+      12,
+      10
+    ],
+    "result": "success",
+    "is_error": false,
+    "permission_denials": [],
+    "duration_ms": 442411,
+    "read_only_tool_calls": 93,
+    "tools": [
+      "Glob",
+      "Grep",
+      "Read"
+    ],
+    "execution": "static inspection only; no commands, tests, browser or network calls",
+    "review_sha256": "28c318ec4c7b88da3b2f4d71b9f5dfe0126f49bfe7f833ed545a7467c4e3ae90"
+  },
+  "coordinator_reproduction": {
+    "baseline": "66d63486722dfb7bc83418667c90db1cecfadbf6",
+    "scope": "one-off synthetic fixtures; SQLite/local files under ignored artifacts; no network or running service changes",
+    "timestamp": {
+      "naive_row_normalize_error": "TIMESTAMP_TIMEZONE_MISSING",
+      "bad_ingest_partitions": 1,
+      "bad": {
+        "expected_slots": 50,
+        "observed_slots": 2,
+        "missing_slots": 48,
+        "coverage_ratio": 0.04
+      },
+      "control": {
+        "expected_slots": 2,
+        "observed_slots": 2,
+        "missing_slots": 0,
+        "coverage_ratio": 1.0
+      }
+    },
+    "report_missing": {
+      "partitions": 1,
+      "metric": {
+        "expected_slots": 96,
+        "observed_slots": 0,
+        "source_interpolation_ratio": null
+      },
+      "report_interpolation": 0,
+      "overview_source_interpolation_ratio": null,
+      "html_interpolation_display": "0.00%"
+    },
+    "ons_error_recording": [
+      {
+        "raised": "ONS_SOURCE_CONTRACT_CHANGED",
+        "saved_error_code": "ValueError",
+        "status": "failed"
+      },
+      {
+        "raised": "ONS_SCHEMA_CHANGED",
+        "saved_error_code": "ValueError",
+        "status": "failed"
+      }
+    ],
+    "artifact_directory": "artifacts/interview-review-20261023/checks-766cddd0dcab42e1b11b42df91784de0"
+  },
+  "probe_script_sha256": "8606beb37f84e506bb67c55472f286acf73e051c0c703dc11e43035610bacf27",
+  "baseline_ci": {
+    "id": 39916721418,
+    "conclusion": "success",
+    "inspected_this_review": true,
+    "rerun_this_review": false
+  }
+}
