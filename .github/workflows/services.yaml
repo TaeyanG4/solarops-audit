@@ -1,0 +1,79 @@
+name: SolarOps service integration
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: solarops-service-integration
+  cancel-in-progress: false
+jobs:
+  services:
+    # Opt-in, private repository, one-job local runner; no hosted minutes required.
+    runs-on: [self-hosted, linux, x64, solarops-integration]
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with: {version: "0.11.29", python-version: "3.12"}
+      - run: uv sync --frozen
+      - name: Build pinned storage image
+        run: docker build -f infra/docker/Dockerfile.minio -t solarops-integration-minio:${{ github.sha }} .
+      - name: Prepare ephemeral credentials
+        run: |
+          uv run python - <<'PY'
+          import os, secrets
+          values = {
+              "POSTGRES_PASSWORD": secrets.token_hex(24),
+              "MINIO_ROOT_USER": "ci-" + secrets.token_hex(8),
+              "MINIO_ROOT_PASSWORD": secrets.token_hex(24),
+          }
+          with open(os.environ["GITHUB_ENV"], "a") as out:
+              for name, value in values.items():
+                  print("::add-mask::" + value)
+                  out.write(f"{name}={value}\n")
+          PY
+      - name: Start isolated synthetic services
+        env:
+          RUN_KEY: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          docker run -d --name solarops-ci-pg-$RUN_KEY --cpus=1 --memory=512m \
+            -e POSTGRES_USER=solarops -e POSTGRES_DB=solarops -e POSTGRES_PASSWORD \
+            -p 127.0.0.1::5432 postgres:16.10-bookworm
+          docker run -d --name solarops-ci-s3-$RUN_KEY --cpus=1 --memory=768m \
+            -e MINIO_ROOT_USER -e MINIO_ROOT_PASSWORD -p 127.0.0.1::9000 \
+            solarops-integration-minio:${{ github.sha }} server /data
+          PG_PORT=$(docker port solarops-ci-pg-$RUN_KEY 5432/tcp | cut -d: -f2)
+          S3_PORT=$(docker port solarops-ci-s3-$RUN_KEY 9000/tcp | cut -d: -f2)
+          {
+            echo "SOLAROPS_DATABASE_URL=postgresql+psycopg://solarops:$POSTGRES_PASSWORD@127.0.0.1:$PG_PORT/solarops"
+            echo "SOLAROPS_S3_ENDPOINT=http://127.0.0.1:$S3_PORT"
+            echo "SOLAROPS_S3_ACCESS_KEY=$MINIO_ROOT_USER"
+            echo "SOLAROPS_S3_SECRET_KEY=$MINIO_ROOT_PASSWORD"
+            echo "SOLAROPS_S3_BUCKET=ci-$RUN_KEY"
+            echo "SOLAROPS_TEST_SERVICES=1"
+          } >> "$GITHUB_ENV"
+          for attempt in {1..60}; do
+            if docker exec solarops-ci-pg-$RUN_KEY pg_isready -U solarops -d solarops && \
+              curl --fail --silent http://127.0.0.1:$S3_PORT/minio/health/ready; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - name: Existing publication, replay and concurrency contracts
+        run: uv run pytest tests/test_services.py -q --junitxml=artifacts/services.xml
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: service-contract-results
+          path: artifacts/services.xml
+          retention-days: 7
+      - name: Stop only this run's containers, preserve evidence
+        if: always()
+        env:
+          RUN_KEY: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          for name in solarops-ci-pg-$RUN_KEY solarops-ci-s3-$RUN_KEY; do
+            if docker container inspect "$name" > /dev/null 2>&1; then docker stop "$name"; fi
+          done
