@@ -42,5 +42,47 @@
     "horizontal_overflow": false,
     "preview_and_browser_stopped": true
   },
-  "deployment": "pending"
+  "deployment": {
+    "/health": {
+      "status": "ok",
+      "mode": "local-read-only",
+      "version": "0.5.5"
+    },
+    "/ready": {
+      "status": "ready"
+    },
+    "/api/v1/overview?period=2024-04&source_kind=public": "5821a74f3857a1e2db8e51374233d33979a1076b0a6883683c28b3082932eeb4",
+    "/api/v1/reports?period=2024-04&source_kind=public": "a7f93beb3b441de4b3572afe783f4efa093519662e5a2087941f1c47778dcd50",
+    "/api/v1/sources/ons?period=2026-10": "c8d6dc36534303128247c4bb8d70d4a992942f3911162b7e1a2f94577fb63316",
+    "minio_mounts": [
+      {
+        "Type": "volume",
+        "Name": "solarops-audit_minio",
+        "Source": "/var/lib/docker/volumes/solarops-audit_minio/_data",
+        "Destination": "/data",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "minio_image": "sha256:ba58cd8f4781043abf8d5c3a3b656d4aba181dc5415ce7e884819b522a3b3955",
+    "public_and_ons_unchanged": true,
+    "kind": "Helm17; 3 rollouts; 6 service Pods Ready",
+    "compose_airflow": "0.5.5 created/stopped",
+    "new_scheduled_kpo_executed": false,
+    "dag_validation": {
+      "local": 7,
+      "kubernetes": 7
+    }
+  },
+  "implementation_commit": "cedf70216add558956001140c56b6931c40a1198",
+  "ci": {
+    "id": 39933397784,
+    "status": "success",
+    "platforms": [
+      "windows-latest",
+      "ubuntu-24.04"
+    ]
+  }
 }

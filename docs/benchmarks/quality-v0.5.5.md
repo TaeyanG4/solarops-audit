@@ -8,4 +8,6 @@
 - 정상합성7일1,342행 논리hash가 이전기준과동일합니다. source-bound인버터 제거시 기대슬롯1,344→672라는 기존제한은 변하지 않으며 이제 새manifest/보고서에서 ID/범위/개수를조회할수있습니다. 공개전체재처리/원본수정/과거보고서재발행은하지않았습니다.
 - Agent Browser의 별도합성preview에서 1440/390px 새 인버터2개표시·가로넘침없음을 확인했습니다. 이미지 `artifacts/portfolio-quality-r4-20261023/inverters-1440.png`, `inverters-390-detail.png`; preview8505와 해당브라우저는종료하고 자료는보존했습니다.
 
-이번 변경은 계산/다운로드/스케줄을 바꾸지 않습니다. [v0.5.4의 저장소 배포](quality-v0.5.4.md), [v0.5.3의 범위 계산 비용](quality-v0.5.3.md)은 과거근거로 보존합니다. 앱0.5.5배포·CI는 진행중이며 아래에 실제결과를추가합니다.
+이번 변경은 계산/다운로드/스케줄을 바꾸지 않습니다. [v0.5.4의 저장소 배포](quality-v0.5.4.md), [v0.5.3의 범위 계산 비용](quality-v0.5.3.md)은 과거근거로 보존합니다. 앱0.5.5배포·CI를 완료했습니다.
+
+[구현/이미지](../releases/0.5.5.json)의0.5.5를 Compose dashboard·kind Airflow/KPO에 반영했습니다. health0.5.5/ready정상, 공개2API와ONSAPI SHA동일. ComposeAirflow3개는생성후중지, kindHelm17·3rollout·6서비스PodReady, 양모드7DAG검사통과. [CI39933397784](https://github.com/TaeyanG4/solarops-audit/actions/runs/39933397784) 양OS성공. MinIO는이전고정이미지/기존볼륨을유지했고 새정기KPO실행은하지않았습니다.
