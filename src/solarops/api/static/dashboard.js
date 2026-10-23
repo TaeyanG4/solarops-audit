@@ -226,6 +226,92 @@ async function get(path, signal) {
     );
   return response.json();
 }
+async function periodRecovery(signal, reportMode = false) {
+  const box = node("section", undefined, "period-recovery");
+  box.setAttribute("aria-label", "사용 가능한 기간 안내");
+  const query = new URLSearchParams();
+  if (state.source !== "all") query.set("source_kind", state.source);
+  try {
+    const data = await get(
+      `/api/v1/${reportMode ? "reports" : "periods"}?${query}`,
+      signal,
+    );
+    const months = reportMode
+      ? [...new Set(data.items.map((item) => item.period))].sort().reverse()
+      : data.items.map((item) => item.period);
+    if (!months.length) {
+      box.append(
+        node(
+          "p",
+          reportMode
+            ? "선택한 자료 구분으로 발행된 보고서가 없습니다. 자료가 있어도 보고서는 별도로 생성해야 합니다."
+            : "선택한 자료 구분으로 게시된 일별 결과가 없습니다. 발전량이 0이라는 의미는 아닙니다.",
+        ),
+      );
+      if (state.source !== "all")
+        box.append(
+          workspaceLink(
+            "전체 자료 구분에서 확인하기",
+            { source: "all" },
+            "text-button",
+          ),
+        );
+      return box;
+    }
+    const source = {
+      all: "전체 자료",
+      public: "공개 자료",
+      synthetic: "합성 데모",
+    }[state.source];
+    box.append(
+      node(
+        "p",
+        `${source} · ${reportMode ? "보고서 발행" : "일별 결과 등록"} ${months.length}개월. 아래 목록에는 실제 자료가 있는 월만 표시합니다.`,
+      ),
+    );
+    const changes = (period) => ({
+      period,
+      review: "all",
+      search: "",
+      ...(reportMode
+        ? {
+            plant: (
+              data.items.find(
+                (r) => r.period === period && r.scope === state.plant,
+              ) || data.items.find((r) => r.period === period)
+            ).scope,
+          }
+        : {}),
+    });
+    const go = workspaceLink(
+      "선택한 월로 이동",
+      changes(months[0]),
+      "secondary",
+    );
+    const controls = node("div", undefined, "filters");
+    controls.append(
+      select(
+        reportMode ? "보고서가 있는 월" : "자료가 있는 월",
+        months.map((period) => [period, period]),
+        months[0],
+        (period) => {
+          go.href = workspaceURL(changes(period));
+        },
+      ),
+      go,
+    );
+    box.append(controls);
+  } catch (error) {
+    if (error.name === "AbortError") throw error;
+    box.append(
+      node(
+        "p",
+        "사용 가능한 기간을 불러오지 못했습니다. 새로고침하거나 보고 월을 직접 선택해 주세요.",
+      ),
+    );
+  }
+  return box;
+}
 function navigate(changes) {
   if (changes.view && changes.view !== state.view)
     window.scrollTo({ top: 0, behavior: "instant" });
@@ -536,9 +622,7 @@ async function overview(signal, mode = "overview") {
       empty(
         "선택한 기간의 자료가 없습니다",
         "보고 월이나 자료 구분을 바꿔 확인해 주세요. 데이터 없는 기간은 0 발전량으로 처리하지 않습니다.",
-        button("합성 데모 기간 보기", () =>
-          navigate({ period: "2024-04", source: "synthetic" }),
-        ),
+        await periodRecovery(signal),
       ),
     );
     return root;
@@ -876,6 +960,7 @@ async function reports(signal) {
       empty(
         "이 기간의 보고서가 없습니다",
         "다른 월을 선택하거나 운영자가 보고서를 생성한 뒤 새로고침해 주세요.",
+        await periodRecovery(signal, true),
       ),
     );
     return root;
@@ -961,6 +1046,29 @@ function reportDocument(report) {
     "report-provenance",
   );
   sheet.append(provenance);
+  const snapshot = panel(
+    "보고서 기준 시점",
+    "생성 당시 게시된 결과를 보존한 스냅샷입니다. 이후 적재·재처리 결과는 자동으로 반영되지 않습니다.",
+  );
+  snapshot.classList.add("report-section", "report-snapshot");
+  const inputVersions = [
+    ...new Set(
+      report.sources.map((source) => source.source_version || "기록 없음"),
+    ),
+  ];
+  snapshot.append(
+    definitionList([
+      ["생성 기준 시각", `${time(report.generated_at)} · 자료 조회 시작 기준`],
+      ["입력 버전", inputVersions.join(" · ") || "기록 없음"],
+      ["계산 버전", report.calculation_version || "기록 없음"],
+    ]),
+    node(
+      "p",
+      "같은 기간에 새 자료를 적재하거나 재처리·계산 버전 변경이 있었다면 보고서를 다시 발행해야 반영됩니다. 기존 보고서 ID의 내용은 유지됩니다.",
+      "subtext",
+    ),
+  );
+  sheet.append(snapshot);
   const metrics = node("dl", undefined, "report-metrics");
   for (const [label, value, description] of [
     ["관측 슬롯 완전성", pct(report.coverage), "등록된 일별 파티션 기준"],
@@ -1100,8 +1208,6 @@ function reportDocument(report) {
         "해석 범위",
         "원본 보간·누락·표본 수 불명 구간에서는 저출력을 판단하지 않습니다. DC 설비용량과 AC 출력의 비율은 탐색용입니다.",
       ],
-      ["계산 버전", report.calculation_version],
-      ["생성 시각", time(report.generated_at)],
       ["보고서 ID", report.report_id],
       ["원본 매니페스트 SHA-256", report.source_manifest_hash],
     ]),
@@ -1134,11 +1240,124 @@ function reportDocument(report) {
   return sheet;
 }
 
+function runDiagnostics(run, signal) {
+  const section = panel(
+    "현재 게시 상태 진단",
+    "실행 기록과 현재 게시된 결과를 함께 확인합니다. 상태 변경이나 재실행 없이 조회합니다.",
+  );
+  section.classList.add("run-diagnostics");
+  const output = node("div");
+  const load = button("진단 조회하기", async () => {
+    load.disabled = true;
+    output.setAttribute("aria-busy", "true");
+    output.replaceChildren(
+      node("p", "게시 상태를 확인하고 있습니다…", "subtext"),
+    );
+    try {
+      const evidence = await get(
+        `/api/v1/runs/${run.run_id}/diagnostics`,
+        signal,
+      );
+      const item = evidence.item;
+      const reasons = {
+        age_threshold_exceeded: `${evidence.older_than_minutes}분 이상 경과 · 확인 필요`,
+        within_threshold: `${evidence.older_than_minutes}분 이내의 미완료 기록`,
+        start_time_unavailable: "시작 시각이나 시간대 기록 확인 필요",
+        clock_skew: "시작 시각이 미래로 기록됨 · 시스템 시계 확인 필요",
+        finished: "종료 상태가 기록된 실행",
+      };
+      output.replaceChildren(
+        definitionList([
+          ["진단 시각", time(evidence.inspected_at)],
+          ["기록 해석", reasons[item.reason] || item.reason],
+          [
+            "이 실행의 게시 결과",
+            `${number(item.active_partition_count)}개 일별 파티션`,
+          ],
+          [
+            "하위 작업의 게시 결과",
+            `${number(item.active_child_partition_count)}개 일별 파티션`,
+          ],
+          [
+            "하위 작업 상태",
+            Object.entries(item.child_status_counts)
+              .map(
+                ([status, count]) =>
+                  `${statuses[status]?.[0] || status} ${count}건`,
+              )
+              .join(" · ") || "연결된 하위 기록 없음",
+          ],
+        ]),
+      );
+      output.append(
+        node(
+          "p",
+          "게시 개수는 모든 계산 버전·시간대의 현재 포인터 기준입니다. 경과 시간만으로 프로세스 중단이나 실패를 확정할 수 없습니다. 재실행 전 실제 프로세스/Pod와 오류 근거를 함께 확인하세요.",
+          "subtext",
+        ),
+      );
+      if (evidence.active_result_lookup_complete) {
+        const current = evidence.active_result;
+        if (current) {
+          output.append(
+            node(
+              "p",
+              `${current.partition_id} · ${current.calculation_version} · ${current.report_timezone}의 현재 결과${current.run_id === run.run_id ? "는 이 실행입니다." : "는 다른 실행에서 게시됐습니다."}`,
+            ),
+          );
+          if (current.run_id !== run.run_id)
+            output.append(
+              workspaceLink(
+                "현재 결과의 실행 보기",
+                {
+                  level: "partition",
+                  status: "",
+                  offset: 0,
+                  run: current.run_id,
+                },
+                "text-button",
+              ),
+            );
+        } else
+          output.append(
+            node(
+              "p",
+              "이 날짜·계산 버전·시간대에 현재 게시된 결과가 없습니다.",
+              "subtext",
+            ),
+          );
+      } else if (run.kind !== "ingest")
+        output.append(
+          node(
+            "p",
+            "이전 기록에 조회 범위가 없어 같은 날짜의 현재 결과를 특정할 수 없습니다.",
+            "subtext",
+          ),
+        );
+      load.textContent = "진단 새로고침";
+    } catch (error) {
+      if (error.name !== "AbortError")
+        output.replaceChildren(
+          node(
+            "p",
+            "진단을 불러오지 못했습니다. 실행 근거는 아래에서 확인하고, 잠시 후 다시 조회해 주세요.",
+            "notice",
+          ),
+        );
+    } finally {
+      load.disabled = false;
+      output.setAttribute("aria-busy", "false");
+    }
+  });
+  section.append(load, output);
+  return section;
+}
+
 async function runs(signal) {
   const root = node("div");
   root.append(
     hero(
-      "처리 과정을 확인하다",
+      "처리 과정을 확인하기",
       "작업과 일별 파티션을 구분하고, 실패 원인과 재실행 기록을 확인합니다.",
     ),
   );
@@ -1358,6 +1577,7 @@ async function runs(signal) {
           "notice",
         ),
       );
+    detail.append(runDiagnostics(run, signal));
     if (run.partitions.length)
       detail.append(
         table(
@@ -1753,6 +1973,7 @@ async function sources(signal) {
       : node("p", "선택한 범위에 등록된 자료가 없습니다."),
   );
   root.append(scope);
+  if (!data.summary.plant_count) scope.append(await periodRecovery(signal));
   const original = panel(
     "BR-PVGen 공개 역사 자료",
     "브라질 51개 발전소를 포함하는 원본 데이터셋 · 실제 운영 중인 실시간 서비스가 아닙니다.",

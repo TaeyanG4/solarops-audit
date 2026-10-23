@@ -1,5 +1,11 @@
 # 개발에 사용한 AI 스킬
 
+## 기간·보고서·진단 보완 — 2026-10-23
+
+- UI UX Pro Max: `empty state recovery clear action labels --domain ux -n 3`의 레이블·빈 화면·복구 지침을 실제 등록/발행 월 안내에 적용했습니다. 기존 디자인과 사용자의 작업형 문구를 유지했습니다.
+- Agent Browser: 기간 선택·보고서 메타데이터·실패 진단에서 현재 결과 이동을1440/768/390px로 확인했습니다. 모바일 axe3회 위반0, 실제 DPR2캡처를 보존했습니다.
+- 새 스킬 설치나 별도 검수 에이전트는 사용하지 않았습니다. [실제 변경·검사·이미지](../worklog/2026-10-23-usability.md)에 범위를 기록합니다.
+
 ## 실행 이력 탐색 보완 — 2026-10-23
 
 - UI UX Pro Max의 `filter URL state keyboard navigation --domain ux -n 3` 검색을 주소 복원·키보드 조회·보이는 레이블에 적용했습니다.

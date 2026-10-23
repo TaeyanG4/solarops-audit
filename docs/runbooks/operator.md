@@ -64,6 +64,12 @@ docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio 
 
 실행 조사: [실행 이력](http://127.0.0.1:8502/?view=runs&run_plant=PS_001)에서 실행 단위·상태·정확한 발전소 ID로 좁힙니다. 전체 기간의 공개·합성 처리 이력을 조회하며 보고 월 필터와 별개입니다. 주소를 저장하면 페이지·선택한 상세까지 복원합니다. 상세의 날짜에서 하위 파티션으로 이동하고 **상위 작업 보기**로 돌아옵니다. 요약 건수는 상태 필터 적용 전이며, 과거 완료 기록이 현재 활성 결과임을 보장하지 않습니다.
 
+상세의 **진단 조회하기**는 현재 게시 개수와 미완료 기록의 경과 시간을 읽습니다. 같은 날짜·계산 버전·시간대의 결과가 다른 실행에 연결되면 **현재 결과의 실행 보기**로 이동합니다. 시간 경과는 프로세스 중단의 확정 근거가 아닙니다. API는 `GET /api/v1/runs/{UUID}/diagnostics`이며 실행 상태를 변경하지 않습니다.
+
+등록 월 안내: 빈 월의 **자료가 있는 월**은 현재 조직·보고 시간대·계산 버전·자료 구분으로 게시된 파티션을 기준으로 합니다(`GET /api/v1/periods`). 보고서는 **보고서가 있는 월**을 별도로 안내합니다. 본문 상단의 생성 기준 시각·입력/계산 버전으로 스냅샷 범위를 확인하세요.
+
+기존 PostgreSQL의 발전소 조회 인덱스는 쓰기용 Catalog 초기화 시 추가됩니다. 읽기 전용 dashboard는 스키마를 바꾸지 않습니다. 기존 로컬 Compose에 새 코드를 적용한 뒤 필요하면 `docker compose --env-file .env -f infra/compose/compose.yaml exec dashboard python -c "from solarops.config import Settings; from solarops.storage.postgres import Catalog; Catalog(Settings()).engine.dispose()"`로 초기화합니다. 현재 로컬 DB에는 이미 반영했습니다. [실측·범위](../worklog/2026-10-23-usability.md#perf-02-17점).
+
 보고서 월: `solarops report --period 2024-04 --plant PS_001 --source-kind public`. 생성된 보고서는 불변 UUID 경로를 가지며 최신 보고서 포인터만 변경됩니다. 이미 발행한 보고서는 후속 적재로 자동 수정되지 않으므로 월간 보고서를 다시 생성해야 합니다.
 
 동시에 생성하면 스냅샷 조회 시작 시각이 더 새로운 보고서를 최신으로 유지합니다. 먼저 시작한 보고서가 늦게 끝나더라도 과거 UUID로 조회할 수 있습니다. 업로드/DB 커밋 실패는 이전 활성 보고서를 유지합니다.

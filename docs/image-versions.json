@@ -17,5 +17,6 @@
   "solarops-worker:0.4.1-workspace-20261023": "sha256:f93d0fa683f1c1c9c90d021d1aa5ae0b1485918119b8784739c9a9e95ec24152",
   "solarops-worker:0.4.1-ui04-20261023": "sha256:1185ecaa0f8ca2028348d309010170383867fb8a6f6d2a91db87142d89f16649",
   "solarops-worker:0.4.1-select-anchor-20261023": "sha256:b6783ca61408ff8af86037eca81c21352ee48fd222accf1d941f47c014fe84e5",
-  "solarops-worker:0.4.1-run-navigation-20261023": "sha256:84648047dcc3513cbfd896d93d51f7d1e0bba46141f088dcb323bc1fe7ecb384"
+  "solarops-worker:0.4.1-run-navigation-20261023": "sha256:84648047dcc3513cbfd896d93d51f7d1e0bba46141f088dcb323bc1fe7ecb384",
+  "solarops-worker:0.4.1-usability-20261023": "sha256:80f476a1e221fc75ba3657313ea2c5ab0376a96f775fb0010334362f6e22361f"
 }

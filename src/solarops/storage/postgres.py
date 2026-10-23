@@ -6,6 +6,7 @@ from pathlib import Path
 from sqlalchemy import (
     JSON,
     Column,
+    Index,
     MetaData,
     String,
     Table,
@@ -47,6 +48,9 @@ runs = table(
     ["run_id"],
     [Column("org_id", String, nullable=False), Column("status", String, nullable=False)],
 )
+run_plant_index = Index(
+    "ix_pipeline_run_org_plant", runs.c.org_id, runs.c.payload["plant_id"].as_string()
+).ddl_if(dialect="postgresql")
 active = table(
     "active_partition_manifest",
     ["org_id", "plant_id", "partition_id", "report_timezone", "calculation_version"],
@@ -128,6 +132,9 @@ class Catalog:
             with self.engine.begin() as conn:
                 conn.execute(text("PRAGMA journal_mode=WAL"))
         metadata.create_all(self.engine)
+        if self.engine.dialect.name == "postgresql":
+            # create_all does not add indexes to tables that already exist.
+            run_plant_index.create(self.engine, checkfirst=True)
 
     def snapshot(self, org, start=None, end=None, plant=None, source_kind=None):
         # One SELECT is a consistent statement snapshot even during a concurrent commit.

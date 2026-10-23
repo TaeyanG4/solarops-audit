@@ -14,9 +14,10 @@ from sqlalchemy import select
 from sqlalchemy.exc import SQLAlchemyError
 
 from solarops import __version__
-from solarops.api.readmodels import fleet_overview, run_history
+from solarops.api.readmodels import available_periods, fleet_overview, run_history
 from solarops.config import Settings
 from solarops.contracts.dates import date_bounds, month_bounds, next_day
+from solarops.diagnostics import inspect_runs
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog, active_reports, metadata, plants, reports, runs
 
@@ -57,6 +58,10 @@ def create_app(settings=None):
             return fleet_overview(catalog, period, source_kind)
         except ValueError:
             raise HTTPException(422, "Expected a valid YYYY-MM period") from None
+
+    @app.get("/api/v1/periods")
+    def period_list(source_kind: Literal["public", "synthetic"] | None = None):
+        return available_periods(catalog, source_kind)
 
     def artifact(uri, expected_sha256=None):
         try:
@@ -184,6 +189,16 @@ def create_app(settings=None):
         plant: str | None = Query(None, pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$"),
     ):
         return run_history(catalog, level, status, plant, offset, limit)
+
+    @app.get("/api/v1/runs/{run_id}/diagnostics")
+    def run_diagnostics(run_id: UUID, older_than_minutes: int = Query(60, ge=1, le=525600)):
+        try:
+            result = inspect_runs(settings, older_than_minutes, limit=1, run_id=str(run_id))
+        except ValueError:
+            raise HTTPException(503, "Catalog unavailable") from None
+        if result["item"] is None:
+            raise HTTPException(404, "Run not found")
+        return result
 
     @app.get("/api/v1/runs/{run_id}")
     def run_detail(run_id: UUID):

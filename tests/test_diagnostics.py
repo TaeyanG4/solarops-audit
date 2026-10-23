@@ -60,6 +60,11 @@ def test_unfinished_runs_are_evidence_not_auto_failed(settings, monkeypatch):
     assert items["future"]["reason"] == "clock_skew"
     page = inspect_runs(settings, limit=2, offset=2, at=at)
     assert page["items"] == result["items"][2:4] and page["has_more"]
+    detail = inspect_runs(settings, at=at, run_id="old")
+    assert detail["item"] == items["old"]
+    assert not detail["active_result_lookup_complete"]
+    assert inspect_runs(settings, at=at, run_id="child")["item"]["reason"] == "finished"
+    assert inspect_runs(settings, at=at, run_id="other")["item"] is None
     with catalog.engine.connect() as conn:
         assert conn.execute(select(runs)).all() == before
     assert all(stmt.lstrip().upper().startswith("SELECT") for stmt in statements)

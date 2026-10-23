@@ -124,6 +124,37 @@ def fleet_overview(catalog, period, source_kind=None):
     }
 
 
+def available_periods(catalog, source_kind=None):
+    """Months with published data, independent of energy values or report publication."""
+    period = func.substr(active.c.partition_id, 1, 7)
+    statement = (
+        select(
+            period.label("period"),
+            func.count().label("partition_count"),
+            func.count(func.distinct(active.c.plant_id)).label("plant_count"),
+        )
+        .where(
+            active.c.org_id == catalog.settings.org,
+            active.c.report_timezone == catalog.settings.timezone,
+            active.c.calculation_version == CALCULATION_VERSION,
+        )
+        .group_by(period)
+        .order_by(period.desc())
+    )
+    if source_kind:
+        statement = statement.where(
+            active.c.payload["source_objects"][0]["source_kind"].as_string() == source_kind
+        )
+    with catalog.engine.connect() as conn:
+        items = [dict(row) for row in conn.execute(statement).mappings()]
+    return {
+        "items": items,
+        "source_kind": source_kind or "all",
+        "timezone": catalog.settings.timezone,
+        "calculation_version": CALCULATION_VERSION,
+    }
+
+
 def run_history(catalog, level="all", status=None, plant=None, offset=0, limit=50):
     predicates = [runs.c.org_id == catalog.settings.org]
     kind = runs.c.payload["kind"].as_string()

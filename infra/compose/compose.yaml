@@ -56,7 +56,7 @@ services:
       app-db: {condition: service_healthy}
       minio: {condition: service_started}
   dashboard:
-    image: solarops-worker:0.4.1-run-navigation-20261023
+    image: solarops-worker:0.4.1-usability-20261023
     user: "50000:0"
     build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
     command: [serve, --host, 0.0.0.0, --port, "8501"]

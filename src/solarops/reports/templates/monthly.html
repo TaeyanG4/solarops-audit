@@ -12,6 +12,10 @@
 <main class="report-sheet">
   <section class="report-band"><div><h1>{{ report.period }} · {{ report.scope }}</h1><p>{{ report.plant_count }}개 발전소 · {{ report.days }}개 일별 파티션 · {{ report.timezone }}</p><span class="report-tag">{{ '월 전체 파티션 확보' if report.status == 'complete' else '부분 기간 보고서' }}</span></div><div class="report-energy"><p>추정 발전량</p><strong>{{ '{:,.2f}'.format(report.estimated_energy_kwh) }}</strong><span>kWh</span><p>유효 전력 × 0.25h · 계량기 실측 전력량과 다릅니다.</p></div></section>
   <p class="report-provenance">{% if report.synthetic and report.public %}공개 자료와 합성 데모를 함께 포함한 보고서입니다. 실제 발전소 실적으로 합산해 해석하지 않습니다.{% elif report.synthetic %}합성 데모 보고서입니다. 실제 발전소의 운영 실적을 나타내지 않습니다.{% else %}BR-PVGen 공개 역사 자료 · 원본 보간 포함 · CC BY 4.0. 실시간 계측 자료가 아닙니다.{% endif %}</p>
+  <section class="panel report-section report-snapshot"><h2>보고서 기준 시점</h2><p>생성 당시 게시된 결과를 보존한 스냅샷입니다. 이후 적재·재처리 결과는 자동으로 반영되지 않습니다.</p>
+    <dl class="definition-list"><div><dt>생성 기준 시각</dt><dd>{{ report.generated_at }} · 자료 조회 시작 기준</dd></div><div><dt>입력 버전</dt><dd>{{ report.sources|map(attribute='source_version')|unique|join(' · ') }}</dd></div><div><dt>계산 버전</dt><dd>{{ report.calculation_version }}</dd></div></dl>
+    <p>같은 기간에 새 자료를 적재하거나 재처리·계산 버전 변경이 있었다면 보고서를 다시 발행해야 반영됩니다. 기존 보고서 ID의 내용은 유지됩니다.</p>
+  </section>
   <dl class="report-metrics">
     <div><dt>관측 슬롯 완전성</dt><dd>{{ '%.1f'|format(report.coverage*100) }}%<p>등록된 일별 파티션 기준</p></dd></div>
     <div><dt>유효값 비율</dt><dd>{{ '%.1f'|format(report.valid_coverage*100) }}%<p>무효값은 추정 에너지 계산에서 제외</p></dd></div>

@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import event, select
 
 from solarops.api.app import create_app
-from solarops.api.readmodels import fleet_overview, run_history
+from solarops.api.readmodels import available_periods, fleet_overview, run_history
 from solarops.config import CALCULATION_VERSION, Settings
 from solarops.storage.postgres import Catalog, active, metrics, put, runs
 from tests.test_pipeline import run
@@ -87,6 +87,16 @@ def test_fleet_weighting_scope_and_one_query(settings):
     assert result["timeline"][2] == {"day": "2024-04-03", "metrics": None}
     assert len(result["timeline"]) == 30
     assert fleet_overview(catalog, "2024-04")["summary"]["plant_count"] == 2
+    # Availability uses the same org/timezone/version/source scope, including zero energy.
+    seed_metric(catalog, "2024-06-01", 0, 0)
+    assert available_periods(catalog, "public")["items"] == [
+        {"period": "2024-06", "partition_count": 1, "plant_count": 1},
+        {"period": "2024-04", "partition_count": 2, "plant_count": 1},
+    ]
+    assert available_periods(catalog, "synthetic")["items"] == [
+        {"period": "2024-04", "partition_count": 1, "plant_count": 1}
+    ]
+    assert available_periods(catalog)["items"][1]["plant_count"] == 2
 
 
 def test_empty_overview_and_api_validation(settings):
@@ -106,6 +116,8 @@ def test_empty_overview_and_api_validation(settings):
     assert client.post("/api/v1/overview?period=2024-04").status_code == 405
     assert client.get("/static/dashboard.js").status_code == 200
     assert client.get("/static/../app.py").status_code == 404
+    assert client.get("/api/v1/periods").json()["items"] == []
+    assert client.get("/api/v1/periods?source_kind=customer").status_code == 422
 
 
 def test_history_latest_first_filters_and_legacy(settings):
@@ -167,11 +179,17 @@ def test_batch_detail_preserves_start_and_links_children(settings, sample):
     )
     assert client.get("/api/v1/runs?status=unknown").status_code == 422
     assert client.get("/api/v1/runs?offset=-1").status_code == 422
+    diagnostic = "/api/v1/runs/" + result["batch_id"] + "/diagnostics"
+    assert client.get(diagnostic).json()["item"]["active_child_partition_count"] == 2
+    assert TestClient(create_app(other)).get(diagnostic).status_code == 404
+    assert client.get(diagnostic + "?older_than_minutes=0").status_code == 422
+    assert client.post(diagnostic).status_code == 405
 
 
 def test_failed_batch_keeps_linked_day_evidence(settings, sample):
     import pytest
 
+    published = run(settings, sample)
     with pytest.raises(RuntimeError, match="INJECTED"):
         run(settings, sample, fail_at="during_commit")
     catalog = Catalog(settings)
@@ -186,4 +204,9 @@ def test_failed_batch_keeps_linked_day_evidence(settings, sample):
             .one()
         )
     assert child["status"] == "failed"
-    assert catalog.snapshot("demo") == []
+    client = TestClient(create_app(settings))
+    evidence = client.get(f"/api/v1/runs/{child['run_id']}/diagnostics").json()
+    assert evidence["item"]["active_partition_count"] == 0
+    assert evidence["active_result_lookup_complete"]
+    assert evidence["active_result"]["run_id"] == published["results"][0]["run_id"]
+    assert catalog.snapshot("demo")[0]["run_id"] == evidence["active_result"]["run_id"]

@@ -956,6 +956,19 @@ footer {
   font-size: 14px;
   color: var(--muted);
 }
+.period-recovery {
+  margin-top: 24px;
+}
+.empty .period-recovery .filters {
+  justify-content: center;
+  text-align: left;
+}
+.run-diagnostics {
+  margin-top: 24px;
+}
+.run-diagnostics .definition-list dd {
+  overflow-wrap: anywhere;
+}
 .empty,
 .error,
 .loading {
