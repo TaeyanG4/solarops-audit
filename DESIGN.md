@@ -289,7 +289,7 @@ Energy Desk는 역사 자료를 읽고 다음 검토 대상을 고르는 작업 
 
 검색 입력은 흰 면·조작부 경계와 보이는 레이블을 사용합니다. placeholder는 레이블을 대체하지 않습니다. 목록 선택은 원래 select의 값과 change 이벤트를 보존하면서 보이는 combobox trigger와 listbox popover로 확장합니다. trigger에 레이블·`aria-expanded`·`aria-controls`를 연결하고 항목에 `aria-selected`·`aria-disabled`를 둡니다.
 
-목록은 방향키·Home/End·Enter/Space·문자 검색을 지원합니다. Escape·Tab과 바깥 클릭은 닫고, 선택 후 trigger로 포커스를 돌립니다. 문서 스크롤·창 크기/visual viewport 변경 때 닫아 trigger와 팝업이 떨어지지 않게 합니다. 목록 내부 스크롤은 열린 채 유지하고 키보드 탐색은 목록만 움직입니다. 팝업은 화면 가장자리 12px을 확보하고 높이를 가용 공간에 맞춰 최대 320px로 제한합니다. 숨긴 원래 select를 별도의 두 번째 탭 정지점으로 만들지 않습니다.
+목록은 방향키·Home/End·Enter/Space·문자 검색을 지원합니다. Escape·Tab과 바깥 클릭은 닫고, 선택 후 trigger로 포커스를 돌립니다. 문서 스크롤·창 크기/visual viewport 변경에도 열린 상태를 유지하며 animation frame마다 trigger 좌표에 다시 붙입니다. trigger가 완전히 화면 밖으로 나가면 닫습니다. 목록 내부 스크롤과 키보드 탐색은 목록만 움직입니다. 팝업은 화면 가장자리 12px을 확보하고 위/아래 가용 공간에 맞춰 최대 320px로 제한합니다. 숨긴 원래 select를 별도의 두 번째 탭 정지점으로 만들지 않습니다. [현재 동작 검증](docs/benchmarks/select-anchor-20261023.md).
 
 월 trigger는 이름 있는 dialog를 엽니다. 최대 너비는 `min(440px, calc(100vw - 32px))`입니다. 연도 입력과 이전·다음 연도, 3열×4행 월 버튼, 취소로 구성하며 연도 범위는 1900–2199입니다. 현재 월은 잉크 바탕·금색 문자와 `aria-pressed`, 방향키는 좌우 1칸·상하 3칸 이동입니다. 열 때 현재 월에 포커스를 두고, 모달 닫힘은 브라우저의 dialog 포커스 복귀를 사용합니다. 월 입력의 값과 change 이벤트는 기존 데이터 계약입니다.
 

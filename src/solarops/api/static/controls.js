@@ -81,21 +81,44 @@
         ),
       );
     }
-    function open() {
-      if (trigger.disabled) return;
+    function position() {
       const rect = trigger.getBoundingClientRect();
-      const width = Math.min(Math.max(rect.width, 220), innerWidth - 24);
+      const viewport = window.visualViewport;
+      const left = viewport?.offsetLeft || 0,
+        top = viewport?.offsetTop || 0,
+        right = left + (viewport?.width || innerWidth),
+        bottom = top + (viewport?.height || innerHeight);
+      // Keep the list attached while scrolling; dismiss only after its control
+      // leaves the visible viewport, rather than leaving an orphaned popup.
+      if (
+        !trigger.isConnected ||
+        rect.bottom <= top ||
+        rect.top >= bottom ||
+        rect.right <= left ||
+        rect.left >= right
+      ) {
+        close();
+        return false;
+      }
+      const width = Math.min(Math.max(rect.width, 220), right - left - 24);
+      const below = Math.max(0, bottom - rect.bottom - 18),
+        above = Math.max(0, rect.top - top - 18);
+      const placeBelow =
+        below >= Math.min(list.scrollHeight || options.length * 46 + 16, 320) ||
+        below >= above;
       list.style.width = `${width}px`;
-      list.style.left = `${Math.max(12, Math.min(rect.left, innerWidth - width - 12))}px`;
-      const below = innerHeight - rect.bottom - 16;
-      list.style.maxHeight = `${Math.min(320, Math.max(below, rect.top - 16))}px`;
-      list.style.top =
-        below >= Math.min(options.length * 46 + 16, 240)
-          ? `${rect.bottom + 6}px`
-          : "auto";
-      list.style.bottom =
-        list.style.top === "auto" ? `${innerHeight - rect.top + 6}px` : "auto";
+      list.style.left = `${Math.max(left + 12, Math.min(rect.left, right - width - 12))}px`;
+      list.style.maxHeight = `${Math.min(320, placeBelow ? below : above)}px`;
+      list.style.top = placeBelow ? `${rect.bottom + 6}px` : "auto";
+      list.style.bottom = placeBelow
+        ? "auto"
+        : `${innerHeight - rect.top + 6}px`;
+      return true;
+    }
+    function open() {
+      if (trigger.disabled || !position()) return;
       list.showPopover();
+      position();
       trigger.setAttribute("aria-expanded", "true");
       highlight(select.selectedIndex);
     }
@@ -187,7 +210,7 @@
     (document.querySelector("main") || document.body).append(list);
     select.after(wrapper);
     select.addEventListener("change", sync);
-    enhanced.set(select, { sync, close, list });
+    enhanced.set(select, { sync, close, list, position });
     sync();
   }
   function syncAll() {
@@ -231,24 +254,34 @@
       });
     }
   }).observe(document.body, { childList: true, subtree: true });
-  window.addEventListener("resize", () => enhanced.forEach((c) => c.close()));
-  // Fixed popovers must not stay behind when their trigger moves. Internal list
-  // scrolling remains open, including keyboard navigation through long lists.
+  let positionFrame = 0;
+  function schedulePosition() {
+    if (positionFrame) return;
+    positionFrame = requestAnimationFrame(() => {
+      positionFrame = 0;
+      for (const control of enhanced.values()) {
+        if (control.list.matches(":popover-open")) control.position();
+      }
+    });
+  }
+  window.addEventListener("resize", schedulePosition);
+  // Re-anchor once per frame. Scrolling the list itself must not reposition it
+  // or change the highlighted option and its internal scroll offset.
   document.addEventListener(
     "scroll",
     (event) => {
       for (const control of enhanced.values()) {
-        if (!control.list.contains(event.target)) control.close();
+        if (
+          control.list.matches(":popover-open") &&
+          !control.list.contains(event.target)
+        )
+          schedulePosition();
       }
     },
     { capture: true, passive: true },
   );
-  window.visualViewport?.addEventListener("resize", () =>
-    enhanced.forEach((c) => c.close()),
-  );
-  window.visualViewport?.addEventListener("scroll", () =>
-    enhanced.forEach((c) => c.close()),
-  );
+  window.visualViewport?.addEventListener("resize", schedulePosition);
+  window.visualViewport?.addEventListener("scroll", schedulePosition);
 
   const period = document.querySelector("#period");
   if (period) {

@@ -22,6 +22,7 @@ def read(url):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--selectors-only", action="store_true")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     binary = os.environ.get("AGENT_BROWSER_BIN") or shutil.which("agent-browser")
@@ -66,6 +67,30 @@ def main():
         audits.append(result["counts"])
         assert result["counts"]["violations"] == 0, result
 
+    def complete():
+        errors = run("errors")
+        assert not errors.get("errors"), errors
+        assert read(base + series_path) == before
+        assert read(base + "api/v1/overview?period=2024-04&source_kind=public") == overview
+        assert read(admin + "api/admin/status")["operation"] == operation
+        (args.output / "summary.json").write_text(
+            json.dumps(
+                {
+                    "scope": "selectors" if args.selectors_only else "interactions",
+                    "commands": len(logs),
+                    "a11y_audits": len(audits),
+                    "violations": 0,
+                    "viewports": [1440, 768, 390],
+                    "api_unchanged": True,
+                    "admin_no_action_submitted": True,
+                    "browser_fixture_only": True,
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+        print((args.output / "summary.json").read_text())
+
     series_path = "api/v1/plants/PS_001/series?day=2024-04-30"
     series_url = base + "?view=series&period=2024-04&source=public&plant=PS_001&day=2024-04-30"
     before = read(base + series_path)
@@ -83,23 +108,52 @@ def main():
                 run("click", selector)
                 check('!!document.querySelector(":popover-open")')
                 # Trigger/list initially meet, with either above or below placement.
-                check(
-                    f"(() => {{ const a=document.querySelector('{selector}').getBoundingClientRect();"
-                    "const b=document.querySelector(':popover-open').getBoundingClientRect();"
-                    "return Math.min(Math.abs(b.top-a.bottom),Math.abs(a.top-b.bottom)) <= 8; })()"
+                attached = (
+                    f"(() => {{ const t=document.querySelector('{selector}');"
+                    "const p=document.querySelector(':popover-open'); if (!p) return false;"
+                    "const a=t.getBoundingClientRect(), b=p.getBoundingClientRect();"
+                    "return t.getAttribute('aria-expanded') === 'true' && "
+                    "Math.min(Math.abs(b.top-a.bottom-6),Math.abs(a.top-b.bottom-6)) < 1 && "
+                    "b.left >= 11 && b.right <= innerWidth-11 && b.top >= 11 && b.bottom <= innerHeight-11; })()"
                 )
+                check(attached)
                 screenshot(f"{page}-open-{width}")
+                initial_y = run("eval", "scrollY")["result"]
                 run("mouse", "move", str(width - 12), "800")
                 run("mouse", "wheel", "180")
+                run("wait", "--fn", f"scrollY > {initial_y + 30}")
+                screenshot(f"{page}-scrolled-{width}")
+                check(attached)
+                audit()
+                run("set", "viewport", str(width), "800", "2")
+                check(attached)
+                run("set", "viewport", str(width), "1000", "2")
+                run("mouse", "wheel", "-90")
+                run("wait", "--fn", f"scrollY < {initial_y + 160}")
+                check(attached)
+                run("press", "Escape")
+                check(f"document.activeElement.matches('{selector}')")
+                check('!document.querySelector(":popover-open")')
+                run("click", selector)
+                run("click", "h1")
+                check('!document.querySelector(":popover-open")')
+                run("click", selector)
+                run("press", "Tab")
+                check('!document.querySelector(":popover-open")')
+                # A control entirely outside the viewport should not leave an orphan.
+                run("click", selector)
+                run(
+                    "eval",
+                    f"window.scrollBy(0, document.querySelector('{selector}').getBoundingClientRect().bottom + 20)",
+                )
                 run("wait", "--fn", '!document.querySelector(":popover-open")')
                 check(
                     f"document.querySelector('{selector}').getAttribute('aria-expanded') === 'false'"
                 )
-                screenshot(f"{page}-scrolled-{width}")
+                run("eval", "scrollTo(0,0)")
                 run("click", selector)
                 run("press", "Escape")
                 check(f"document.activeElement.matches('{selector}')")
-                audit()
 
             # The real 30-day selector must scroll internally and retain keyboard focus.
             run("open", base + "?view=overview&period=2024-04&source=public")
@@ -120,6 +174,9 @@ def main():
             run("press", "Home")
             run("press", "Enter")
             check('document.querySelector(".chart-controls select").value === "0"')
+
+            if args.selectors_only:
+                continue
 
             run("open", series_url)
             run("wait", ".observation-chart [data-series]")
@@ -176,6 +233,10 @@ def main():
             check('document.activeElement.id === "cancel-action"')
             run("press", "Escape")
             check('!document.querySelector("dialog").open')
+
+        if args.selectors_only:
+            complete()
+            return
 
         run("set", "viewport", "1440", "1000", "2")
         run("open", base + "?view=reports&period=2024-04&source=public&plant=PS_001")
@@ -239,27 +300,7 @@ def main():
         run("network", "unroute")
         run("click", ".error button")
         run("wait", ".observation-chart")
-        errors = run("errors")
-        assert not errors.get("errors"), errors
-        assert read(base + series_path) == before
-        assert read(base + "api/v1/overview?period=2024-04&source_kind=public") == overview
-        assert read(admin + "api/admin/status")["operation"] == operation
-        (args.output / "summary.json").write_text(
-            json.dumps(
-                {
-                    "commands": len(logs),
-                    "a11y_audits": len(audits),
-                    "violations": 0,
-                    "viewports": [1440, 768, 390],
-                    "api_unchanged": True,
-                    "admin_no_action_submitted": True,
-                    "browser_fixture_only": True,
-                },
-                indent=2,
-            ),
-            encoding="utf-8",
-        )
-        print((args.output / "summary.json").read_text())
+        complete()
     finally:
         run("close")
 

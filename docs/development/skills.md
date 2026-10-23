@@ -81,3 +81,5 @@ npx --yes skills@1.7.4 add vercel-labs/agent-skills --skill web-design-guideline
 2026-10-23 UI-04에서는 UI UX Pro Max의 dropdown/scroll/keyboard·missing/time series 검색을 적용했습니다. Impeccable의 harden·craft-floor·polish로 상호작용과 실제 캡처를 자체 검수하고, Web Design Guidelines로 직접 링크·탭 URL·포커스·키보드 스크롤을 확인했습니다. 별도 에이전트 리뷰는 수행하지 않았습니다.
 
 Agent Browser 회귀는 1440/768/390px, 303명령·axe18회 위반0입니다. Impeccable detector는 27건(권고26·경고1)이었으며 정적 HTML의 CSS 경로를 해석하지 못한 제목 크기 경고는 실제 computed style과 대조했습니다. 이전 작업의 detector 결과를 이번 결과로 재사용하지 않습니다. [수정·검수·한계](../benchmarks/interactions-20261023.md) · [실제 캡처 출처](../portfolio/images/interactions-20261023/README.md).
+
+UI-05에서는 사용자가 스크롤 닫힘을 거절해 열림 유지로 재수정했습니다. UI UX Pro Max의 키보드·포커스 가이드와 Impeccable harden·craft-floor의 상태·경계 검수를 적용했고, Agent Browser269명령·3너비·열린 목록 axe6회 위반0을 확인했습니다. controls.js만 검사한 detector는 `[]`입니다. [기준 구현 실패 → 수정 후 통과와 한계](../benchmarks/select-anchor-20261023.md). Web Design Guidelines는 이번 좁은 수정에서 재실행하지 않았습니다.
