@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import os
+import secrets as random_secrets
 import subprocess
 import time
 import uuid
@@ -39,7 +40,16 @@ def remap(value, old_bucket, new_bucket):
     return value
 
 
-def run_drill(output):
+def run_drill(output, isolated_target=False):
+    owned = []
+    try:
+        return _run_drill(output, isolated_target, owned)
+    finally:
+        if owned:
+            subprocess.run(["docker", "stop", *owned], check=True, capture_output=True)
+
+
+def _run_drill(output, isolated_target, target_containers):
     started = time.monotonic()
     output = output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -62,31 +72,118 @@ def run_drill(output):
         f"restore-{suffix}-{kind}" for kind in ("original", "restored")
     )
     org = "restore-" + suffix
-    admin = create_engine(base, isolation_level="AUTOCOMMIT")
-    try:
-        with admin.connect() as conn:
-            # Names are generated internally, never accepted from command-line input.
-            conn.execute(text(f'CREATE DATABASE "{original_db}"'))
-            conn.execute(text(f'CREATE DATABASE "{restored_db}"'))
-    finally:
-        admin.dispose()
+    target_base = base
+    target_endpoint = "http://127.0.0.1:59000"
+    target_credentials = secrets
+    if isolated_target:
+        target_credentials = {
+            "APP_DB_PASSWORD": random_secrets.token_hex(24),
+            "MINIO_ROOT_USER": "restore-" + suffix,
+            "MINIO_ROOT_PASSWORD": random_secrets.token_hex(24),
+        }
+        pg_name, s3_name = "solarops-restore-pg-" + suffix, "solarops-restore-s3-" + suffix
+        for name, port, image, env, command in (
+            (
+                pg_name,
+                5432,
+                "postgres:16.10-bookworm",
+                {
+                    "POSTGRES_USER": "solarops",
+                    "POSTGRES_DB": "solarops",
+                    "POSTGRES_PASSWORD": target_credentials["APP_DB_PASSWORD"],
+                },
+                [],
+            ),
+            (
+                s3_name,
+                9000,
+                "solarops-minio:2025-10-15",
+                {
+                    "MINIO_ROOT_USER": target_credentials["MINIO_ROOT_USER"],
+                    "MINIO_ROOT_PASSWORD": target_credentials["MINIO_ROOT_PASSWORD"],
+                },
+                ["server", "/data"],
+            ),
+        ):
+            subprocess.run(
+                [
+                    "docker",
+                    "run",
+                    "-d",
+                    "--name",
+                    name,
+                    "--cpus=1",
+                    "--memory=768m",
+                    "-p",
+                    f"127.0.0.1::{port}",
+                    *[value for key in env for value in ("-e", key)],
+                    image,
+                    *command,
+                ],
+                env={**os.environ, **env},
+                check=True,
+                capture_output=True,
+            )
+            target_containers.append(name)
+            # Persist owned resource names immediately, even if a later readiness check fails.
+            (output / "target-containers.json").write_text(json.dumps(target_containers))
+        pg_port = int(
+            subprocess.check_output(["docker", "port", pg_name, "5432/tcp"], text=True)
+            .strip()
+            .rsplit(":", 1)[1]
+        )
+        s3_port = int(
+            subprocess.check_output(["docker", "port", s3_name, "9000/tcp"], text=True)
+            .strip()
+            .rsplit(":", 1)[1]
+        )
+        target_base = base.set(port=pg_port, password=target_credentials["APP_DB_PASSWORD"])
+        target_endpoint = f"http://127.0.0.1:{s3_port}"
+        from urllib.request import urlopen
+
+        for _ in range(60):
+            try:
+                ready = (
+                    subprocess.run(
+                        ["docker", "exec", pg_name, "pg_isready", "-U", "solarops"],
+                        capture_output=True,
+                        check=False,
+                    ).returncode
+                    == 0
+                )
+                with urlopen(target_endpoint + "/minio/health/ready", timeout=2) as response:
+                    if ready and response.status == 200:
+                        break
+            except OSError:
+                pass
+            time.sleep(1)
+        else:
+            raise RuntimeError("Isolated target not ready; owned containers retained in output")
+    for url, database in ((base, original_db), (target_base, restored_db)):
+        admin = create_engine(url, isolation_level="AUTOCOMMIT")
+        try:
+            with admin.connect() as conn:
+                # Names are generated internally, never accepted from command-line input.
+                conn.execute(text(f'CREATE DATABASE "{database}"'))
+        finally:
+            admin.dispose()
     os.environ.update(
         SOLAROPS_S3_ACCESS_KEY=secrets["MINIO_ROOT_USER"],
         SOLAROPS_S3_SECRET_KEY=secrets["MINIO_ROOT_PASSWORD"],
         SOLAROPS_S3_BUCKET=original_bucket,
     )
 
-    def config(name, folder):
+    def config(name, folder, url=base, endpoint="http://127.0.0.1:59000"):
         return Settings(
             root=output / folder,
-            database_url=base.set(database=name).render_as_string(hide_password=False),
-            s3_endpoint="http://127.0.0.1:59000",
+            database_url=url.set(database=name).render_as_string(hide_password=False),
+            s3_endpoint=endpoint,
             org=org,
             timezone="UTC",
         )
 
     original = config(original_db, "original")
-    restored = config(restored_db, "restored")
+    restored = config(restored_db, "restored", target_base, target_endpoint)
     paths = generate(original.root / "fixtures")
 
     def process(settings, inputs):
@@ -142,12 +239,13 @@ def run_drill(output):
     store = ObjectStore(original)
     client = store.client
 
-    def objects(bucket):
+    def objects(bucket, connection=client):
         result = {}
-        for page in client.get_paginator("list_objects_v2").paginate(Bucket=bucket):
+        for page in connection.get_paginator("list_objects_v2").paginate(Bucket=bucket):
             for row in page.get("Contents", []):
-                response = client.get_object(Bucket=bucket, Key=row["Key"])
+                response = connection.get_object(Bucket=bucket, Key=row["Key"])
                 body = response["Body"].read()
+                response["Body"].close()
                 result[row["Key"]] = {"sha256": digest(body), "size": len(body)}
         return result
 
@@ -181,6 +279,8 @@ def run_drill(output):
             out.write(body)
     assert objects(original_bucket) == inventory
     manifest = {
+        "target_containers": target_containers,
+        "isolated_target": isolated_target,
         "database_dump_sha256": checksum(dump),
         "objects": inventory,
         "original_database": original_db,
@@ -208,11 +308,16 @@ def run_drill(output):
     (output / "backup-manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
     restore_started = time.monotonic()
-    os.environ["SOLAROPS_S3_BUCKET"] = restored_bucket
-    ObjectStore(restored)  # Creates the new isolated bucket.
+    os.environ.update(
+        SOLAROPS_S3_BUCKET=restored_bucket,
+        SOLAROPS_S3_ACCESS_KEY=target_credentials["MINIO_ROOT_USER"],
+        SOLAROPS_S3_SECRET_KEY=target_credentials["MINIO_ROOT_PASSWORD"],
+    )
+    target_client = ObjectStore(restored).client
+    restore_command = ["docker", "exec", "-i", target_containers[0]] if isolated_target else compose
     with dump.open("rb") as inp:
         subprocess.run(
-            compose
+            restore_command
             + [
                 "pg_restore",
                 "-U",
@@ -230,11 +335,12 @@ def run_drill(output):
     for key, info in inventory.items():
         path = output / "objects" / key
         assert checksum(path) == info["sha256"]
-        client.upload_file(
+        target_client.upload_file(
             str(path), restored_bucket, key, ExtraArgs={"Metadata": {"sha256": info["sha256"]}}
         )
-    assert objects(restored_bucket) == inventory
+    assert objects(restored_bucket, target_client) == inventory
     catalog = Catalog(restored)
+    restored.root.mkdir(parents=True, exist_ok=False)
     with catalog.engine.begin() as conn:
         for table in metadata.sorted_tables:
             for row in conn.execute(select(table)).mappings().all():
@@ -248,9 +354,9 @@ def run_drill(output):
             info = row["payload"]
             prefix = f"s3://{restored_bucket}/"
             assert info["raw_uri"].startswith(prefix)
-            data = client.get_object(Bucket=restored_bucket, Key=info["raw_uri"][len(prefix) :])[
-                "Body"
-            ].read()
+            data = target_client.get_object(
+                Bucket=restored_bucket, Key=info["raw_uri"][len(prefix) :]
+            )["Body"].read()
             assert digest(data) == row["sha256"]
             local = restored.root / info["original_filename"]
             with local.open("xb") as out:
@@ -278,7 +384,11 @@ def run_drill(output):
     assert checksum(dump) == manifest["database_dump_sha256"]
     result = {
         **{k: v for k, v in manifest.items() if k != "objects"},
-        "scope": "quiesced synthetic logical restore; separate DBs/buckets on the same local servers",
+        "scope": (
+            "quiesced synthetic restore into separate Postgres/MinIO containers on the same host"
+            if isolated_target
+            else "quiesced synthetic logical restore; separate DBs/buckets on the same local servers"
+        ),
         "active_partitions": len(expected),
         "object_count": len(inventory),
         "restore_through_api_verification_seconds": restore_seconds,
@@ -296,4 +406,6 @@ def run_drill(output):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    print(json.dumps(run_drill(parser.parse_args().output), indent=2))
+    parser.add_argument("--isolated-target", action="store_true")
+    args = parser.parse_args()
+    print(json.dumps(run_drill(args.output, args.isolated_target), indent=2))

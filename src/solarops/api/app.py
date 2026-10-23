@@ -18,8 +18,9 @@ from solarops.api.readmodels import available_periods, fleet_overview, run_histo
 from solarops.config import Settings
 from solarops.contracts.dates import date_bounds, month_bounds, next_day
 from solarops.diagnostics import inspect_runs
+from solarops.reports.freshness import compare_report
 from solarops.storage.minio import ObjectStore
-from solarops.storage.postgres import Catalog, active_reports, metadata, plants, reports, runs
+from solarops.storage.postgres import Catalog, active_reports, metadata, now, plants, reports, runs
 
 PlantId = Annotated[str, ApiPath(pattern=r"^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$")]
 
@@ -295,6 +296,27 @@ def create_app(settings=None):
         if not row:
             raise HTTPException(404, "Report not found")
         return row["payload"]
+
+    @app.get("/api/v1/reports/{report_id}/freshness")
+    def report_freshness(report_id: UUID, response: Response):
+        info = report_info(report_id)  # Organization boundary applies before reading evidence.
+        response.headers["Cache-Control"] = "no-store"
+        try:
+            manifest = json.loads(
+                artifact(
+                    info["artifacts"]["manifest.json"],
+                    info.get("artifact_sha256", {}).get("manifest.json"),
+                )
+            )
+            if manifest["report_id"] != str(report_id):
+                raise ValueError("Report identity mismatch")
+            return compare_report(catalog, manifest)
+        except (HTTPException, SQLAlchemyError, KeyError, ValueError, TypeError):
+            return {
+                "status": "unavailable",
+                "reason": "evidence_unavailable",
+                "checked_at": now(),
+            }
 
     @app.get("/reports/{report_id}/{filename}")
     def report_file(report_id: UUID, filename: str):

@@ -17,6 +17,14 @@ uv build --wheel --out-dir artifacts/dist
 
 Node는 JS 문법 검사에만 필요합니다. 오프라인 테스트와 합성 데모는 외부 데이터 다운로드를 하지 않습니다. PostgreSQL·MinIO 통합 검사는 Compose 실행 후 `uv run python scripts/validation/service-test.py`로 별도 수행합니다. 실행/재시도/KPO 검사는 [DAG 안내](docs/runbooks/dags.md)를 따릅니다.
 
+## 선택형 서비스 CI
+
+[서비스 워크플로](.github/workflows/services.yaml)는 `workflow_dispatch`로만 실행하며 기존 통합 검사 5건을 재사용합니다. 일반 push/PR의 오프라인 검사에 컨테이너 빌드를 추가하지 않습니다. 공개 데이터 다운로드는 없습니다.
+
+신뢰하는 커밋에 대해 Linux x64의 **일회성 self-hosted 실행기**를 `solarops-integration` 라벨과 `--ephemeral` 옵션으로 등록한 후 `gh workflow run services.yaml --ref main`을 실행합니다. 실행기 등록은 GitHub 저장소 Settings → Actions → Runners의 최신 설치 안내를 따르고 등록 토큰은 저장소나 로그에 기록하지 않습니다. 이 작업은 로컬 Docker·네트워크·디스크를 사용하고 GitHub 호스팅 실행 분을 요청하지 않습니다.
+
+워크플로는 고정 버전 MinIO를 빌드하고 임의 포트·무작위 자격증명의 별도 PostgreSQL/MinIO 컨테이너를 만듭니다. 각 컨테이너는 CPU1개와 메모리512/768MiB로 제한합니다. 종료 시 이 실행의 컨테이너만 중지하고 데이터는 남깁니다. 실행기는 한 작업 후 자동 등록 해제됩니다. 기존 앱 `.env`나 사용자 DB는 사용하지 않으며 JUnit 결과만 7일간 업로드합니다. 실행기가 없으면 대기하므로 재실행 전에 준비 상태를 확인합니다.
+
 ## 변경 원칙
 
 - 계산식·품질 규칙·분모·시간대 해석을 바꾸면 `CALCULATION_VERSION`과 회귀 fixture, 재처리 범위를 함께 검토합니다. API 오류 처리나 문서 정리는 계산 결과를 변경하지 않습니다.

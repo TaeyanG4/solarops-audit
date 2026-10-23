@@ -1002,12 +1002,18 @@ async function reports(signal) {
     ),
     downloads,
   );
-  const manifest = await get(`/reports/${id}/manifest.json`, signal);
-  root.append(toolbar, reportDocument(manifest));
+  const [manifest, freshness] = await Promise.all([
+    get(`/reports/${id}/manifest.json`, signal),
+    get(`/api/v1/reports/${id}/freshness`, signal).catch((error) => {
+      if (signal.aborted) throw error;
+      return { status: "unavailable", reason: "request_failed" };
+    }),
+  ]);
+  root.append(toolbar, reportDocument(manifest, freshness));
   return root;
 }
 
-function reportDocument(report) {
+function reportDocument(report, freshness) {
   const sheet = node("article", undefined, "report-sheet");
   sheet.setAttribute(
     "aria-label",
@@ -1051,6 +1057,28 @@ function reportDocument(report) {
     "생성 당시 게시된 결과를 보존한 스냅샷입니다. 이후 적재·재처리 결과는 자동으로 반영되지 않습니다.",
   );
   snapshot.classList.add("report-section", "report-snapshot");
+  const freshnessLabels = {
+    unchanged: "발행 당시와 현재 게시 근거가 같습니다",
+    changed: "보고서 발행 이후 게시 근거가 변경됐습니다",
+    unavailable: "현재 자료와 비교할 수 없습니다",
+  };
+  const freshnessNote = node(
+    "p",
+    freshnessLabels[freshness.status] || freshnessLabels.unavailable,
+    "report-freshness",
+  );
+  freshnessNote.dataset.state = freshness.status;
+  freshnessNote.setAttribute("role", "status");
+  freshnessNote.setAttribute("aria-atomic", "true");
+  snapshot.append(freshnessNote);
+  if (freshness.status === "changed")
+    snapshot.append(node("p",
+      "현재 자료를 반영하려면 운영자가 보고서를 다시 발행해야 합니다. 재처리로 근거만 달라진 경우도 있어 수치 변경이나 고장을 뜻하지 않습니다.",
+      "subtext"));
+  else if (freshness.reason === "scope_not_recorded")
+    snapshot.append(node("p", "이전 보고서에는 생성 당시의 자료 선택 범위가 기록되지 않았습니다. 기존 보고서는 그대로 열람할 수 있습니다.", "subtext"));
+  else if (freshness.status === "unavailable")
+    snapshot.append(node("p", "비교 근거를 확인하지 못했습니다. 저장소 상태를 확인한 뒤 새로고침해 주세요.", "subtext"));
   const inputVersions = [
     ...new Set(
       report.sources.map((source) => source.source_version || "기록 없음"),
@@ -1061,6 +1089,7 @@ function reportDocument(report) {
       ["생성 기준 시각", `${time(report.generated_at)} · 자료 조회 시작 기준`],
       ["입력 버전", inputVersions.join(" · ") || "기록 없음"],
       ["계산 버전", report.calculation_version || "기록 없음"],
+      ["현재 자료 비교", freshness.checked_at ? `${time(freshness.checked_at)} 조회 기준 · 실시간 감시 아님` : "조회하지 못함"],
     ]),
     node(
       "p",

@@ -127,6 +127,10 @@ def test_org_isolation(settings, sample):
 
 
 def test_report_api_and_lineage(settings, sample):
+    from copy import deepcopy
+
+    from solarops.reports.freshness import compare_report
+
     run(settings, sample)
     result = build_report(settings, "2024-04")
     assert result["status"] == "partial_period"
@@ -144,6 +148,51 @@ def test_report_api_and_lineage(settings, sample):
         root=settings.root, database_url=settings.database_url, org="other", s3_endpoint=None
     )
     assert TestClient(create_app(other)).get(path + "manifest.json").status_code == 404
+    freshness_path = "/api/v1/reports/" + result["report_id"] + "/freshness"
+    current = client.get(freshness_path)
+    assert current.json()["status"] == "unchanged"
+    assert current.headers["cache-control"] == "no-store"
+    assert TestClient(create_app(other)).get(freshness_path).status_code == 404
+    assert client.post(freshness_path).status_code == 405
+    original_bytes = client.get(path + "manifest.json").content
+    manifest = json.loads(original_bytes)
+    catalog = Catalog(settings, read_only=True)
+    legacy = deepcopy(manifest)
+    legacy.pop("selection")
+    assert compare_report(catalog, legacy)["reason"] == "scope_not_recorded"
+    old_version = dict(manifest, calculation_version="retired")
+    assert compare_report(catalog, old_version)["reason"] == "calculation_version_changed"
+    assert compare_report(catalog, dict(manifest, timezone="Asia/Seoul"))["status"] == "changed"
+    assert compare_report(catalog, dict(manifest, org_id="other"))["status"] == "unavailable"
+    scoped = build_report(settings, "2024-04", "DEMO_01", "synthetic")
+    scoped_path = "/api/v1/reports/" + scoped["report_id"] + "/freshness"
+    baseline = catalog.snapshot(settings.org)[0]
+    # Other plant, period, source, timezone and calculation publications are excluded.
+    with Catalog(settings).engine.begin() as conn:
+        for change in (
+            {"plant_id": "OTHER"},
+            {"partition_id": "2024-06-01"},
+            {"partition_id": "2024-04-08", "source_kind": "public"},
+            {"report_timezone": "Asia/Seoul"},
+            {"calculation_version": "retired"},
+        ):
+            payload = {**baseline["payload"], **change}
+            if "source_kind" in change:
+                payload["source_objects"] = [{"source_kind": change["source_kind"]}]
+            key = {column.name: payload[column.name] for column in active.primary_key}
+            put(conn, active, key, payload, run_id=baseline["run_id"])
+    assert client.get(scoped_path).json()["status"] == "unchanged"
+    catalog.engine.dispose()
+    # A differently scoped publication must not make this report stale.
+    run(other, sample, start="2024-04-01", end="2024-04-02")
+    assert client.get(scoped_path).json()["status"] == "unchanged"
+    # Reprocessing changes publication evidence even when energy is identical.
+    run(settings, sample, start="2024-04-01", end="2024-04-02")
+    changed = client.get(freshness_path).json()
+    assert changed["status"] == "changed" and changed["reason"] == "publication_changed"
+    assert changed["report_partition_count"] == 7 and changed["current_partition_count"] == 9
+    assert client.get(scoped_path).json()["current_partition_count"] == 7
+    assert client.get(path + "manifest.json").content == original_bytes
 
 
 def test_unknown_plant_and_malformed_timestamp_block(settings, sample):

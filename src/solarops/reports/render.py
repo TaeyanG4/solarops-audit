@@ -50,6 +50,7 @@ def build_report(settings, period, plant=None, source_kind=None):
         "org_id": settings.org,
         "period": period,
         "scope": plant or ("all-" + source_kind if source_kind else "all"),
+        "selection": {"plant_id": plant, "source_kind": source_kind},
         "generated_at": generated_at,
         "timezone": settings.timezone,
         "calculation_version": CALCULATION_VERSION,

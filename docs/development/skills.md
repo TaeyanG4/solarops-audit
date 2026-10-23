@@ -95,3 +95,9 @@ npx --yes skills@1.7.4 add vercel-labs/agent-skills --skill web-design-guideline
 Agent Browser 회귀는 1440/768/390px, 303명령·axe18회 위반0입니다. Impeccable detector는 27건(권고26·경고1)이었으며 정적 HTML의 CSS 경로를 해석하지 못한 제목 크기 경고는 실제 computed style과 대조했습니다. 이전 작업의 detector 결과를 이번 결과로 재사용하지 않습니다. [수정·검수·한계](../benchmarks/interactions-20261023.md) · [실제 캡처 출처](../portfolio/images/interactions-20261023/README.md).
 
 UI-05에서는 사용자가 스크롤 닫힘을 거절해 열림 유지로 재수정했습니다. UI UX Pro Max의 키보드·포커스 가이드와 Impeccable harden·craft-floor의 상태·경계 검수를 적용했고, Agent Browser269명령·3너비·열린 목록 axe6회 위반0을 확인했습니다. controls.js만 검사한 detector는 `[]`입니다. [기준 구현 실패 → 수정 후 통과와 한계](../benchmarks/select-anchor-20261023.md). Web Design Guidelines는 이번 좁은 수정에서 재실행하지 않았습니다.
+
+## 보고서 게시 근거 비교
+
+2026-10-23 TECH-02에서는 UI UX Pro Max의 `live status screen reader` 검색에서 contextual live badge 지침을 확인해, 색과16px 문구·비교 기준 시각을 함께 표시하고 하나의 atomic status 영역을 사용했습니다. 최초 `status feedback stale data` 검색은 부적합한 결과라 적용하지 않았습니다. 기존 DESIGN.md의 색·타이포그래피를 유지했습니다.
+
+Agent Browser로 실제 공개 자료의 동일 상태와 별도 합성 재처리의 변경 상태를 열었습니다.1440/768/390px의 넘침0, 최종 모바일 두 상태의 보고서 영역 axe 위반0·JS오류0을 확인했습니다. DPR2 원본 [화면과 출처](../portfolio/images/technical-20261023/README.md)를 보존했습니다. 백엔드·CI·복원 작업에는 UI 스킬을 적용하지 않았고, 이번 좁은 변경에서 Impeccable/Web Design Guidelines·별도 에이전트 검수를 수행한 것으로 기록하지 않습니다.

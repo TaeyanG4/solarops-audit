@@ -90,6 +90,8 @@ def test_missing_report_artifact_is_a_controlled_response(settings, sample):
     response = client.get(f"/reports/{report['report_id']}/report.html")
     assert response.status_code == 404
     assert "missing.html" not in response.text
+    freshness = client.get(f"/api/v1/reports/{report['report_id']}/freshness")
+    assert freshness.status_code == 200 and freshness.json()["status"] == "unavailable"
 
 
 def test_read_api_does_not_initialize_missing_catalog(settings):

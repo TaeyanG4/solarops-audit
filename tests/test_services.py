@@ -12,6 +12,7 @@ from sqlalchemy.exc import DBAPIError
 from solarops.api.app import create_app
 from solarops.config import Settings
 from solarops.fixtures import generate
+from solarops.reports.render import build_report
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog
 from tests.test_pipeline import run
@@ -60,6 +61,14 @@ def test_postgres_minio_transaction(sample, tmp_path):
     read_catalog.engine.dispose()
     assert client.get("/ready").status_code == 200
     assert client.get("/api/v1/plants/DEMO_01/series?day=2024-04-01").status_code == 200
+    report = build_report(settings, "2024-04", "DEMO_01", "synthetic")
+    freshness = f"/api/v1/reports/{report['report_id']}/freshness"
+    artifact = f"/reports/{report['report_id']}/manifest.json"
+    original_report = client.get(artifact).content
+    assert client.get(freshness).json()["status"] == "unchanged"
+    run(settings, sample, start="2024-04-01", end="2024-04-02")
+    assert client.get(freshness).json()["status"] == "changed"
+    assert client.get(artifact).content == original_report
 
 
 @pytest.mark.services

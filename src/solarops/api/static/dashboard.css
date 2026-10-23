@@ -905,6 +905,24 @@ td strong {
   font-size: 14px;
   line-height: 1.8;
 }
+.report-freshness {
+  padding: 14px 16px;
+  margin: 20px 0;
+  border-radius: 8px;
+  background: var(--subtle);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.6;
+}
+.report-freshness[data-state="unchanged"] {
+  background: var(--green-soft);
+  color: var(--green-dark);
+}
+.report-freshness[data-state="changed"] {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
 footer {
   border-top: 1px solid var(--line);
   padding: 24px 0;

@@ -12,6 +12,7 @@ from sqlalchemy import (
     Table,
     UniqueConstraint,
     create_engine,
+    func,
     select,
     text,
 )
@@ -50,6 +51,16 @@ runs = table(
 )
 run_plant_index = Index(
     "ix_pipeline_run_org_plant", runs.c.org_id, runs.c.payload["plant_id"].as_string()
+).ddl_if(dialect="postgresql")
+run_updated_index = Index(
+    "ix_pipeline_run_org_updated",
+    runs.c.org_id,
+    func.coalesce(
+        runs.c.payload["finished_at"].as_string(),
+        runs.c.payload["started_at"].as_string(),
+        "",
+    ).desc(),
+    runs.c.run_id.desc(),
 ).ddl_if(dialect="postgresql")
 active = table(
     "active_partition_manifest",
@@ -135,6 +146,7 @@ class Catalog:
         if self.engine.dialect.name == "postgresql":
             # create_all does not add indexes to tables that already exist.
             run_plant_index.create(self.engine, checkfirst=True)
+            run_updated_index.create(self.engine, checkfirst=True)
 
     def snapshot(self, org, start=None, end=None, plant=None, source_kind=None):
         # One SELECT is a consistent statement snapshot even during a concurrent commit.

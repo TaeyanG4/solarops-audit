@@ -1,0 +1,442 @@
+{
+  "scope": "synthetic read-only run history on same host; closed-loop bounded concurrency, no SLO claim",
+  "before": [
+    {
+      "rows": 25000,
+      "concurrency": 1,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 19.35,
+      "p95_ms": 31.69,
+      "errors": 0,
+      "seconds": 0.75
+    },
+    {
+      "rows": 25000,
+      "concurrency": 1,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 112.55,
+      "p95_ms": 199.27,
+      "errors": 0,
+      "seconds": 5.03
+    },
+    {
+      "rows": 25000,
+      "concurrency": 1,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 185.28,
+      "p95_ms": 193.21,
+      "errors": 0,
+      "seconds": 6.92
+    },
+    {
+      "rows": 25000,
+      "concurrency": 4,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 12.86,
+      "p95_ms": 32.31,
+      "errors": 0,
+      "seconds": 0.17
+    },
+    {
+      "rows": 25000,
+      "concurrency": 4,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 397.73,
+      "p95_ms": 486.63,
+      "errors": 0,
+      "seconds": 4.18
+    },
+    {
+      "rows": 25000,
+      "concurrency": 4,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 877.16,
+      "p95_ms": 1069.84,
+      "errors": 0,
+      "seconds": 9.13
+    },
+    {
+      "rows": 25000,
+      "concurrency": 8,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 32.81,
+      "p95_ms": 46.63,
+      "errors": 0,
+      "seconds": 0.17
+    },
+    {
+      "rows": 25000,
+      "concurrency": 8,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 779.9,
+      "p95_ms": 967.93,
+      "errors": 0,
+      "seconds": 4.07
+    },
+    {
+      "rows": 25000,
+      "concurrency": 8,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 1363.98,
+      "p95_ms": 2570.17,
+      "errors": 0,
+      "seconds": 8.41
+    },
+    {
+      "rows": 100000,
+      "concurrency": 1,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 8.57,
+      "p95_ms": 31.39,
+      "errors": 0,
+      "seconds": 0.63
+    },
+    {
+      "rows": 100000,
+      "concurrency": 1,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 395.12,
+      "p95_ms": 478.7,
+      "errors": 0,
+      "seconds": 16.37
+    },
+    {
+      "rows": 100000,
+      "concurrency": 1,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 664.51,
+      "p95_ms": 758.93,
+      "errors": 0,
+      "seconds": 26.68
+    },
+    {
+      "rows": 100000,
+      "concurrency": 4,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 19.52,
+      "p95_ms": 66.68,
+      "errors": 0,
+      "seconds": 0.26
+    },
+    {
+      "rows": 100000,
+      "concurrency": 4,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 1748.46,
+      "p95_ms": 2331.82,
+      "errors": 0,
+      "seconds": 17.26
+    },
+    {
+      "rows": 100000,
+      "concurrency": 4,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 3969.67,
+      "p95_ms": 6409.31,
+      "errors": 0,
+      "seconds": 43.97
+    },
+    {
+      "rows": 100000,
+      "concurrency": 8,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 46.08,
+      "p95_ms": 96.71,
+      "errors": 0,
+      "seconds": 0.27
+    },
+    {
+      "rows": 100000,
+      "concurrency": 8,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 2774.42,
+      "p95_ms": 5651.75,
+      "errors": 0,
+      "seconds": 17.39
+    },
+    {
+      "rows": 100000,
+      "concurrency": 8,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 7624.9,
+      "p95_ms": 18956.41,
+      "errors": 0,
+      "seconds": 44.6
+    }
+  ],
+  "after": [
+    {
+      "rows": 100000,
+      "concurrency": 1,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 29.27,
+      "p95_ms": 32.4,
+      "errors": 0
+    },
+    {
+      "rows": 100000,
+      "concurrency": 1,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 109.57,
+      "p95_ms": 183.35,
+      "errors": 0
+    },
+    {
+      "rows": 100000,
+      "concurrency": 1,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 112.8,
+      "p95_ms": 175.66,
+      "errors": 0
+    },
+    {
+      "rows": 100000,
+      "concurrency": 4,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 18.07,
+      "p95_ms": 34.99,
+      "errors": 0
+    },
+    {
+      "rows": 100000,
+      "concurrency": 4,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 488.52,
+      "p95_ms": 680.74,
+      "errors": 0
+    },
+    {
+      "rows": 100000,
+      "concurrency": 4,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 576.26,
+      "p95_ms": 678.7,
+      "errors": 0
+    },
+    {
+      "rows": 100000,
+      "concurrency": 8,
+      "scenario": "plant",
+      "requests": 40,
+      "p50_ms": 31.23,
+      "p95_ms": 63.41,
+      "errors": 0
+    },
+    {
+      "rows": 100000,
+      "concurrency": 8,
+      "scenario": "all-first",
+      "requests": 40,
+      "p50_ms": 876.05,
+      "p95_ms": 1751.63,
+      "errors": 0
+    },
+    {
+      "rows": 100000,
+      "concurrency": 8,
+      "scenario": "all-deep",
+      "requests": 40,
+      "p50_ms": 966.94,
+      "p95_ms": 2045.67,
+      "errors": 0
+    }
+  ],
+  "before_resources": {
+    "samples": 77,
+    "containers": {
+      "postgres": {
+        "max_cpu_percent": 114.77,
+        "max_memory_mib": 513.2
+      },
+      "api": {
+        "max_cpu_percent": 14.84,
+        "max_memory_mib": 89.35
+      }
+    },
+    "max_connections_including_observer": 16
+  },
+  "after_resources": {
+    "samples": 14,
+    "containers": {
+      "postgres": {
+        "max_cpu_percent": 105.84,
+        "max_memory_mib": 182.1
+      },
+      "api": {
+        "max_cpu_percent": 9.18,
+        "max_memory_mib": 89.38
+      }
+    },
+    "max_connections_including_observer": 17
+  },
+  "conditions": {
+    "synthetic": true,
+    "rows": [
+      25000,
+      100000
+    ],
+    "concurrency": [
+      1,
+      4,
+      8
+    ],
+    "requests_per_case": 40,
+    "warmups": 2,
+    "cpu_limit_each": 1,
+    "memory_limit_each": "768m",
+    "image": "solarops-worker:0.4.1-technical-20261023",
+    "image_id": "sha256:f1149e1669868e95ed7b3418a88f11ce513b70d850bedef7dd4e77b3d9021c14",
+    "scope": "read-only run history, fixed closed-loop concurrency, isolated DB; no ingestion, remote host, or public dataset"
+  },
+  "isolated_index": {
+    "index_build_ms": 597.7877000113949,
+    "bytes": 10485760,
+    "data_sha256_before": "7d004bd240df7637f059be2a8cdc44102fe503d0415dda799925593fcd499972",
+    "data_sha256_after": "7d004bd240df7637f059be2a8cdc44102fe503d0415dda799925593fcd499972"
+  },
+  "live_index": {
+    "before": {
+      "active_partition_manifest": {
+        "rows": 25281,
+        "sha256": "14589a87d301c9ac21ebc8e9648e3fa58b0021455571886f631b1b3c9989a055"
+      },
+      "active_report_manifest": {
+        "rows": 10,
+        "sha256": "2c7d8790a305290ad8a3970c588b4374ddc0ff469ff6124e131affd72ec9fa63"
+      },
+      "anomaly_event": {
+        "rows": 25494,
+        "sha256": "5a556f1ecb1186995b65035e5a411abb16d0ded4c5bea6f8022f7a9ef27778c6"
+      },
+      "daily_plant_metric": {
+        "rows": 25494,
+        "sha256": "fbc6ef47f0e2af52dd1869fabb2dd17a00454f1b7240b4cba9ee27601787239b"
+      },
+      "dim_plant": {
+        "rows": 73,
+        "sha256": "05b412604d565bd0b095912bdc5b703c3f3b0580d39cb9a531d7d7ace8aa464d"
+      },
+      "dq_issue": {
+        "rows": 25494,
+        "sha256": "857cedf25b70543cf8c9d399977a9a8dba00ff75e708597b7f555fe979f098c6"
+      },
+      "pipeline_run": {
+        "rows": 25694,
+        "sha256": "dab008a05f099c07fc08f38bcd9be64eb20c06dceabf15f4b7c66b48cb1755fe"
+      },
+      "report_run": {
+        "rows": 58,
+        "sha256": "b332356d82f3bc2dc304b7f6645b8561d1eb0e5f167c1a9d97a416ecf86c151a"
+      },
+      "source_object": {
+        "rows": 173,
+        "sha256": "da61c3294f5c6c76b93252c425b41ea153ac4a56c125ddb4e52d5aefde1e0a2f"
+      },
+      "source_version": {
+        "rows": 73,
+        "sha256": "6f8657880cd94dc6b348e703abc56f7edde7c65d67083b2689a6a945b7f5f18e"
+      }
+    },
+    "after": {
+      "active_partition_manifest": {
+        "rows": 25281,
+        "sha256": "14589a87d301c9ac21ebc8e9648e3fa58b0021455571886f631b1b3c9989a055"
+      },
+      "active_report_manifest": {
+        "rows": 10,
+        "sha256": "2c7d8790a305290ad8a3970c588b4374ddc0ff469ff6124e131affd72ec9fa63"
+      },
+      "anomaly_event": {
+        "rows": 25494,
+        "sha256": "5a556f1ecb1186995b65035e5a411abb16d0ded4c5bea6f8022f7a9ef27778c6"
+      },
+      "daily_plant_metric": {
+        "rows": 25494,
+        "sha256": "fbc6ef47f0e2af52dd1869fabb2dd17a00454f1b7240b4cba9ee27601787239b"
+      },
+      "dim_plant": {
+        "rows": 73,
+        "sha256": "05b412604d565bd0b095912bdc5b703c3f3b0580d39cb9a531d7d7ace8aa464d"
+      },
+      "dq_issue": {
+        "rows": 25494,
+        "sha256": "857cedf25b70543cf8c9d399977a9a8dba00ff75e708597b7f555fe979f098c6"
+      },
+      "pipeline_run": {
+        "rows": 25694,
+        "sha256": "dab008a05f099c07fc08f38bcd9be64eb20c06dceabf15f4b7c66b48cb1755fe"
+      },
+      "report_run": {
+        "rows": 58,
+        "sha256": "b332356d82f3bc2dc304b7f6645b8561d1eb0e5f167c1a9d97a416ecf86c151a"
+      },
+      "source_object": {
+        "rows": 173,
+        "sha256": "da61c3294f5c6c76b93252c425b41ea153ac4a56c125ddb4e52d5aefde1e0a2f"
+      },
+      "source_version": {
+        "rows": 73,
+        "sha256": "6f8657880cd94dc6b348e703abc56f7edde7c65d67083b2689a6a945b7f5f18e"
+      }
+    },
+    "unchanged": true,
+    "initialization_ms": 171.80979996919632,
+    "index_bytes": 2711552
+  },
+  "restore": {
+    "target_containers": [
+      "solarops-restore-pg-a873fe4533de",
+      "solarops-restore-s3-a873fe4533de"
+    ],
+    "isolated_target": true,
+    "database_dump_sha256": "8154bc784e992b95d6425c25b5fb807239565d04581c487678e3f560cb0c22ec",
+    "original_database": "restore_a873fe4533de_original",
+    "restored_database": "restore_a873fe4533de_restored",
+    "original_bucket": "restore-a873fe4533de-original",
+    "restored_bucket": "restore-a873fe4533de-restored",
+    "org": "restore-a873fe4533de",
+    "app_version": "0.4.1",
+    "calculation_version": "energy-interval-v2",
+    "original_catalog_hash": "78a8ea5ac01457dd011c450eac99ab5e1dfc74eb6fd9c5c1ac552b9787e00eb7",
+    "postgres_dump_version": "pg_dump (PostgreSQL) 16.10 (Debian 16.10-1.pgdg12+1)",
+    "image_ids": {
+      "solarops-worker:0.4.1": "sha256:d094ef2634308f3cf91ddc8f7de894229618bec1b73547fd04a0ba02b902cad8",
+      "postgres:16.10-bookworm": "sha256:38471f330eb885e04de130b768d6db4e10469e2311879c7e5c699f6d2d8a1c74",
+      "solarops-minio:2025-10-15": "sha256:2f115a675087ecf700126be7e34aba5a320cafc890f674c62f6a6a00ef92182a"
+    },
+    "scope": "quiesced synthetic restore into separate Postgres/MinIO containers on the same host",
+    "active_partitions": 7,
+    "object_count": 27,
+    "restore_through_api_verification_seconds": 0.953,
+    "total_drill_seconds": 6.891,
+    "object_hashes_and_original_reports_equal": true,
+    "restored_raw_replay_hashes_equal": true,
+    "original_catalog_and_objects_unchanged": true,
+    "disaster_recovery_rto_rpo_validated": false,
+    "note": "Original dump and artifact bytes preserved; restored catalog S3 bucket references remapped. Historical manifests use the original bucket mapping above. No resources deleted."
+  }
+}
