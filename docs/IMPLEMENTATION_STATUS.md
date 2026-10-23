@@ -11,7 +11,7 @@
 | 입력·정규화·품질·계보·보고서 | 계산 v2 및 공개 전체 서비스 처리 검증 | 51개 발전소, 인버터 14,400,480행, 12,572개 일별 v1/v2 지표·원본 SHA 일치, v1 보존 |
 | Airflow·Compose·kind/KPO | 실제 실행·재시도·백필 검증 | 공개/합성 시나리오, Pod 중단 복구, 일별 해시 비교 |
 | 월별 UI·API·실행 이력 | 구현 및 브라우저/관련 검사 통과 | 단일 SELECT, 슬롯 가중 집계, 발전소별 조회·주소 복원·batch↔partition [탐색 검증](worklog/2026-10-23-run-navigation.md) |
-| 배포·품질 관리 | private GitHub, 최신UI/관리 CI 양OS127통과·5제외, 로컬126통과·6제외 | [최신 검증](benchmarks/workspace-20261023.md), [이전 서비스5개 검사](benchmarks/integrity-v0.4.1.md) |
+| 배포·품질 관리 | private GitHub, 실행 탐색 CI 양OS127통과·5제외, 관련 로컬5통과 | [최신 검증](worklog/2026-10-23-run-navigation.md), [이전 서비스5개 검사](benchmarks/integrity-v0.4.1.md) |
 | 진단·복원 | 읽기 전용 실행 진단, 합성 SQLite/파일 및 PostgreSQL/MinIO 복원 통과 | 7개 진단 테스트, SQLite 31파일, 서비스 27객체·dump 복원·API·raw 재처리 |
 | 문서·구조 | 점수 계획·근거·인계 체계 | README·목차·설치·기술 선택·운영 계약, plan·짧은 handoff·[날짜별 상세 기록](worklog/README.md) 연결 |
 | 고객·사업 검증 | 준비 자료만 있음 | 인터뷰/스키마 매핑/가격 산술; 실제 계약·매출 없음 |

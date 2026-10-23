@@ -26,4 +26,5 @@
 
 - dashboard JS 캐시 키와 Compose 이미지 태그를 `run-navigation-20261023`으로 갱신하고 dashboard만 빌드·재생성했습니다. DB·MinIO·kind 데이터는 유지했습니다.
 - 이미지 ID는 `sha256:84648047dcc3513cbfd896d93d51f7d1e0bba46141f088dcb323bc1fe7ecb384`이며 [버전 기록](../image-versions.json)에 추가했습니다. 로컬 `/ready`는 `ready`입니다.
-- `uv run python scripts/validation/check_docs.py`: 로컬 링크536개·스크립트 참조58개·원본 기획 체크섬8개 통과. `git diff --check` 통과, handoff는 100줄·최근 요약8개 이내입니다. 기존 커밋의 전체 CI를 이번 변경의 결과로 간주하지 않습니다.
+- `uv run python scripts/validation/check_docs.py`: 로컬 링크536개·스크립트 참조59개·원본 기획 체크섬8개 통과. `git diff --check` 통과, handoff42줄·최근 요약8개입니다.
+- 기능 커밋 `451a229`의 [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39886235410)는 Windows/Ubuntu 각각 **127통과·5제외**입니다. 린트·문서·합성 데모·복원·wheel·소스 패키징 모두 성공했습니다. 결과 기록만 추가하는 후속 커밋은 `[skip ci]`로 중복 전체 실행을 피합니다.
