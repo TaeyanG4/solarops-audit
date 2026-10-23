@@ -156,11 +156,12 @@ flowchart LR
 | 실패·동시성·복구 | 입력 변경·동시 버전·보고서 역순 완료·파일 누락/변조·격리 복원 | [v0.4.1 검증](docs/benchmarks/integrity-v0.4.1.md) |
 | 화면·보고서·관리 | 1440/768/390px, overview 107명령·workspace 195명령, axe 3+23회 위반 0, API 동일 | [최신 UI 검증](docs/benchmarks/workspace-20261023.md) |
 | 실행 이력 탐색 | 기존 관련 테스트 5개 통과, 3너비·주소 복원·상하위 이동 확인, 모바일 axe 위반 0건; 영구 테스트 추가 없음 | [변경·검증·한계](docs/worklog/2026-10-23-run-navigation.md) |
+| 기간·보고서·진단 | 관련15개 검사, 3너비·모바일 axe3회 위반0, 기존 게시/보고서 보존·실제 PostgreSQL 인덱스 측정 | [검증·성능 조건](docs/worklog/2026-10-23-usability.md) |
 | 선택창·관리 탭·관측 차트 | 후속 303명령·axe 18회 위반 0, Python 31통과, 원본 빈값 대조·API 동일 | [상호작용 회귀](docs/benchmarks/interactions-20261023.md) |
 | 열린 목록 스크롤 유지 | 닫힘 동작을 교체, 269명령·3너비·열린 목록 axe6회 위반0, API 동일 | [목록 회귀](docs/benchmarks/select-anchor-20261023.md) |
 | 서비스 제어 | 실제 전체 중지→기본 3서비스 시작→kind 시작, 독립 관리 서버 유지·다른 프로젝트 보존 | [관리 검증과 한계](docs/benchmarks/workspace-20261023.md) |
 | 최신 로컬 회귀 | Python 126통과·6제외, Ruff·4개 JS 문법·wheel 정적 자산 확인 | [최신 수행 기록](docs/worklog/2026-10-23-workspace.md) |
-| 회귀·전달 | 기능 커밋 `451a229`의 Windows/Ubuntu 각각 **127통과·5제외**, 합성 복원·wheel·소스 패키징 성공 | [검증 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39886235410) |
+| 회귀·전달 | 기능 커밋 `d225e19`의 Windows/Ubuntu 각각 **127통과·5제외**, 합성 복원·wheel·소스 패키징 성공 | [검증 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39892650065) |
 | 월별 조회 | HTTP 53회 → 1회. 같은 로컬 조건 5회 중앙값 703.239ms → 12.576ms | [측정 조건](docs/benchmarks/workspace-v0.3.0.md) |
 
 조회 측정은 응답 범위와 요청 방식이 달라 일반적인 성능 배수로 해석하지 않습니다. 자동 접근성 위반 0건은 WCAG 인증이 아니며 실제 모바일 기기·스크린리더·다른 브라우저는 미검증입니다. 과거 전체 처리를 매번 재실행한 것으로 표현하지 않습니다.
