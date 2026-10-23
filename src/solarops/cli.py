@@ -122,15 +122,27 @@ def main(argv=None):
             print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))
         return 0
     except Exception as exc:
+        if args.command.startswith("ons-"):
+            from solarops.acquisition.ons import failure_code
+        else:
+            from solarops.contracts.brpvgen import failure_code
+        safe_usage = {
+            "Use --period or --from/--to, not both",
+            "Backfill/demo requires 1–31 days",
+        }
+        message = (
+            str(exc)
+            if isinstance(exc, ValueError) and str(exc) in safe_usage
+            else ("Operation failed; see docs/runbooks/recovery.md for this code")
+        )
         # Log type/code, never connection URLs, tokens or raw customer values.
         print(
             json.dumps(
                 {
                     "status": "error",
                     "code": type(exc).__name__,
-                    "message": str(exc)
-                    if isinstance(exc, ValueError | RuntimeError)
-                    else "Operation failed; inspect local service logs",
+                    "error_code": failure_code(exc),
+                    "message": message,
                 }
             ),
             file=sys.stderr,

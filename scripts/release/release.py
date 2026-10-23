@@ -19,6 +19,7 @@ def check_release(sync=False):
     assert release["worker_image"] == f"solarops-worker:{version}"
     assert release["airflow_image"] == f"solarops-airflow:{version}"
     paths = [
+        "Makefile",
         "infra/compose/compose.yaml",
         "infra/helm/airflow-values.yaml",
         "scripts/ops/k8s-deploy.sh",

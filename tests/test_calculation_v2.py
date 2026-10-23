@@ -102,6 +102,35 @@ def test_entire_missing_dst_day_is_published(settings, sample, day, timestamps, 
         == 0
     )
     assert (directory / "manifest.json").read_bytes() == original
+    # Observed rows with unknown flags must not look like explicit False.
+    for label, flags, ratio, unknown in (
+        ("unknown", ["", "", ""], None, 3),
+        ("mixed", ["true", "false", ""], 1 / 3, 1),
+        ("false", ["false", "false", "false"], 0, 0),
+    ):
+        sparse_source(sample, [f"{day}T12:{minute:02d}:00Z" for minute in (0, 15, 30)])
+        with sample["inverter"].open(encoding="utf-8", newline="") as handle:
+            records = list(csv.DictReader(handle))
+        for raw_record, value in zip(records, flags, strict=True):
+            raw_record["interpolated_keys_total_active_power_w"] = value
+        with sample["inverter"].open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(records[0]))
+            writer.writeheader()
+            writer.writerows(records)
+        run(local, sample, version=label, start=day, end=end)
+        result = build_report(local, day[:7], "DEMO_01", "synthetic")
+        target = Path(result["local_directory"])
+        manifest = json.loads((target / "manifest.json").read_text(encoding="utf-8"))
+        assert manifest["interpolation"] == ratio
+        assert manifest["interpolation_unknown_slots"] == unknown
+        html = (target / "report.html").read_text(encoding="utf-8")
+        if label == "unknown":
+            assert "<dt>원본 보간 표시</dt><dd>알 수 없음" in html
+        elif label == "mixed":
+            assert "33.33% 확인 · 불명 1슬롯" in html
+        else:
+            assert "<dt>원본 보간 표시</dt><dd>0.00%" in html
+        assert (directory / "manifest.json").read_bytes() == original
 
 
 def test_v2_hash_includes_series_and_retains_replay_determinism(settings, sample, monkeypatch):

@@ -12,7 +12,7 @@ from sqlalchemy import select, text, update
 from solarops.acquisition.brpvgen import DOI, checksum
 from solarops.analytics.metrics import analyze, day_window
 from solarops.config import CALCULATION_VERSION, identifier
-from solarops.contracts.brpvgen import read_metadata
+from solarops.contracts.brpvgen import failure_code, read_metadata
 from solarops.normalize.parquet import (
     configure_duckdb,
     inverter_id,
@@ -240,6 +240,13 @@ def ingest(
     outcomes = []
     try:
         bounds = source_bounds(captured["inverter"], plant, meta)
+        # BR versions are bounded upserts, not authoritative withdrawal snapshots.
+        # Never report a successful correction while silently keeping an old day
+        # inside the request that the new source no longer covers.
+        for day in expected:
+            day_start, day_end = day_window(day, settings.timezone)
+            if not any(a < day_end and b >= day_start for a, b in bounds.values()):
+                raise ValueError("SOURCE_RANGE_SHRINK: existing day outside new source bounds")
         inv_iter = iter(
             normalized_days(
                 captured["inverter"], "inverter", plant, begin_utc, end_utc, settings.timezone
@@ -301,7 +308,7 @@ def ingest(
                 status="committed",
             )
     except Exception as exc:
-        catalog.fail(batch_id, str(exc).split(":")[0][:100])
+        catalog.fail(batch_id, failure_code(exc))
         raise
     return {
         "batch_id": batch_id,
@@ -495,7 +502,7 @@ def publish_day(
         }
     except Exception as exc:
         (staging / "quarantine.json").write_text(
-            json.dumps({"error_code": str(exc).split(":")[0], "run_id": run_id}), encoding="utf-8"
+            json.dumps({"error_code": failure_code(exc), "run_id": run_id}), encoding="utf-8"
         )
-        catalog.fail(run_id, str(exc).split(":")[0][:100])
+        catalog.fail(run_id, failure_code(exc))
         raise

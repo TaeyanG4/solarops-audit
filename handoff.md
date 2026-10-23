@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-- 최신 코드 **v0.5.2** / 계산 `energy-interval-v2`: 시각 계약·보고서 unknown·ONS 오류 코드·README 보완. [검사·동등성·비용](docs/benchmarks/quality-v0.5.2.md). Compose 대시보드·kind Airflow와 KPO 이미지 선언도 v0.5.2로 정렬했습니다. [이미지/구현 커밋](docs/releases/0.5.2.json). [GitHub](https://github.com/TaeyanG4/solarops-audit)는 비공개입니다.
+- 최신 코드 **v0.5.3** / 계산 `energy-interval-v2`: R1 지적의 시각 형식·범위 축소·불명 표시·오류 코드/빌드 입력 보완. [검사](docs/benchmarks/quality-v0.5.3.md). 서비스는0.5.2이며 새 배포 대기. [검사·동등성·비용](docs/benchmarks/quality-v0.5.2.md). Compose 대시보드·kind Airflow와 KPO 이미지 선언도 v0.5.2로 정렬했습니다. [이미지/구현 커밋](docs/releases/0.5.2.json). [GitHub](https://github.com/TaeyanG4/solarops-audit)는 비공개입니다.
 - DATA-03/PERF-03 완료: [ONS 증분 계약](docs/ons-source-contract.md), 성공 cursor와 변경 날짜 원자 게시, 별도 CLI/API, 실제 정기 수집과 공개4일 Airflow 병렬 비교. [실행 근거·한계](docs/benchmarks/incremental-v0.5.0.md).
 - ONS: Compose 10월 태양광 69,696행·21일, 같은 응답 재실행 변경 0개. kind 9~10월 167,424행·51일, 실제 scheduled KPO 성공. 두 환경의 10월 일별 hash 일치. 원문 시각/MWmed·검증/예측/미확정 보존, 기존 발전량에 합산하지 않습니다.
 - 공개 4일 실제 KPO: 직렬 36.675초→동시 2개 19.339초(47.3% 단축), hash 동일·오류 0, worker RSS 최대 427.78MiB. 총 CPU 24.3% 증가. 별도 DB/버킷이며 단일 호스트·각 1회·4개의 일별 task 비교입니다.
@@ -19,6 +19,7 @@
 ## 다음 재개 지점
 
 - 사용자는 면접·개인 역량 검증을 생략했습니다. [고정 산출물 루브릭](docs/reviews/portfolio-rubric.md)으로 두 독립 평가 각각 95점 이상을 목표로 개선합니다. 이전 면접 점수와 새 기준 점수는 직접 비교하지 않습니다.
+- R1은 Fable95/Astra86이며 [원문/수용](docs/reviews/2026-10-23-artifact-r1.md)을 보존했습니다. v0.5.3 수정·검사 뒤 배포·같은커밋 재평가를 진행합니다.
 - INT-01/02/03·DOC-04 완료: 오프라인 136통과·14제외, 독립 실제 서비스 13통과, 정상 합성 7일 hash/공개 PS_001 범위 동일. v0.5.2 배포·CI 확인까지 완료했고 다음은 증거를 모은 같은 커밋의 독립 평가입니다. [plan](plan.md)의 REVIEW-02 진행 중, BIZ-01 후순위.
 - 매일 10:00 KST 이 대화 자동 점검(`solarops`)을 설정했습니다. 의미 있는 개선 뒤에만 Fable(Claude Code)/Astra 새 세션에서 평가하며 목표 달성 시 중지합니다. 변화 없는 점수 재추첨은 하지 않습니다.
 - ONS는 이전/현재 월을 재확인하며 그보다 오래된 정정은 `ons-sync --period YYYY-MM`. 실패 시 월별 성공 cursor 유지, 충돌은 최신 상태에서 재시도. 원문 시간대를 추측해 UTC로 변환하지 않습니다.
@@ -31,7 +32,7 @@
 
 | 일자 | 수행 영역과 결과 | 상세 |
 |---|---|---|
-| 10-23 | 면접 제외·고정 루브릭·반복 점검·세 경계/README 수정·관련 검사 | [개선·재평가 진행](docs/worklog/2026-10-23-quality.md) |
+| 10-23 | R1 Fable95/Astra86·시각/정정/불명/비밀/빌드 보완 | [R1 구현](docs/worklog/2026-10-23-quality-r2.md), [초기 개선](docs/worklog/2026-10-23-quality.md) |
 | 10-23 | Fable·Astra 면접 평가·합성 경계 3개 재현·후속 21/19/16점 등록 | [평가·재현·전달](docs/worklog/2026-10-23-interview.md) |
 | 10-23 | PORT-01~04완료·ONS상태UI·0.5.1배포·격리재현·제출자료·최신CI | [최종 수행](docs/worklog/2026-10-23-portfolio-finish.md) |
 | 10-23 | ONS 실제 증분·정기 KPO·공개 DAG 동시 2개 비교, 0.5.0 배포·문서 갱신 | [수행·전달](docs/worklog/2026-10-23-incremental.md) |

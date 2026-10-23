@@ -7,7 +7,12 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23172131'/%3E%3Cpath d='M19 4 7 18h9l-2 10 12-16h-9l2-8Z' fill='%23f3ba55'/%3E%3C/svg%3E">
   <style>*{box-sizing:border-box}body{margin:0;background:#f1f3f7;color:#172131}button:focus-visible{outline:3px solid #285bdd;outline-offset:4px}{{ report_css|safe }}</style>
 </head>
-<body><div class="report-export">
+<body>{% macro interpolation_label(ratio, observed, unknown) -%}
+{%- if ratio is none or observed == 0 or unknown >= observed -%}알 수 없음
+{%- elif unknown > 0 -%}{{ '%.2f'|format(ratio*100) }}% 확인 · 불명 {{ unknown }}슬롯
+{%- else -%}{{ '%.2f'|format(ratio*100) }}%
+{%- endif -%}
+{%- endmacro %}<div class="report-export">
 <header class="report-export-header"><strong>SolarOps Audit</strong><span>{{ report.period }} 월간 보고서</span><button type="button" onclick="window.print()">인쇄 / PDF 저장</button></header>
 <main class="report-sheet">
   <section class="report-band"><div><h1>{{ report.period }} · {{ report.scope }}</h1><p>{{ report.plant_count }}개 발전소 · {{ report.days }}개 일별 파티션 · {{ report.timezone }}</p><span class="report-tag">{{ '월 전체 파티션 확보' if report.status == 'complete' else '부분 기간 보고서' }}</span></div><div class="report-energy"><p>추정 발전량</p><strong>{{ '{:,.2f}'.format(report.estimated_energy_kwh) }}</strong><span>kWh</span><p>유효 전력 × 0.25h · 계량기 실측 전력량과 다릅니다.</p></div></section>
@@ -19,12 +24,12 @@
   <dl class="report-metrics">
     <div><dt>관측 슬롯 완전성</dt><dd>{{ '%.1f'|format(report.coverage*100) ~ '%' if report.coverage is not none else '알 수 없음' }}<p>등록된 일별 파티션 기준</p></dd></div>
     <div><dt>유효값 비율</dt><dd>{{ '%.1f'|format(report.valid_coverage*100) ~ '%' if report.valid_coverage is not none else '알 수 없음' }}<p>무효값은 추정 에너지 계산에서 제외</p></dd></div>
-    <div><dt>원본 보간 표시</dt><dd>{{ '%.2f'|format(report.interpolation*100) ~ '%' if report.interpolation is not none else '알 수 없음' }}<p>유효·무효와 겹칠 수 있는 별도 속성</p></dd></div>
+    <div><dt>원본 보간 표시</dt><dd>{{ interpolation_label(report.interpolation, report.observed_slots, report.interpolation_unknown_slots) }}<p>전체 관측 중 확인된 보간 표시 · 불명은 별도 표시</p></dd></div>
     <div><dt>저출력 검토 구간</dt><dd>{{ report.candidates|length }}건<p>사람이 확인할 후보 · 고장 확정 아님</p></dd></div>
   </dl>
   <section class="panel report-section"><h2>일별 데이터 내역</h2><p>추정 발전량과 품질을 함께 확인하세요. 원본 보간 여부 불명은 0%로 표시하지 않습니다.</p><p><a href="metrics.csv">CSV 다운로드</a></p>
     <div class="table-wrap"><table class="report-daily"><thead><tr><th scope="col">발전소 / 날짜</th><th scope="col">추정 kWh</th><th scope="col">관측 / 기대 슬롯</th><th scope="col">누락 / 무효</th><th scope="col">원본 보간</th><th scope="col">검토 구간</th></tr></thead><tbody>
-    {% for m in report.metrics %}<tr><td data-label="발전소 / 날짜">{{ m.plant_id }} · {{ m.local_date }}</td><td data-label="추정 kWh">{{ '{:,.2f}'.format(m.estimated_energy_kwh) if m.estimated_energy_kwh is not none else '추정값 없음' }}</td><td data-label="관측 / 기대 슬롯">{{ m.observed_slots }} / {{ m.expected_slots }}</td><td data-label="누락 / 무효">{{ m.missing_slots }} / {{ m.invalid_slots }}</td><td data-label="원본 보간">{{ '%.2f'|format(m.source_interpolation_ratio*100) ~ '%' if m.source_interpolation_ratio is not none else '알 수 없음' }}</td><td data-label="검토 구간">{{ m.review_candidate_count }}건</td></tr>{% endfor %}
+    {% for m in report.metrics %}<tr><td data-label="발전소 / 날짜">{{ m.plant_id }} · {{ m.local_date }}</td><td data-label="추정 kWh">{{ '{:,.2f}'.format(m.estimated_energy_kwh) if m.estimated_energy_kwh is not none else '추정값 없음' }}</td><td data-label="관측 / 기대 슬롯">{{ m.observed_slots }} / {{ m.expected_slots }}</td><td data-label="누락 / 무효">{{ m.missing_slots }} / {{ m.invalid_slots }}</td><td data-label="원본 보간">{{ interpolation_label(m.source_interpolation_ratio, m.observed_slots, m.interpolation_unknown_slots) }}</td><td data-label="검토 구간">{{ m.review_candidate_count }}건</td></tr>{% endfor %}
     </tbody></table></div>
   </section>
   <div class="report-evidence">

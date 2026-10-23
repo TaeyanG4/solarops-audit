@@ -10,7 +10,7 @@
 | 현재 진행도와 다음 과제 | [구현 상태](IMPLEMENTATION_STATUS.md), [점수 기반 계획](../plan.md), [인계·진행 기록](../handoff.md), [날짜별 상세 기록](worklog/README.md), [버전별 변경](../CHANGELOG.md) |
 | 독립 기술 검토 | [독립 세션 평가](reviews/2026-10-23-independent.md), [재현·수용/보류 판단](worklog/2026-10-23-independent-review.md) |
 | 독립 모의 면접 평가 | [Fable·Astra 비교와 코드 재현](reviews/2026-10-23-interview.md), [Astra 전문](reviews/2026-10-23-interview-astra.md), [Fable 전문](reviews/2026-10-23-interview-fable.md) |
-| 산출물 개선·재평가 | [면접 제외 고정 루브릭](reviews/portfolio-rubric.md), [v0.5.2 경계 수정과 검사](benchmarks/quality-v0.5.2.md), [진행 기록](worklog/2026-10-23-quality.md) |
+| 산출물 개선·재평가 | [면접 제외 고정 루브릭](reviews/portfolio-rubric.md), [R1 원문·수용](reviews/2026-10-23-artifact-r1.md), [v0.5.3 경계 보완](benchmarks/quality-v0.5.3.md), [진행 기록](worklog/2026-10-23-quality-r2.md) |
 | 포트폴리오 설명 | [한 쪽 제출 요약](portfolio/SUBMISSION.md), [설계 질문5개](portfolio/DESIGN_QUESTIONS.md), [문제·설계·증거 사례](portfolio/CASE_STUDY.md), [최종 검증](benchmarks/portfolio-finish-20261023.md) |
 | 기술 선택 이해 | [버전·선택 이유·대안](architecture/technology-stack.md), [아키텍처·배포 경계·데이터 흐름·트랜잭션](architecture/system.md) |
 | 실제 사용·자료 진위 | [실행 기술·원본 해시·독립 계산·합성 시험 구분](benchmarks/stack-authenticity-20261023.md) |
@@ -40,7 +40,9 @@
 
 `plan/`은 [원본 기획](plan/00_START_HERE.md)과 [SHA-256 목록](plan/MANIFEST.sha256)을 보존하는 영역입니다. 과거 예시 프롬프트·중단 조건·계획은 현재 실행 결과나 사용자의 현재 지시와 구별합니다. 최신 상태는 위 구현 상태 문서가 기준입니다.
 
-최신 v0.5.2: [경계 수정·동등성·배포 검증](benchmarks/quality-v0.5.2.md) · [릴리스 이미지](releases/0.5.2.json).
+최신 v0.5.3: [경계·빌드 입력·검증](benchmarks/quality-v0.5.3.md). 배포 상태는 [handoff](../handoff.md).
+
+이전 v0.5.2: [경계 수정·동등성·배포 검증](benchmarks/quality-v0.5.2.md) · [릴리스 이미지](releases/0.5.2.json).
 
 화면·제출 v0.5.1: [제출 마감·ONS 상태 UI·재현 검증](benchmarks/portfolio-finish-20261023.md) · [릴리스 이미지](releases/0.5.1.json).
 

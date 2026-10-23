@@ -70,7 +70,7 @@ def test_old_calculation_version_not_double_counted(settings, sample):
 
 
 @pytest.mark.parametrize("failure", ["before_commit", "during_commit"])
-def test_failure_keeps_published_partition(settings, sample, failure):
+def test_failure_keeps_published_partition(settings, sample, failure, monkeypatch, capsys):
     run(settings, sample)
     before = hashes(settings)
     client = TestClient(create_app(settings))
@@ -82,6 +82,29 @@ def test_failure_keeps_published_partition(settings, sample, failure):
     assert client.get("/api/v1/plants").json() == before_plants
     with Catalog(settings).engine.connect() as c:
         assert c.execute(select(runs).where(runs.c.status == "failed")).first()
+    import solarops.pipeline as pipeline
+    from solarops import cli
+
+    sentinel = "private-input-value-do-not-log"
+
+    def bad_value(*args, **kwargs):
+        raise ValueError(sentinel)
+
+    monkeypatch.setattr(pipeline, "analyze", bad_value)
+    with pytest.raises(ValueError):
+        run(settings, sample, version="private-error")
+    with Catalog(settings).engine.connect() as c:
+        failures = (
+            c.execute(select(runs.c.payload).where(runs.c.status == "failed")).scalars().all()
+        )
+    assert any(r["error_code"] == "BR_INPUT_INVALID" for r in failures)
+    assert sentinel not in json.dumps(failures)
+    assert all(sentinel not in p.read_text() for p in settings.root.rglob("quarantine.json"))
+    monkeypatch.setattr(cli, "execute", bad_value)
+    assert cli.main(["doctor"]) == 1
+    error = capsys.readouterr().err
+    assert sentinel not in error and json.loads(error)["error_code"] == "BR_INPUT_INVALID"
+    assert hashes(settings) == before
 
 
 def test_targeted_replay_preserves_other_days(settings, sample):
@@ -90,6 +113,25 @@ def test_targeted_replay_preserves_other_days(settings, sample):
     run(settings, sample, start="2024-04-03", end="2024-04-04")
     after = {r["partition_id"]: r["run_id"] for r in Catalog(settings).snapshot(settings.org)}
     assert [day for day in before if before[day] != after[day]] == ["2024-04-03"]
+    # A new BR source is not a withdrawal instruction. Reject range shrink
+    # before publishing any day, including a completely empty source.
+    before_shrink = Catalog(settings).snapshot(settings.org)
+    with sample["inverter"].open(encoding="utf-8", newline="") as handle:
+        records = list(csv.DictReader(handle))
+    for i, retained in enumerate(
+        (
+            [r for r in records if r["datetime"][:10] != "2024-04-01"],
+            [r for r in records if r["datetime"][:10] != "2024-04-07"],
+            [],
+        )
+    ):
+        with sample["inverter"].open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(records[0]))
+            writer.writeheader()
+            writer.writerows(retained)
+        with pytest.raises(ValueError, match="SOURCE_RANGE_SHRINK"):
+            run(settings, sample, version=f"shrink-{i}")
+        assert Catalog(settings).snapshot(settings.org) == before_shrink
 
 
 def test_changed_input_requires_explicit_version(settings, sample):
@@ -207,7 +249,9 @@ def test_unknown_plant_and_malformed_timestamp_block(settings, sample):
     with pytest.raises(ValueError, match="UNKNOWN_PLANT"):
         run(settings, sample, version="unknown")
     # Invalid rows outside the requested day still contribute to source bounds.
-    for i, stamp in enumerate(("2024-03-31T23:45:00", "2024-03-31T23:46:00Z", "bad-time")):
+    for i, stamp in enumerate(
+        ("2024-03-31T23:45:00", "2024-03-31T23:46:00Z", "bad-time", "20240401T120000Z")
+    ):
         sample["inverter"].write_text(text + f"{stamp},DEMO_01,1,1000,false,3\n", encoding="utf-8")
         with pytest.raises(ValueError, match="TIMESTAMP"):
             run(settings, sample, version=f"bad-{i}", end="2024-04-02")

@@ -1,0 +1,18 @@
+{
+  "commit": "adc75001360a767f9d10ed4066d42a31a0b6abf0",
+  "model": "claude-fable-5-1",
+  "session_id": "e7d55ce7-cb6e-4050-b055-6b3b1d38f724",
+  "cli": "Claude Code 2.1.287",
+  "tools": [
+    "Read",
+    "Glob",
+    "Grep"
+  ],
+  "duration_ms": 488515,
+  "is_error": false,
+  "round": 1,
+  "rubric": "portfolio-rubric v1",
+  "dynamic_checks_executed": false,
+  "score": 95,
+  "target_blinding": "incomplete: reviewer read target in handoff/worklog; excluded in subsequent review"
+}

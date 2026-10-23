@@ -86,7 +86,7 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 
 ## 실행 근거와 한계
 
-최신 구현은 **v0.5.2 · energy-interval-v2**입니다. 시각 계약·보고서 unknown·ONS 오류 코드를 보완했고 [변경과 검증](docs/benchmarks/quality-v0.5.2.md)에 정상 입력 동등성과 성능 비용을 함께 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
+최신 구현은 **v0.5.3 · energy-interval-v2**입니다. 시각 파싱·범위 축소·보간 불명·오류 정보와 릴리스 재현성을 보완했고 [변경과 검증](docs/benchmarks/quality-v0.5.3.md)에 정상 입력 동등성과 성능 비용을 함께 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
 
 | 확인한 항목 | 결과 | 범위와 근거 |
 |---|---|---|

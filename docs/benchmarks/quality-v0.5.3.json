@@ -1,0 +1,82 @@
+{
+  "release": "0.5.3",
+  "baseline_review_commit": "adc75001360a767f9d10ed4066d42a31a0b6abf0",
+  "normal_input": {
+    "synthetic_days": 7,
+    "synthetic_rows": 1342,
+    "logical_hashes_unchanged": true,
+    "public_bytes": 138848090,
+    "trials": [
+      {
+        "iteration": 0,
+        "version": "baseline",
+        "seconds": 0.7172737999935634,
+        "inverters": 41,
+        "bounds_sha256": "90594906751143440e77b556461ca5c8b3a0df1c0b641bc9a2b93172fefcda3a"
+      },
+      {
+        "iteration": 0,
+        "version": "current",
+        "seconds": 3.3182808000128716,
+        "inverters": 41,
+        "bounds_sha256": "90594906751143440e77b556461ca5c8b3a0df1c0b641bc9a2b93172fefcda3a"
+      },
+      {
+        "iteration": 1,
+        "version": "current",
+        "seconds": 3.5269513000384904,
+        "inverters": 41,
+        "bounds_sha256": "90594906751143440e77b556461ca5c8b3a0df1c0b641bc9a2b93172fefcda3a"
+      },
+      {
+        "iteration": 1,
+        "version": "baseline",
+        "seconds": 0.6729533999459818,
+        "inverters": 41,
+        "bounds_sha256": "90594906751143440e77b556461ca5c8b3a0df1c0b641bc9a2b93172fefcda3a"
+      },
+      {
+        "iteration": 2,
+        "version": "baseline",
+        "seconds": 0.6740135999862105,
+        "inverters": 41,
+        "bounds_sha256": "90594906751143440e77b556461ca5c8b3a0df1c0b641bc9a2b93172fefcda3a"
+      },
+      {
+        "iteration": 2,
+        "version": "current",
+        "seconds": 3.846405300020706,
+        "inverters": 41,
+        "bounds_sha256": "90594906751143440e77b556461ca5c8b3a0df1c0b641bc9a2b93172fefcda3a"
+      }
+    ]
+  },
+  "deployment": "pending",
+  "independent_review": "pending same-commit round 2",
+  "browser": {
+    "1440": "all unknown -> unknown",
+    "390": "mixed -> confirmed 33.33%, unknown 1 slot",
+    "768": "all False -> 0%",
+    "horizontal_overflow": false,
+    "page_errors": 0
+  },
+  "minio": {
+    "source_sha256": "be6d0bd3696c3a13a35f02d3a0280b64319c67918b4501c5c3d87f96d000085c",
+    "test_image": "solarops-minio:2025-10-15-pinned",
+    "image_id": "sha256:ba58cd8f4781043abf8d5c3a3b656d4aba181dc5415ce7e884819b522a3b3955",
+    "build_cache_used": true,
+    "live_storage_replaced": false
+  },
+  "offline": {
+    "tests": 154,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 14
+  },
+  "services": {
+    "tests": 13,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

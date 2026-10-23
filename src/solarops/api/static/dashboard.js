@@ -68,6 +68,13 @@ const number = (value, digits = 0) =>
     : Number(value).toLocaleString("ko-KR", { maximumFractionDigits: digits });
 const pct = (value) =>
   value === null || value === undefined ? "—" : `${number(value * 100, 1)}%`;
+function interpolationText(metric, ratio = metric.source_interpolation_ratio) {
+  const unknown = metric.interpolation_unknown_slots || 0;
+  if (ratio == null || !metric.observed_slots || unknown >= metric.observed_slots)
+    return "알 수 없음";
+  const confirmed = `${number(ratio * 100, 2)}%`;
+  return unknown ? `${confirmed} 확인 · 불명 ${number(unknown)}슬롯` : confirmed;
+}
 const mwh = (value) =>
   value == null ? "추정값 없음" : number(value / 1000, 2);
 const time = (value) =>
@@ -694,7 +701,7 @@ async function overview(signal, mode = "overview") {
   );
   const interpolation = node("div", undefined, "interpolation-note");
   interpolation.append(
-    node("strong", `원본 보간 표시 ${pct(sum.source_interpolation_ratio)}`),
+    node("strong", `원본 보간 표시 ${interpolationText(sum)}`),
     node(
       "p",
       `보간 여부 불명 ${number(sum.interpolation_unknown_slots)}슬롯. 유효·무효와 별도 속성으로, 보간된 값도 유효값에 포함될 수 있습니다.`,
@@ -726,7 +733,7 @@ async function overview(signal, mode = "overview") {
           number(plant.valid_slots),
           number(plant.invalid_slots),
           number(plant.missing_slots),
-          pct(plant.source_interpolation_ratio),
+          interpolationText(plant),
           workspaceLink(
             `${plant.plant_id} 관측`,
             { view: "series", plant: plant.plant_id, day: plant.last_day },
@@ -877,7 +884,7 @@ async function overview(signal, mode = "overview") {
       mwh(plant.estimated_energy_kwh),
       valid,
       `${number(plant.missing_slots)} / ${number(plant.invalid_slots)}`,
-      pct(plant.source_interpolation_ratio),
+      interpolationText(plant),
       actions,
     ];
   });
@@ -1140,10 +1147,12 @@ function reportDocument(report, freshness) {
     ],
     [
       "원본 보간 표시",
-      report.interpolation == null
-        ? "알 수 없음"
-        : `${number(report.interpolation * 100, 2)}%`,
-      "유효·무효와 겹칠 수 있는 별도 속성",
+      interpolationText({
+        observed_slots: report.metrics.reduce((sum, m) => sum + m.observed_slots, 0),
+        interpolation_unknown_slots: report.metrics.reduce(
+          (sum, m) => sum + (m.interpolation_unknown_slots || 0), 0),
+      }, report.interpolation),
+      "전체 관측 중 확인된 보간 표시 · 불명은 별도 표시",
     ],
     [
       "저출력 검토 구간",
@@ -1182,9 +1191,7 @@ function reportDocument(report, freshness) {
         number(m.estimated_energy_kwh, 2),
         `${number(m.observed_slots)} / ${number(m.expected_slots)}`,
         `${number(m.missing_slots)} / ${number(m.invalid_slots)}`,
-        m.source_interpolation_ratio == null
-          ? "알 수 없음"
-          : pct(m.source_interpolation_ratio),
+        interpolationText(m),
         `${number(m.review_candidate_count)}건`,
       ]),
       "report-daily",

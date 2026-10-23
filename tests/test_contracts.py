@@ -108,7 +108,18 @@ def test_flags(value, expected):
     assert flag(value) is expected
 
 
-@pytest.mark.parametrize("ts", ["garbage", "2024-04-01T00:00:00", "2024-04-01T00:01:00Z"])
+@pytest.mark.parametrize(
+    "ts",
+    [
+        "garbage",
+        "2024-04-01T00:00:00",
+        "2024-04-01T00:01:00Z",
+        "20240401T000000Z",
+        "2024-W14-1T00:00:00Z",
+        "2024-04-01X00:00:00Z",
+        "2024-04-01T00:00:00.0000001Z",
+    ],
+)
 def test_bad_timestamps(ts, tmp_path):
     with pytest.raises(ValueError):
         record(ts)

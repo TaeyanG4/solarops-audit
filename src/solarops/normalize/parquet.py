@@ -45,9 +45,9 @@ def rows(path, kind, plant, start, end):
     conn = duckdb.connect()
     configure_duckdb(conn)
     order = (
-        "TRY_CAST(datetime AS TIMESTAMPTZ), inverter_id"
+        "TRY_CAST(datetime AS TIMESTAMPTZ) NULLS FIRST, inverter_id"
         if kind == "inverter"
-        else "TRY_CAST(datetime AS TIMESTAMPTZ)"
+        else "TRY_CAST(datetime AS TIMESTAMPTZ) NULLS FIRST"
     )
     query = f"""SELECT * FROM read_csv({sql_quote(path)}, all_varchar=true)
       WHERE ps_id={sql_quote(plant)} AND
@@ -72,6 +72,14 @@ def timestamp_utc(value):
         raise ValueError("TIMESTAMP_INVALID") from None
     if dt.tzinfo is None:
         raise ValueError("TIMESTAMP_TIMEZONE_MISSING")
+    # Python also accepts compact/week dates and arbitrary separators that SQL
+    # cannot sort. Admit only the shared, lossless wire format before grouping.
+    if not re.fullmatch(
+        r"[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}:[0-9]{2}"
+        r"(?:\.[0-9]{1,6})?(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])",
+        value,
+    ):
+        raise ValueError("TIMESTAMP_FORMAT")
     try:
         dt = dt.astimezone(UTC)
     except (ValueError, OverflowError):

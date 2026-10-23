@@ -35,3 +35,25 @@ kind는 재해복구 저장소가 아닙니다. 고객 도입 전 PostgreSQL dum
 | `ONS_IO_ERROR`, `ONS_UNEXPECTED_ERROR` | 호스트 여유 공간·권한 및 제한된 로컬 태스크 로그 확인. 비밀값을 외부 문서에 복사하지 않음 |
 
 성공 cursor가 남아 있다고 수집기가 현재 정상이라고 단정하지 않습니다. 프로세스 강제 종료로 남은 ONS `running` 기록도 Airflow/Pod와 대조해야 하며, 현재 자동 조정기는 없습니다. 삭제나 과거 성공 덮어쓰기 없이 새 실행으로 복구합니다.
+
+## BR 입력·오류 코드와 범위 축소
+
+새 실패의 `error_code`는 허용된 계약 코드 또는 `BR_INPUT_INVALID`(파싱/값), `BR_CATALOG_ERROR`(DB), `BR_OBJECT_STORE_ERROR`(S3), `BR_IO_ERROR`(파일), `BR_UNEXPECTED_ERROR`입니다. catalog·quarantine·CLI에 원문 값/접속 문자열을 복사하지 않습니다. 원인은 권한이 있는 로컬 원본/태스크 로그에서 확인하며 과거 오류 기록은 소급 변경하지 않습니다.
+
+`SOURCE_RANGE_SHRINK`는 요청 안에 이미 게시한 날짜가 새 인버터 전체 관측 범위에서 빠졌다는 뜻입니다. 첫 날짜를 게시하기 전에 중단하고 이전 active를 유지합니다. 잘린 파일인지 먼저 조사하고 완전한 원본과 새 버전을 준비하거나 실제 지원 날짜로 요청을 좁힙니다. BR 날짜 철회 기능은 없으므로 DB/객체를 임의 삭제해 해결하지 않습니다. ONS는 별도 월 snapshot 철회 계약입니다.
+
+## ONS running 기록이 오래 남을 때
+
+`inspect-runs`는 BR `pipeline_run`용입니다. ONS는 **해당 저장소 환경**의 `solarops ons-status --period YYYY-MM`에서 `recent_runs`의 run_id·started_at·execution(dag_run_id, task_id, pod_name)을 확인합니다. Compose와 kind 저장소는 다르므로 Compose 결과로 kind 상태를 판단하지 않습니다.
+
+kind의 WSL 터미널에서 실제 작업을 대조합니다(조회만 수행):
+
+```bash
+export PATH="$PWD/.tools:$PWD/.tools/linux-amd64:$PATH"
+kubectl --kubeconfig artifacts/kubeconfig -n solarops exec airflow-scheduler-0 -c scheduler -- airflow dags list-runs solarops_ons_daily --state running --output json
+# 기록에서 확인한 Pod 이름을 사용. Secret/환경 전체 출력은 불필요.
+kubectl --kubeconfig artifacts/kubeconfig -n solarops get pod POD_NAME
+kubectl --kubeconfig artifacts/kubeconfig -n solarops logs POD_NAME --tail=80
+```
+
+작업이 살아 있으면 기다립니다. 종료가 확인되면 기존 Airflow 재시도/수동 Trigger 또는 같은 환경의 월별 `ons-sync --period`를 사용합니다. 새 시도가 성공해도 과거 running을 성공으로 덮어쓰지 않습니다. 최근20회 밖 기록은 해당 DAG 실행 이력과 보존 로그로 추적하며, 자동 TTL/강제 실패 조정기는 없습니다.

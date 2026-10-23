@@ -46,6 +46,7 @@ def build_report(settings, period, plant=None, source_kind=None):
     candidates = [dict(e, plant_id=r["plant_id"]) for r in snapshot for e in r["events"]["items"]]
     denominator = sum(m["expected_slots"] for m in metrics)
     observed = sum(m["observed_slots"] for m in metrics)
+    interpolation_unknown = sum(m["interpolation_unknown_slots"] for m in metrics)
     report = {
         "report_id": report_id,
         "org_id": settings.org,
@@ -62,6 +63,8 @@ def build_report(settings, period, plant=None, source_kind=None):
         "status": "complete" if complete else "partial_period",
         "days": len(metrics),
         "plant_count": len({r["plant_id"] for r in snapshot}),
+        "observed_slots": observed,
+        "interpolation_unknown_slots": interpolation_unknown,
         "estimated_energy_kwh": round(sum(m["estimated_energy_kwh"] for m in metrics), 3),
         "coverage": sum(m["observed_slots"] for m in metrics) / denominator
         if denominator
@@ -73,7 +76,7 @@ def build_report(settings, period, plant=None, source_kind=None):
             (m["source_interpolation_ratio"] or 0) * m["observed_slots"] for m in metrics
         )
         / observed
-        if observed
+        if observed > interpolation_unknown
         else None,
         "metrics": metrics,
         "issues": quality,

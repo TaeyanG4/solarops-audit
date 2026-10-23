@@ -9,6 +9,53 @@ REQUIRED = {
     "station": {"datetime", "ps_id", "poa_irradiance_wm2"},
 }
 
+ERROR_CODES = frozenset(
+    {
+        "UNKNOWN_PLANT_IN_SOURCE",
+        "UNKNOWN_PLANT",
+        "DUPLICATE_CONFLICT",
+        "SOURCE_VERSION_CONFLICT",
+        "HISTORICAL_RESTORE_REQUIRES_FLAG",
+        "SOURCE_RANGE_SHRINK",
+        "PUBLICATION_CONFLICT",
+        "PLANT_METADATA_CONFLICT",
+        "INJECTED_BEFORE_COMMIT",
+        "INJECTED_DURING_COMMIT",
+        "NONCANONICAL_INVERTER_ID",
+        "INVERTER_ID_OUT_OF_RANGE",
+        "TIMESTAMP_INVALID",
+        "TIMESTAMP_TIMEZONE_MISSING",
+        "TIMESTAMP_OFF_GRID",
+        "TIMESTAMP_FORMAT",
+        "NEGATIVE_DOCUMENT_COUNT",
+        "SOURCE_PATH_OUTSIDE_ROOT",
+        "MISSING_PUBLIC_SOURCE",
+        "NO_SOURCE_DATA_IN_WINDOW",
+        "NO_ACTIVE_PARTITIONS",
+    }
+)
+
+
+def failure_code(exc):
+    """Persist/print a classification, never arbitrary source or connection text."""
+    from botocore.exceptions import BotoCoreError, ClientError
+    from duckdb import Error as DuckDBError
+    from sqlalchemy.exc import SQLAlchemyError
+
+    if isinstance(exc, (ValueError, RuntimeError)):
+        code = str(exc).split(":", 1)[0]
+        if code in ERROR_CODES:
+            return code
+    if isinstance(exc, (ValueError, DuckDBError)):
+        return "BR_INPUT_INVALID"
+    if isinstance(exc, SQLAlchemyError):
+        return "BR_CATALOG_ERROR"
+    if isinstance(exc, (BotoCoreError, ClientError)):
+        return "BR_OBJECT_STORE_ERROR"
+    if isinstance(exc, OSError):
+        return "BR_IO_ERROR"
+    return "BR_UNEXPECTED_ERROR"
+
 
 def read_metadata(path: Path):
     with path.open(encoding="utf-8-sig", newline="") as f:

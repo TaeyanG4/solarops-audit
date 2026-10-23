@@ -119,14 +119,14 @@ def test_postgres_report_publication(tmp_path, sample, monkeypatch, boundary):
     "boundary",
     ["absent", "existing", "duplicate", "restore", "before_commit", "during_commit", "trace"],
 )
-def test_postgres_partition_publication(tmp_path, sample, monkeypatch, boundary):
+def test_postgres_partition_publication(tmp_path, sample, monkeypatch, boundary, capsys):
     settings = Settings(root=tmp_path, org="test-" + uuid.uuid4().hex[:12])
     if boundary == "trace":
         check_trace(settings, sample, monkeypatch)
     elif boundary == "restore":
         check_restore(settings, sample)
     elif boundary.endswith("commit"):
-        check_failed_partition(settings, sample, boundary)
+        check_failed_partition(settings, sample, boundary, monkeypatch, capsys)
     else:
         check_overlap(settings, sample, tmp_path, monkeypatch, boundary)
 

@@ -6,11 +6,11 @@
 
 BR-PVGen은 고정 배포 다운로드·역사 구간 재처리입니다. ONS는 실제 갱신되는 월별 CSV를 매일 조건부 HTTP GET하고 변경 날짜만 게시합니다. ETag·원본 SHA·성공 cursor·기대 run ID 비교로 재처리와 역순 게시를 제어합니다. 원문 MWmed와 시각을 보존하며 시간대가 미명시라 기존 추정 kWh에 합산하지 않습니다. [수집·일정·확장 절차](../guides/data-ingestion.md).
 
-선택 기준은 로컬에서 재현 가능하고, 메모리 사용을 제한하며, 결과의 출처와 재시도 경계를 설명할 수 있는가입니다. 아래 버전은 직접 의존성 및 현재 인프라 설정 기준입니다. 전이 의존성은 [uv.lock](../../uv.lock), 현재 배포 커밋·이미지 식별자는 [v0.5.2 릴리스](../releases/0.5.2.json), 이전 이미지 목록은 [image-versions.json](../image-versions.json)을 확인합니다.
+선택 기준은 로컬에서 재현 가능하고, 메모리 사용을 제한하며, 결과의 출처와 재시도 경계를 설명할 수 있는가입니다. 아래 버전은 직접 의존성 및 현재 인프라 설정 기준입니다. 전이 의존성은 [uv.lock](../../uv.lock), 현재 배포 커밋·이미지 식별자는 [현재 상태](../../handoff.md)와 연결된 릴리스 기록, 이전 이미지 목록은 [image-versions.json](../image-versions.json)을 확인합니다.
 
 ## 처리와 저장
 
-MinIO는 공식 release tag를 지정한 자체 빌드입니다. 실행 바이너리의 `--version`은 `DEVELOPMENT.GOGET`으로 표시됩니다. 실제 S3 동작은 검증했지만 소스 아카이브 digest 고정·바이너리 재현 빌드까지 검증한 것은 아닙니다. Helm chart의 기본 app_version(3.2.2)과 실제 이미지의 Airflow(3.3.2)도 구별합니다.
+MinIO는 공식 release tag를 지정한 자체 빌드입니다. 실행 바이너리의 `--version`은 `DEVELOPMENT.GOGET`으로 표시됩니다. v0.5.3에서 소스 archive SHA256·Go/Debian 기반 digest를 고정하고 캐시 사용 빌드·격리 S3 검사를 실행했습니다. 실행 중 기존 MinIO는 교체하지 않았으며 캐시 없는 두 호스트 바이너리 재현 빌드까지 검증한 것은 아닙니다. [입력·검사 범위](../benchmarks/quality-v0.5.3.md#minio-빌드-입력). Helm chart의 기본 app_version(3.2.2)과 실제 이미지의 Airflow(3.3.2)도 구별합니다.
 
 | 기술 / 버전 | 담당 역할과 선택 근거 | 대안·비용·재검토 조건 |
 |---|---|---|
