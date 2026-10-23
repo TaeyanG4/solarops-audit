@@ -62,6 +62,8 @@ docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio 
 
 새 파일: 별도 폴더에서 `solarops source checksum`으로 확인 후 `solarops ingest`의 metadata/inverter/station 경로를 지정합니다. 공개 자료는 `--source-kind public`, 테스트는 synthetic. 데이터가 수정됐다면 새 버전을 주어야 합니다. 원본 파일을 직접 덮어써서 수정하지 않습니다.
 
+실행 조사: [실행 이력](http://127.0.0.1:8502/?view=runs&run_plant=PS_001)에서 실행 단위·상태·정확한 발전소 ID로 좁힙니다. 전체 기간의 공개·합성 처리 이력을 조회하며 보고 월 필터와 별개입니다. 주소를 저장하면 페이지·선택한 상세까지 복원합니다. 상세의 날짜에서 하위 파티션으로 이동하고 **상위 작업 보기**로 돌아옵니다. 요약 건수는 상태 필터 적용 전이며, 과거 완료 기록이 현재 활성 결과임을 보장하지 않습니다.
+
 보고서 월: `solarops report --period 2024-04 --plant PS_001 --source-kind public`. 생성된 보고서는 불변 UUID 경로를 가지며 최신 보고서 포인터만 변경됩니다. 이미 발행한 보고서는 후속 적재로 자동 수정되지 않으므로 월간 보고서를 다시 생성해야 합니다.
 
 동시에 생성하면 스냅샷 조회 시작 시각이 더 새로운 보고서를 최신으로 유지합니다. 먼저 시작한 보고서가 늦게 끝나더라도 과거 UUID로 조회할 수 있습니다. 업로드/DB 커밋 실패는 이전 활성 보고서를 유지합니다.

@@ -1,5 +1,11 @@
 # 개발에 사용한 AI 스킬
 
+## 실행 이력 탐색 보완 — 2026-10-23
+
+- UI UX Pro Max의 `filter URL state keyboard navigation --domain ux -n 3` 검색을 주소 복원·키보드 조회·보이는 레이블에 적용했습니다.
+- Impeccable의 harden/craft-floor 지침으로 빈 결과·잘못된 주소·조회 범위 설명을 점검하고 세 너비 캡처를 검토했습니다. 이 범위에서 별도 에이전트 검수나 detector를 새로 실행한 것으로 기록하지 않습니다.
+- Agent Browser로 발전소/상태·새로고침·뒤로/앞으로·상하위 링크·1440/768/390px를 확인했습니다. 기존 관련 테스트 5개와 단발성 브라우저 확인을 사용했으며 영구 테스트·검사 스크립트는 추가하지 않았습니다. [실제 결과·이미지·한계](../worklog/2026-10-23-run-navigation.md).
+
 ## 현재 워크스페이스에 적용한 목적
 
 최신 근거는 [사이드바·보고서·관리 검증](../benchmarks/workspace-20261023.md), [실제 캡처](../portfolio/images/workspace-20261023/README.md), [현재 DESIGN.md](../../DESIGN.md)입니다. 아래 초기 개선과 수평 Energy Desk 기록은 단계별 이력이며 최신 화면과 구분합니다.

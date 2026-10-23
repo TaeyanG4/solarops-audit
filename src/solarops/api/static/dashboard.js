@@ -2,38 +2,57 @@
 
 const $ = (selector) => document.querySelector(selector);
 const view = $("#view");
-const query = new URLSearchParams(location.search);
-const state = {
-  view: query.get("view") || "overview",
-  period: query.get("period") || "2024-04",
-  source: query.get("source") || "all",
-  plant: query.get("plant") || "PS_001",
-  day: query.get("day") || "",
-  status: "",
-  level: "batch",
-  offset: 0,
-  run: "",
-  review: query.get("review") || "all",
-  search: query.get("search") || "",
-};
-if (!["all", "partial", "invalid", "missing"].includes(state.review))
-  state.review = "all";
-if (
-  ![
-    "overview",
-    "plants",
-    "quality",
-    "sources",
-    "system",
-    "reports",
-    "runs",
-    "series",
-  ].includes(state.view)
-)
-  state.view = "overview";
-if (!["all", "public", "synthetic"].includes(state.source))
-  state.source = "all";
-if (!/^\d{4}-\d{2}$/.test(state.period)) state.period = "2024-04";
+function readURLState() {
+  const query = new URLSearchParams(location.search);
+  const next = {
+    view: query.get("view") || "overview",
+    period: query.get("period") || "2024-04",
+    source: query.get("source") || "all",
+    plant: query.get("plant") || "PS_001",
+    day: query.get("day") || "",
+    status: query.get("status") || "",
+    level: query.get("level") || "batch",
+    offset: Number(query.get("offset") || 0),
+    run: query.get("run") || "",
+    runPlant: query.get("run_plant") || "",
+    review: query.get("review") || "all",
+    search: query.get("search") || "",
+  };
+  if (!["all", "partial", "invalid", "missing"].includes(next.review))
+    next.review = "all";
+  if (
+    ![
+      "overview",
+      "plants",
+      "quality",
+      "sources",
+      "system",
+      "reports",
+      "runs",
+      "series",
+    ].includes(next.view)
+  )
+    next.view = "overview";
+  if (!["all", "public", "synthetic"].includes(next.source))
+    next.source = "all";
+  if (!/^\d{4}-\d{2}$/.test(next.period)) next.period = "2024-04";
+  if (
+    !["", "running", "validated", "committed", "failed"].includes(next.status)
+  )
+    next.status = "";
+  if (!["all", "batch", "partition"].includes(next.level)) next.level = "batch";
+  if (!Number.isSafeInteger(next.offset) || next.offset < 0) next.offset = 0;
+  if (
+    !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
+      next.run,
+    )
+  )
+    next.run = "";
+  if (!/^[A-Za-z0-9][A-Za-z0-9_-]{0,79}$/.test(next.runPlant))
+    next.runPlant = "";
+  return next;
+}
+const state = readURLState();
 let revision = 0;
 let controller;
 const number = (value, digits = 0) =>
@@ -98,9 +117,16 @@ function workspaceURL(changes = {}) {
     if (next.review !== "all") params.set("review", next.review);
     if (next.search) params.set("search", next.search);
   }
+  if (next.view === "runs") {
+    if (next.level !== "batch") params.set("level", next.level);
+    if (next.status) params.set("status", next.status);
+    if (next.offset) params.set("offset", next.offset);
+    if (next.run) params.set("run", next.run);
+    if (next.runPlant) params.set("run_plant", next.runPlant);
+  }
   return `?${params}`;
 }
-function workspaceLink(text, changes, className) {
+function workspaceLink(text, changes, className = "") {
   const element = link(text, workspaceURL(changes));
   element.className = className;
   return element;
@@ -203,6 +229,12 @@ async function get(path, signal) {
 function navigate(changes) {
   if (changes.view && changes.view !== state.view)
     window.scrollTo({ top: 0, behavior: "instant" });
+  if (
+    state.view === "runs" &&
+    (!changes.view || changes.view === "runs") &&
+    workspaceURL(changes) !== workspaceURL()
+  )
+    history.pushState(null, "", workspaceURL(changes));
   Object.assign(state, changes);
   render();
 }
@@ -1110,7 +1142,15 @@ async function runs(signal) {
       "작업과 일별 파티션을 구분하고, 실패 원인과 재실행 기록을 확인합니다.",
     ),
   );
-  const filters = node("div", undefined, "filters");
+  root.append(
+    node(
+      "p",
+      "전체 처리 기간 · 공개 자료와 합성 시험 포함. 보고 월·자료 구분과 별도로 실행 단위·상태·발전소를 선택합니다.",
+      "subtext",
+    ),
+  );
+  const filters = node("form", undefined, "filters");
+  filters.setAttribute("aria-label", "실행 이력 필터");
   const reload = (key, value) => navigate({ [key]: value, offset: 0, run: "" });
   filters.append(
     select(
@@ -1136,7 +1176,46 @@ async function runs(signal) {
       (value) => reload("status", value),
     ),
   );
-  filters.append(button("새로고침", render));
+  const plantLabel = node("label", "발전소 ID (정확히 일치)"),
+    plantInput = node("input"),
+    submit = node("button", "조회", "secondary");
+  plantInput.type = "search";
+  plantInput.name = "run_plant";
+  plantInput.setAttribute("aria-label", "발전소 ID");
+  plantInput.placeholder = "예: PS_001, DEMO_01";
+  plantInput.autocomplete = "off";
+  plantInput.spellcheck = false;
+  plantInput.maxLength = 80;
+  plantInput.pattern = "[A-Za-z0-9][A-Za-z0-9_\\-]{0,79}";
+  plantInput.value = state.runPlant;
+  plantLabel.append(plantInput);
+  submit.type = "submit";
+  filters.onsubmit = (event) => {
+    event.preventDefault();
+    if (filters.reportValidity()) reload("runPlant", plantInput.value.trim());
+  };
+  filters.append(plantLabel, submit, button("새로고침", render));
+  if (
+    state.runPlant ||
+    state.status ||
+    state.level !== "batch" ||
+    state.offset ||
+    state.run
+  )
+    filters.append(
+      button(
+        "필터 초기화",
+        () =>
+          navigate({
+            runPlant: "",
+            status: "",
+            level: "batch",
+            offset: 0,
+            run: "",
+          }),
+        "text-button",
+      ),
+    );
   root.append(filters);
   const params = new URLSearchParams({
     level: state.level,
@@ -1144,18 +1223,25 @@ async function runs(signal) {
     offset: String(state.offset),
   });
   if (state.status) params.set("status", state.status);
+  if (state.runPlant) params.set("plant", state.runPlant);
   const data = await get(`/api/v1/runs?${params}`, signal),
     count = data.status_counts;
+  // A bookmarked page can outlive its records; land on the last available page.
+  if (state.offset > 0 && state.offset >= data.total) {
+    state.offset = Math.max(0, Math.floor((data.total - 1) / 20) * 20);
+    syncURL();
+    return runs(signal);
+  }
   const cards = node("div", undefined, "cards");
   cards.append(
     card(
       "전체 기록",
       number(Object.values(count).reduce((a, b) => a + b, 0)),
       "건",
-      "선택한 실행 단위 기준",
+      "실행 단위·발전소 기준, 상태 필터 적용 전",
       true,
     ),
-    card("완료", number(count.committed || 0), "건", "활성 결과 공개 완료"),
+    card("완료", number(count.committed || 0), "건", "처리 및 게시 완료 기록"),
     card("실패", number(count.failed || 0), "건", "장애 주입 검증 기록 포함"),
     card(
       "실행 / 공개 대기",
@@ -1167,7 +1253,13 @@ async function runs(signal) {
   root.append(cards);
   const list = panel("최근 실행", "완료 또는 마지막 기록 시각의 최신순 · UTC");
   if (!data.items.length)
-    list.append(node("p", "선택한 상태의 실행 기록이 없습니다.", "subtext"));
+    list.append(
+      node(
+        "p",
+        "선택한 발전소·실행 단위·상태의 기록이 없습니다. 필터를 바꾸거나 초기화해 주세요.",
+        "subtext",
+      ),
+    );
   else
     list.append(
       table(
@@ -1192,11 +1284,7 @@ async function runs(signal) {
             run.elapsed_ms === undefined
               ? "기록 없음"
               : `${number(run.elapsed_ms / 1000, 2)}초`,
-            button(
-              "상세 보기",
-              () => navigate({ run: run.run_id }),
-              "text-button",
-            ),
+            workspaceLink("상세 보기", { run: run.run_id }, "text-button"),
           ];
         }),
       ),
@@ -1247,6 +1335,19 @@ async function runs(signal) {
       grid.append(item);
     });
     detail.append(grid);
+    if (run.batch_id)
+      detail.append(
+        workspaceLink(
+          "상위 작업 보기",
+          {
+            level: "batch",
+            status: "",
+            offset: 0,
+            run: run.batch_id,
+          },
+          "text-button",
+        ),
+      );
     if (run.error_code)
       detail.append(
         node(
@@ -1262,7 +1363,12 @@ async function runs(signal) {
         table(
           ["날짜", "상태", "행", "오류"],
           run.partitions.map((row) => [
-            row.partition_id,
+            workspaceLink(row.partition_id, {
+              level: "partition",
+              status: "",
+              offset: 0,
+              run: row.run_id,
+            }),
             badge(row.status),
             number(row.rows),
             row.error_code || "—",
@@ -1777,6 +1883,10 @@ $("#period").onchange = () => {
   if ($("#period").reportValidity()) navigate({ period: $("#period").value });
 };
 $("#source").onchange = () => navigate({ source: $("#source").value });
+window.addEventListener("popstate", () => {
+  Object.assign(state, readURLState());
+  render();
+});
 $("#refresh").onclick = render;
 get("/health")
   .then((data) => {
