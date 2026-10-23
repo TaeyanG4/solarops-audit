@@ -6,7 +6,7 @@
 
 BR-PVGen은 고정 배포 다운로드·역사 구간 재처리입니다. ONS는 실제 갱신되는 월별 CSV를 매일 조건부 HTTP GET하고 변경 날짜만 게시합니다. ETag·원본 SHA·성공 cursor·기대 run ID 비교로 재처리와 역순 게시를 제어합니다. 원문 MWmed와 시각을 보존하며 시간대가 미명시라 기존 추정 kWh에 합산하지 않습니다. [수집·일정·확장 절차](../guides/data-ingestion.md).
 
-선택 기준은 로컬에서 재현 가능하고, 메모리 사용을 제한하며, 결과의 출처와 재시도 경계를 설명할 수 있는가입니다. 아래 버전은 직접 의존성 및 현재 인프라 설정 기준입니다. 전이 의존성은 [uv.lock](../../uv.lock), 배포 이미지 digest는 누적 목록 [image-versions.json](../image-versions.json)(현재 0.5.6 포함) 한 곳에서, 릴리스별 소스 커밋은 [docs/releases/](../releases/0.5.6.json)에서 확인합니다.
+선택 기준은 로컬에서 재현 가능하고, 메모리 사용을 제한하며, 결과의 출처와 재시도 경계를 설명할 수 있는가입니다. 아래 버전은 직접 의존성 및 현재 인프라 설정 기준입니다. 전이 의존성은 [uv.lock](../../uv.lock), 배포 이미지 digest는 누적 목록 [image-versions.json](../image-versions.json)(현재 0.5.7 포함) 한 곳에서, 릴리스별 소스 커밋은 [docs/releases/](../releases/0.5.7.json)에서 확인합니다.
 
 ## 처리와 저장
 

@@ -4,7 +4,7 @@
 
 SolarOps는 **역사 CSV 분석과 갱신 원천의 증분 수집을 수행하는 배치 시스템**입니다. Python CLI가 처리와 쓰기를 담당하고 FastAPI 대시보드는 저장된 결과를 읽습니다. 같은 CLI를 네이티브, Compose, Airflow, Kubernetes 작업 Pod에서 실행합니다. ONS의 원문 단위·시각은 BR-PVGen의 추정 에너지와 분리합니다.
 
-설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 코드 v0.5.6 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
+설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 코드 v0.5.7 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
 
 **v0.4.2:** 독립 검토에서 재현한 입력 ID·추출·metadata·역순 게시 경계를 수정했습니다. 배치 시작 때 기대한 active와 비교해 교체하고 metadata도 같은 트랜잭션에 게시합니다. 충돌은 이전 결과를 유지한 채 명시적으로 실패하며 의도적 과거 복원은 `--restore`가 필요합니다. [실제 SQLite/PostgreSQL 검증](../benchmarks/integrity-v0.4.2.md).
 
@@ -135,7 +135,7 @@ DB와 객체 저장소 전체를 하나의 분산 트랜잭션으로 묶지는 �
 
 ## 구현·배포·검증의 범위
 
-최신 코드0.5.6은 보고서 선택키·품질이슈총계·읽기분석을 보완했습니다. 계산 v2·과거산출물은 유지합니다. [검사와 배포 상태](../benchmarks/quality-v0.5.6.md) · [현재 실행 환경](../../handoff.md). ONS 상태 UI의0.5.1 실행은 [이전 근거](../benchmarks/portfolio-finish-20261023.md)로 보존합니다.
+최신 코드 0.5.7은 보고서와 overview가 같은 지표 필수 필드 계약을 쓰고, 보고서 snapshot을 읽기 전용으로 먼저 읽습니다. 0.5.6은 보고서 선택키·품질이슈총계·읽기분석을 보완했습니다. 계산 v2·과거산출물은 유지합니다. [0.5.7 검사와 배포](../benchmarks/quality-v0.5.7.md) · [현재 실행 환경](../../handoff.md). ONS 상태 UI의0.5.1 실행은 [이전 근거](../benchmarks/portfolio-finish-20261023.md)로 보존합니다.
 
 v0.5.0에서 Compose dashboard/worker/Airflow와 kind Airflow/KPO를 갱신했습니다. [단일 명세](../../src/solarops/release.json)와 [v0.5.0 커밋·이미지 ID](../releases/0.5.0.json)를 연결하고 CI에서 선언 드리프트를 검사합니다. Compose Airflow는 중지 상태이며 과거 완료 Pod·보고서는 보존합니다. v0.4.2 당시의 환경별 동일 표본·재시도 검증은 [역사 근거](../benchmarks/integrity-v0.4.2.md)로 유지합니다.
 

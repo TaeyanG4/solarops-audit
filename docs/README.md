@@ -10,7 +10,7 @@
 | 현재 진행도와 다음 과제 | [구현 상태](IMPLEMENTATION_STATUS.md), [점수 기반 계획](../plan.md), [인계·진행 기록](../handoff.md), [날짜별 상세 기록](worklog/README.md), [버전별 변경](../CHANGELOG.md) |
 | 독립 기술 검토 | [독립 세션 평가](reviews/2026-10-23-independent.md), [재현·수용/보류 판단](worklog/2026-10-23-independent-review.md) |
 | 독립 모의 면접 평가 | [Fable·Astra 비교와 코드 재현](reviews/2026-10-23-interview.md), [Astra 전문](reviews/2026-10-23-interview-astra.md), [Fable 전문](reviews/2026-10-23-interview-fable.md) |
-| 산출물 개선·재평가 | [면접 제외 고정 루브릭](reviews/portfolio-rubric.md), [R5 원문·수용](reviews/2026-10-23-artifact-r5.md), [v0.5.6 검증](benchmarks/quality-v0.5.6.md), [세션 인계](worklog/2026-10-23-handoff-r5.md) |
+| 산출물 개선·재평가 | [면접 제외 고정 루브릭](reviews/portfolio-rubric.md), [R6 원문·수용](reviews/2026-10-23-artifact-r6.md), [R5 원문·수용](reviews/2026-10-23-artifact-r5.md), [v0.5.7 검증·배포](benchmarks/quality-v0.5.7.md). 반복 평가는 2026-10-23 사용자 요청으로 종료 |
 | 포트폴리오 설명 | [한 쪽 제출 요약](portfolio/SUBMISSION.md), [설계 질문5개](portfolio/DESIGN_QUESTIONS.md), [문제·설계·증거 사례](portfolio/CASE_STUDY.md), [최종 검증](benchmarks/portfolio-finish-20261023.md) |
 | 기술 선택 이해 | [버전·선택 이유·대안](architecture/technology-stack.md), [아키텍처·배포 경계·데이터 흐름·트랜잭션](architecture/system.md) |
 | 실제 사용·자료 진위 | [실행 기술·원본 해시·독립 계산·합성 시험 구분](benchmarks/stack-authenticity-20261023.md) |
@@ -19,6 +19,7 @@
 | 데이터 해석 | [실제 CSV 스키마·품질·에너지 계약](data-contract.md) |
 | 로컬 운영 | [화면·보고서](runbooks/operator.md), [DAG·백필](runbooks/dags.md), [실패·진단](runbooks/recovery.md), [백업·복원 시험](runbooks/backup-restore.md) |
 | 디자인·사용 스킬 | [새 디자인 시스템](../DESIGN.md), [워크스페이스·보고서·관리 검증](benchmarks/workspace-20261023.md), [스킬별 목적·결과물](development/skills.md), [최신 이미지](portfolio/images/workspace-20261023/README.md) |
+| 제품 소개 페이지 | [독립 랜딩페이지 실행·구성](../landing/README.md), [화면 검수와 한계](../landing/QA.md), [디자인 결정](../landing/DESIGN.md) |
 | 검사·패키징·기여 | [개발 안내](../CONTRIBUTING.md), [스크립트 목록](../scripts/README.md) |
 | 실행 증거 | [공개 전체 처리·Compose·kind](benchmarks/2026-10-22.md), [v0.3 화면·조회 성능](benchmarks/workspace-v0.3.0.md), [v0.3.1 유지보수](benchmarks/maintenance-v0.3.1.md), [v0.4 계산·진단·복원](benchmarks/reliability-v0.4.0.md) |
 | 파일럿 준비 | [수익화 판단](market/revenue-assessment.md), [제안과 범위](market/pilot.md), [측정 양식](market/pilot-scorecard.md), [인터뷰 양식](market/interview-template.md), [스키마 대응표](market/schema-mapping.csv) |
@@ -40,7 +41,7 @@
 
 `plan/`은 [원본 기획](plan/00_START_HERE.md)과 [SHA-256 목록](plan/MANIFEST.sha256)을 보존하는 영역입니다. 과거 예시 프롬프트·중단 조건·계획은 현재 실행 결과나 사용자의 현재 지시와 구별합니다. 최신 상태는 위 구현 상태 문서가 기준입니다.
 
-최신 v0.5.6: [보고서 선택·품질 집계·재현 근거](benchmarks/quality-v0.5.6.md). 이전 [v0.5.4 고정 저장소 배포](benchmarks/quality-v0.5.4.md). 이전 [v0.5.3 경계·빌드 입력](benchmarks/quality-v0.5.3.md)은 과거 근거입니다. 배포 상태는 [handoff](../handoff.md).
+최신 v0.5.7: [지표 계약 공유·읽기 전용 보고서 snapshot·배포 근거](benchmarks/quality-v0.5.7.md). 이전 v0.5.6: [보고서 선택·품질 집계·재현 근거](benchmarks/quality-v0.5.6.md). 이전 [v0.5.4 고정 저장소 배포](benchmarks/quality-v0.5.4.md). 이전 [v0.5.3 경계·빌드 입력](benchmarks/quality-v0.5.3.md)은 과거 근거입니다. 배포 상태는 [handoff](../handoff.md).
 
 이전 v0.5.2: [경계 수정·동등성·배포 검증](benchmarks/quality-v0.5.2.md) · [릴리스 이미지](releases/0.5.2.json).
 

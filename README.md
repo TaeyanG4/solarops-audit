@@ -4,6 +4,13 @@
 
 관측 슬롯이 모두 있어도 값이 모두 유효한 것은 아닙니다. SolarOps는 무효·누락·원본 보간을 구분하고, 검증한 결과만 게시하며, 실패하면 이전 결과를 유지합니다. Python 공통 CLI를 로컬, Docker, Airflow의 Kubernetes 작업 Pod에서 사용합니다.
 
+**무엇을 하나요**
+
+- **검증·계산:** 브라질 공개 BR-PVGen 51개 발전소 자료를 계약 검증·정규화하고, 일별 추정 발전량과 품질(관측·유효·누락·무효·원본 보간)을 함께 계산합니다.
+- **안전한 게시:** 검증을 통과한 일별 결과만 원자적으로 게시합니다. 게시가 실패하면 이전 결과를 유지하고, 재처리하면 같은 논리 해시로 확인합니다.
+- **추적 가능한 보고서:** 월간 보고서(HTML·CSV·계보 JSON)가 발행 당시의 원본 manifest 해시·입력·계산 버전을 보존합니다.
+- **같은 코드, 여러 실행 환경:** 로컬, Docker Compose, Airflow + KubernetesPodOperator가 같은 CLI를 호출하고 FastAPI 대시보드로 결과를 조회합니다.
+
 [한 쪽 요약](docs/portfolio/SUBMISSION.md) · [5분 재현](#빠른-실행) · [아키텍처](docs/architecture/system.md) · [설계 사례](docs/portfolio/CASE_STUDY.md) · [검사 CI](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml) · [전체 문서](docs/README.md)
 
 ![전체 현황 — BR-PVGen 공개 자료의 추정 에너지와 데이터 품질](docs/portfolio/images/workspace-20261023/overview.png)
@@ -86,16 +93,17 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 
 ## 실행 근거와 한계
 
-최신 구현은 **v0.5.6 · energy-interval-v2**입니다. 발전소·전체·자료 필터별 보고서를 독립적으로 보존하고 총 품질 이슈와 분석 경고를 구별합니다. [최신 검증](docs/benchmarks/quality-v0.5.6.md) · [재계산 가능한 성능 표본](docs/benchmarks/evidence/technical-20261023/README.md)과 [v0.5.3의 정상 입력 동등성·비용](docs/benchmarks/quality-v0.5.3.md)을 구분해 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
+최신 릴리스는 **v0.5.7 · energy-interval-v2**이며 Compose 대시보드와 kind Airflow/KPO에 배포했습니다. 보고서와 overview가 같은 지표 필수 필드 계약을 쓰고, 보간이 전부 불명인 날은 0%가 아닌 null로 표시합니다. [최신 검증·배포](docs/benchmarks/quality-v0.5.7.md) · [재계산 가능한 성능 표본](docs/benchmarks/evidence/technical-20261023/README.md)과 [v0.5.3의 정상 입력 동등성·비용](docs/benchmarks/quality-v0.5.3.md)을 구분해 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
 
 | 확인한 항목 | 결과 | 범위와 근거 |
 |---|---|---|
+| v0.5.7 릴리스 검사·배포 | 오프라인 142통과·14제외, 실제 PostgreSQL/MinIO 13통과, Compose 배포 전후 응답 비교, kind 3개 rollout·6개 Pod Ready | 단일 로컬 호스트. 새 scheduled KPO·성능 재측정은 미실행. [검사·배포](docs/benchmarks/quality-v0.5.7.md) |
 | 공개 역사 자료 처리 | 51개 발전소, 인버터 14,400,480행, 일별 파티션 12,572개 | 과거 전체 처리 근거이며 매 커밋마다 전체를 재실행한 수치가 아님. [스택·자료 실사](docs/benchmarks/stack-authenticity-20261023.md) |
 | 실제 ONS 정기 수집 | kind 9~10월 태양광 167,424행·51일, 실제 scheduled KPO 성공. Compose 재확인 변경 0일 | 두 환경 저장소는 독립. [명령·원본 SHA·수집 결과](docs/benchmarks/incremental-v0.5.0.md) |
 | 공개 일별 KPO 병렬 비교 | 동일 4일, 직렬 36.675초 → 동시 2개 19.339초. 결과 hash 4개 동일, CPU 합 24.3% 증가 | 단일 kind 호스트, 직렬 후 병렬 각 1회, 기동·캐시 영향 포함. 하나의 4일 CLI 배치와 비교하지 않음. [조건·기계 판독 결과](docs/benchmarks/incremental-v0.5.0.json) |
 | 실패·재현·최종 화면 | v0.5.1 기준 양 OS 각각 137통과·13제외, 격리 합성 7일 복구·보고서·종료, 1440/768/390px 확인 | 해당 버전의 과거 근거. [검증 기록](docs/benchmarks/portfolio-finish-20261023.md) · [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39915517455) |
 
-[최신 산출물 독립 평가 R5](docs/reviews/2026-10-23-artifact-r5.md)는 같은 고정 커밋을 대상으로 완료했습니다. 면접·개인 역량은 제외하고 코드·실행 근거·문서를 검토했습니다. 평가 후 정정한 hash 문서와 남은 지표 계약·SQL 문서 확인은 [현재 계획](plan.md)에 구분했습니다. [다른 세션 재개 지점](handoff.md) · [최신 검사 CI](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml). 점수는 품질 보증이 아니며 원문·실행 검사·한계를 함께 보존합니다.
+고정 20항목 [루브릭](docs/reviews/portfolio-rubric.md)으로 코드·실행 근거·문서를 독립 평가했습니다(면접·개인 역량 제외). 최근 결과는 [R5](docs/reviews/2026-10-23-artifact-r5.md) Astra 96 / Fable 94, [R6](docs/reviews/2026-10-23-artifact-r6.md) Fable 91이며, R6 지적 5건은 v0.5.7에서 보완했습니다. 반복 평가는 2026-10-23 사용자 요청으로 종료했습니다. 점수는 품질 보증이 아니며 원문·실행 검사·한계를 함께 보존합니다. [최신 검사 CI](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml).
 
 실제 PostgreSQL/MinIO, 복구·동시 조회, 모바일 접근성, 버전별 무결성 등 상세 증거는 [문서 목차](docs/README.md)에 모았습니다. 단일 호스트 kind는 고가용성 근거가 아니며 일회 비교는 일반적인 처리량·확장성을 입증하지 않습니다. 자동 접근성 검사 통과도 실제 보조공학 검사나 인증을 대체하지 않습니다.
 
@@ -127,11 +135,14 @@ AI 도구의 사용 범위·버전·채택하지 않은 제안은 [스킬 기록
 
 검증 대상은 로컬 엔지니어링 포트폴리오입니다. 고객 계약·매출·현장 고장 정답·고객 인증·외부 SLO·다른 물리 호스트의 재해복구는 미검증입니다. 저출력은 검토 후보이며 확정 고장이나 손실이 아닙니다. [현재 구현 상태](docs/IMPLEMENTATION_STATUS.md).
 
+라이선스: 이 비공개 저장소의 코드에는 아직 라이선스 파일이 없어 재사용 조건이 정해지지 않았습니다. 데이터는 BR-PVGen CC BY 4.0·ONS CC BY 조건을 따르고, 글꼴 Pretendard는 [SIL OFL 1.1](src/solarops/api/static/fonts/OFL.txt)입니다.
+
 ```text
 src/solarops/       CLI · 수집 · 분석 · 저장 · 보고서 · API
 tests/             데이터 계약 · 재처리 · 게시 · 보안 · 패키징
 dags/ / infra/     Airflow · Docker/Compose · kind/Helm
 scripts/           데모 · 운영 · 검증 · 데이터 · 릴리스
+landing/           제품 소개 정적 페이지(저장된 공개 집계 데모)
 docs/              출처 · 설계 · 운영 · 증거 · 날짜별 작업 기록
 plan.md            미완료 항목의 점수·의존성
 handoff.md         현재 상태와 다음 행동, 100줄 이하

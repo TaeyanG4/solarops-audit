@@ -20,6 +20,7 @@
 | 갱신 원천 | kind ONS 9~10월 태양광167,424행·51일, 실제 정기 KPO 성공. Compose 10월69,696행 재확인 변경0일 |
 | 제한 병렬 실행 | 동일 공개4일의 일별 task, 직렬36.675→동시2개19.339초(47.3% 단축), 4개 논리hash 동일. 총CPU 24.3% 증가 |
 | 실패 복구 | 격리 합성7일에서 커밋 실패 후 이전 게시 보존, 재실행hash 일치, 보고서 생성. 새 checkout CI에서도 실행 |
+| 현재 릴리스 v0.5.7 | 오프라인 142통과·14제외, 실제 PostgreSQL/MinIO 13통과, Compose 대시보드·kind Airflow/KPO 배포와 배포 전후 응답 비교. [검사·배포](../benchmarks/quality-v0.5.7.md) |
 
 수집과 성능은 [v0.5.0 측정 조건](../benchmarks/incremental-v0.5.0.md), 최종 화면·재현·CI는 [제출 마감 근거](../benchmarks/portfolio-finish-20261023.md)에 연결합니다. [4~5분 시연](DEMO_GUIDE.md) · [핵심 설계 질문 5개](DESIGN_QUESTIONS.md) · [아키텍처](../architecture/system.md).
 
