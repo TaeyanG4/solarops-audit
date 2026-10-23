@@ -51,7 +51,31 @@
       }
     ]
   },
-  "deployment": "pending",
+  "deployment": {
+    "public_api_sha256": {
+      "/api/v1/overview?period=2024-04&source_kind=public": "5821a74f3857a1e2db8e51374233d33979a1076b0a6883683c28b3082932eeb4",
+      "/api/v1/reports?period=2024-04&source_kind=public": "a7f93beb3b441de4b3572afe783f4efa093519662e5a2087941f1c47778dcd50"
+    },
+    "public_api_unchanged": true,
+    "checks": {
+      "/health": {
+        "status": "ok",
+        "mode": "local-read-only",
+        "version": "0.5.3"
+      },
+      "/ready": {
+        "status": "ready"
+      }
+    },
+    "compose_dashboard": "0.5.3 running",
+    "compose_airflow": "three 0.5.3 containers created and stopped",
+    "kind": "Helm revision 15; 3 rollouts successful; 6 service Pods ready; Airflow 0.5.3",
+    "dag_validation": {
+      "local": 7,
+      "kubernetes": 7
+    },
+    "new_scheduled_kpo_executed": false
+  },
   "independent_review": "pending same-commit round 2",
   "browser": {
     "1440": "all unknown -> unknown",
@@ -78,5 +102,14 @@
     "failures": 0,
     "errors": 0,
     "skipped": 0
+  },
+  "implementation_commit": "038a000b69befaa77efd918a0b9654ba866ce501",
+  "ci": {
+    "id": 39926445552,
+    "status": "success",
+    "platforms": [
+      "windows-latest",
+      "ubuntu-24.04"
+    ]
   }
 }

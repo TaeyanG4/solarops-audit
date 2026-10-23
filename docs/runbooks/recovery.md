@@ -44,7 +44,7 @@ kind는 재해복구 저장소가 아닙니다. 고객 도입 전 PostgreSQL dum
 
 ## ONS running 기록이 오래 남을 때
 
-`inspect-runs`는 BR `pipeline_run`용입니다. ONS는 **해당 저장소 환경**의 `solarops ons-status --period YYYY-MM`에서 `recent_runs`의 run_id·started_at·execution(dag_run_id, task_id, pod_name)을 확인합니다. Compose와 kind 저장소는 다르므로 Compose 결과로 kind 상태를 판단하지 않습니다.
+`inspect-runs`는 BR `pipeline_run`용입니다. ONS는 **해당 저장소 환경**의 `solarops ons-status --period YYYY-MM`에서 `recent_attempts`의 run_id·started_at·execution(dag_run_id, task_id, pod_name)을 확인합니다. Compose와 kind 저장소는 다르므로 Compose 결과로 kind 상태를 판단하지 않습니다.
 
 kind의 WSL 터미널에서 실제 작업을 대조합니다(조회만 수행):
 

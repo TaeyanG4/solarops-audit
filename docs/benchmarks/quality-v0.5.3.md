@@ -31,3 +31,7 @@ BR-PVGen은 고정 배포 자료의 선택 기간 upsert이며 사라진 날짜�
 Agent Browser의 작업 전용 세션과 격리 SQLite/합성 3슬롯씩 사용했습니다. 전체 불명 1440px, 혼합 390px, 명시 False 768px에서 실제 표시·가로 넘침 없음·페이지 오류 없음을 확인했습니다. 전체 UI 재검사나 접근성 인증을 주장하지 않습니다. 캡처와 서버 로그는 Git 제외 `artifacts/portfolio-quality-20261023/`에 보존합니다.
 
 범위 계산은 작은 합성 7일 정상 hash와 기존 공개 PS_001 파일의 min/max를 대조했습니다. 다운로드·전체 공개 재처리 없이 수행했고, [재현 명령](../worklog/2026-10-23-bounds-reproduction.md)을 별도로 보존합니다. 이 범위 측정은 전체 ingest 성능이 아닙니다.
+
+## 실제 배포
+
+[구현·이미지](../releases/0.5.3.json)의0.5.3을 Compose 대시보드·kind Airflow/KPO 선언에 반영했습니다. health0.5.3/ready정상, 공개2API SHA256 동일, local/Kubernetes각7DAG검사 통과, Helm15·3rollout·6서비스Pod Ready입니다. Compose Airflow3개는 생성 후 중지를 유지했습니다. [구현CI39926445552](https://github.com/TaeyanG4/solarops-audit/actions/runs/39926445552)는 양OS 성공입니다. 새 정기 KPO 실행이나 전체 공개 재처리는 하지 않았습니다.
