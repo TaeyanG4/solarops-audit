@@ -40,6 +40,8 @@
 
 `plan/`은 [원본 기획](plan/00_START_HERE.md)과 [SHA-256 목록](plan/MANIFEST.sha256)을 보존하는 영역입니다. 과거 예시 프롬프트·중단 조건·계획은 현재 실행 결과나 사용자의 현재 지시와 구별합니다. 최신 상태는 위 구현 상태 문서가 기준입니다.
 
-최신 v0.5.1: [제출 마감·ONS 상태 UI·재현 검증](benchmarks/portfolio-finish-20261023.md) · [릴리스 이미지](releases/0.5.1.json).
+최신 v0.5.2: [경계 수정·동등성·배포 검증](benchmarks/quality-v0.5.2.md) · [릴리스 이미지](releases/0.5.2.json).
+
+화면·제출 v0.5.1: [제출 마감·ONS 상태 UI·재현 검증](benchmarks/portfolio-finish-20261023.md) · [릴리스 이미지](releases/0.5.1.json).
 
 수집 기능 v0.5.0: [ONS 실제 정기 수집·Airflow 공개 병렬 측정](benchmarks/incremental-v0.5.0.md) · [릴리스 이미지](releases/0.5.0.json).

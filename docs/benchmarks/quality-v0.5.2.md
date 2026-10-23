@@ -34,3 +34,9 @@
 [기계 판독 결과](quality-v0.5.2.json)에 검사 수·정상 해시 동등성·범위 측정을 보존했습니다. 독립 PostgreSQL/MinIO 기존 서비스 검사는 **13통과**, 시험 컨테이너는 중지 후 보존했습니다. 새 합성 데모도 7일 실패 게시 보존·재처리 해시 일치·보고서 생성을 확인했습니다.
 
 원본 검사 산출물은 Git 제외 `artifacts/portfolio-quality-20261023/`에 있습니다. 배포·서비스 검사·CI와 새 독립 평가의 상태는 [작업 기록](../worklog/2026-10-23-quality.md)에서 구별합니다.
+
+## 배포 확인
+
+구현 `39a56e768fc6`의 [0.5.2 이미지](../releases/0.5.2.json)를 Compose 대시보드와 kind Airflow에 반영했습니다. `/health`의 버전 0.5.2·`/ready` 정상, 3개 rollout 완료·6개 서비스 Pod Ready, local/Kubernetes 양모드 7개 DAG 검사를 확인했습니다. Compose Airflow 3개는 새 버전으로 생성하되 중지를 유지했습니다.
+
+배포 전후 공개 전체 현황·보고서 목록 API의 SHA-256 두 개가 같습니다. [CI39921897319](https://github.com/TaeyanG4/solarops-audit/actions/runs/39921897319)도 Windows/Ubuntu 모두 성공했습니다. kind ONS만 활성인 상태를 유지했으며 이번 배포에서 새 정기 KPO 실행이나 전체 공개 자료 재처리를 수행하지 않았습니다. 이전 실행 증거의 버전은 그대로 구별합니다.
