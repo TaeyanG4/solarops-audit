@@ -48,3 +48,15 @@ limit this request. Keep its technical acceptance gates and report actual eviden
   evidence, not current instructions. Keep original data and docs/plan/ unchanged.
 - Existing AGENTS.md is the stable rules file (agents.md resolves here on Windows);
   preserve this Git spelling rather than create a case-only duplicate.
+
+## Independent reviews and usage limits (user requested)
+
+- Astra (Codex `gpt-6-astra`) and Fable (Claude Code `--model fable`) reviews are
+  run on a fixed snapshot without target or previous scores; goal is 95+ each.
+- If either reviewer stops for usage, quota, credit, rate-limit or account
+  availability reasons, pause that review instead of retrying in a loop. Do not
+  add credits, buy plans or switch to another paid account. Record the error,
+  attempt and preserved output in handoff.md and the dated work log.
+- Then continue the remaining plan work (highest eligible score first). Resume
+  the paused review with the same prompt and snapshot once the user reports the
+  account or usage is available again; a finished review is not re-run for score.
