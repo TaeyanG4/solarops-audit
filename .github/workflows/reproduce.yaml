@@ -1,0 +1,113 @@
+name: SolarOps clean-machine reproduction
+# Runs the README's three paths on a fresh GitHub-hosted Ubuntu machine:
+# Compose (PostgreSQL, MinIO, dashboard, Airflow), kind (Airflow + KPO) and real ONS collection.
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+concurrency:
+  group: solarops-reproduce
+  cancel-in-progress: false
+jobs:
+  reproduce:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Free runner disk for image builds
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          docker image prune -af > /dev/null
+          df -h /
+      - uses: astral-sh/setup-uv@94527f2e458b27549849d47d273a16bec83a01e9 # v7
+        with: {version: "0.11.29", python-version: "3.12"}
+      - name: Tool versions
+        run: |
+          docker version --format 'docker {{.Server.Version}}'
+          docker compose version
+          kubectl version --client
+          make --version | head -1
+
+      # Path 1: Python only
+      - run: make install
+      - run: uv run python scripts/demo/portfolio_demo.py --output data/reproduce/portfolio-demo
+
+      # Path 2: Docker Compose + Airflow
+      - name: make up-local
+        run: make up-local
+      - name: Wait for dashboard readiness
+        run: |
+          for i in $(seq 1 60); do
+            curl -fsS http://127.0.0.1:8502/ready && exit 0
+            sleep 5
+          done
+          exit 1
+      - run: make demo-services
+      - run: make test-services
+      - name: Real ONS collection (Compose worker)
+        run: |
+          mkdir -p artifacts
+          make -s ons-sync | tee artifacts/compose-ons-sync.json
+          make -s ons-status | tee artifacts/compose-ons-status.json
+      - run: make airflow-up
+      - name: Wait for Compose Airflow DAGs
+        run: |
+          compose="docker compose --env-file .env -f infra/compose/compose.yaml"
+          for i in $(seq 1 60); do
+            $compose exec -T airflow-scheduler airflow dags list 2>/dev/null | grep -q solarops_ons_daily && exit 0
+            sleep 10
+          done
+          exit 1
+      - run: make dag-validate
+      - name: Compose Airflow DAG runs (normal, retry, backfill, quality, report, ONS)
+        run: |
+          uv run python scripts/validation/airflow_checks.py --mode compose
+          uv run python scripts/validation/airflow_checks.py --mode compose --ons
+      - name: Stop Compose before kind (volumes kept)
+        run: make down-local
+
+      # Path 3: Kubernetes (kind + Airflow + KubernetesPodOperator)
+      - run: bash scripts/ops/install-k8s-tools.sh
+      - run: make k8s-bootstrap
+      - run: make k8s-deploy
+      - name: make k8s-smoke (KPO task Pods for synthetic DAGs)
+        run: make k8s-smoke
+      - name: Real ONS collection through Airflow KPO
+        run: uv run python scripts/validation/airflow_checks.py --mode k8s --ons
+      - name: Record result
+        if: always()
+        run: |
+          export KUBECONFIG="$PWD/artifacts/kubeconfig"
+          {
+            echo "## Clean-machine reproduction"
+            echo '```'
+            docker images --format '{{.Repository}}:{{.Tag}} {{.Size}}' | grep -E 'solarops|postgres|kindest' || true
+            kubectl get pods -n solarops -o wide 2>/dev/null || true
+            echo '```'
+            for f in artifacts/airflow-*-checks.jsonl; do
+              [ -f "$f" ] && { echo "### $f"; echo '```'; cut -c1-200 "$f"; echo '```'; }
+            done
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          docker compose --env-file .env -f infra/compose/compose.yaml --profile airflow ps -a || true
+          docker compose --env-file .env -f infra/compose/compose.yaml --profile airflow logs --tail 80 || true
+          export KUBECONFIG="$PWD/artifacts/kubeconfig"
+          kubectl get pods -A || true
+          kubectl -n solarops describe pods | tail -120 || true
+      - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        if: always()
+        with:
+          name: reproduce-evidence
+          path: |
+            artifacts/airflow-*-checks.jsonl
+            artifacts/compose-ons-*.json
+            artifacts/helm-rendered.yaml
+            data/reproduce/portfolio-demo/evidence.json
+          if-no-files-found: warn

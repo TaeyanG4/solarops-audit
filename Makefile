@@ -2,7 +2,7 @@ UV ?= uv
 export UV_PROJECT_ENVIRONMENT ?= .venv-linux
 export SOLAROPS_DATA_DIR ?= data/linux-native
 COMPOSE = docker compose --env-file .env -f infra/compose/compose.yaml
-.PHONY: install doctor lint test demo-sample demo-services download-metadata download-full up-local down-local db-migrate airflow-up dag-validate k8s-bootstrap k8s-deploy k8s-smoke serve test-services
+.PHONY: install doctor lint test demo-sample demo-services download-metadata download-full up-local down-local db-migrate airflow-up dag-validate k8s-bootstrap k8s-deploy k8s-smoke serve test-services ons-sync ons-status
 install:
 	$(UV) sync --frozen
 doctor:
@@ -39,6 +39,10 @@ dag-validate:
 	docker run --rm -v "$(CURDIR)/scripts/validation/validate_dags.py:/tmp/validate_dags.py:ro" --entrypoint python solarops-airflow:0.5.7 /tmp/validate_dags.py
 test-services:
 	$(UV) run python scripts/validation/service-test.py
+ons-sync:
+	$(COMPOSE) run --rm worker ons-sync
+ons-status:
+	$(COMPOSE) run --rm worker ons-status --period $$(date -u +%Y-%m)
 k8s-bootstrap:
 	bash scripts/ops/k8s-bootstrap.sh
 k8s-deploy:

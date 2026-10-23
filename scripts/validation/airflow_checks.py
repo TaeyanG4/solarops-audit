@@ -4,6 +4,7 @@ import argparse
 import json
 import subprocess
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 parser = argparse.ArgumentParser()
@@ -14,6 +15,9 @@ parser.add_argument("--from", dest="start")
 parser.add_argument("--to", dest="end")
 parser.add_argument("--source-version")
 parser.add_argument("--period")
+parser.add_argument(
+    "--ons", action="store_true", help="Run only the real ONS incremental collection DAG"
+)
 args = parser.parse_args()
 if args.source_kind == "public" and not all(
     (args.plant, args.start, args.end, args.source_version, args.period)
@@ -55,7 +59,8 @@ def command(*argv):
     return p.stdout
 
 
-log = root / "artifacts" / f"airflow-{args.mode}-{args.source_kind}-checks.jsonl"
+kind = "ons" if args.ons else args.source_kind
+log = root / "artifacts" / f"airflow-{args.mode}-{kind}-checks.jsonl"
 log.parent.mkdir(parents=True, exist_ok=True)
 cases = [
     ("solarops_ingest_daily", "normal", {}),
@@ -84,8 +89,11 @@ if args.source_kind == "public":
         ("solarops_quality_daily", "quality", common),
         ("solarops_report_monthly", "report", common),
     ]
+if args.ons:
+    # Real public network collection: previous and current month as of today (UTC).
+    cases = [("solarops_ons_daily", "ons", {"as_of": datetime.now(UTC).strftime("%Y-%m-%d")})]
 for dag, scenario, conf in cases:
-    run_id = f"{args.mode}-{args.source_kind}-{scenario}-{stamp}"
+    run_id = f"{args.mode}-{kind}-{scenario}-{stamp}"
     command("dags", "unpause", dag)
     try:
         command("dags", "trigger", dag, "--run-id", run_id, "--conf", json.dumps(conf))
@@ -106,4 +114,7 @@ for dag, scenario, conf in cases:
             raise TimeoutError(run_id)
     finally:
         command("dags", "pause", dag)
-print(f"Completed {args.source_kind}: " + ", ".join(case[1] for case in cases), flush=True)
+print(
+    f"Completed {'ons' if args.ons else args.source_kind}: " + ", ".join(case[1] for case in cases),
+    flush=True,
+)
