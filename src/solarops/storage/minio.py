@@ -51,7 +51,7 @@ class ObjectStore:
                 out.flush()
                 os.fsync(out.fileno())
             if checksum(staged) != digest:
-                raise ValueError("Immutable raw object checksum differs")
+                raise ValueError("RAW_OBJECT_CHECKSUM_MISMATCH: immutable raw checksum differs")
             # Link a completed file atomically without replacing a concurrent winner.
             # Keep staging evidence; it shares bytes with the published file on success.
             try:
@@ -59,12 +59,12 @@ class ObjectStore:
             except FileExistsError:
                 pass
         if checksum(target) != digest:
-            raise ValueError("Immutable raw object checksum differs")
+            raise ValueError("RAW_OBJECT_CHECKSUM_MISMATCH: immutable raw checksum differs")
         if self.client:
             try:
                 obj = self.client.head_object(Bucket=self.bucket, Key=key)
                 if obj["Metadata"].get("sha256") != digest:
-                    raise ValueError("Immutable raw object checksum differs")
+                    raise ValueError("RAW_OBJECT_CHECKSUM_MISMATCH: immutable raw checksum differs")
             except ClientError as exc:
                 if exc.response["Error"]["Code"] not in ("404", "NoSuchKey"):
                     raise

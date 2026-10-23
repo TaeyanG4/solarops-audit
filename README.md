@@ -86,7 +86,7 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 
 ## 실행 근거와 한계
 
-최신 구현은 **v0.5.4 · energy-interval-v2**입니다. 실패 기록의 2차 오류에도 원래 원인을 유지하고 안전한 필드 진단을 제공합니다. [최신 검증](docs/benchmarks/quality-v0.5.4.md)과 [v0.5.3의 정상 입력 동등성·비용](docs/benchmarks/quality-v0.5.3.md)을 구분해 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
+최신 구현은 **v0.5.5 · energy-interval-v2**입니다. 원본 체크섬 오류를 구별하고 새 보고서에 원본 인버터 개수·범위를 기록해 품질 분모 변화를 조사할 수 있습니다. [최신 검증](docs/benchmarks/quality-v0.5.5.md)과 [v0.5.3의 정상 입력 동등성·비용](docs/benchmarks/quality-v0.5.3.md)을 구분해 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
 
 | 확인한 항목 | 결과 | 범위와 근거 |
 |---|---|---|
@@ -103,6 +103,9 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 
 전체 현황·발전소·데이터 품질·월간 보고서·실행 이력·데이터 출처를 기능별 사이드바로 묶었습니다. 보고서는 생성 당시 자료의 스냅샷이며 현재 게시 결과와 비교할 수 있습니다. 이전 보고서를 새 값으로 덮어쓰지 않습니다.
 
+<details>
+<summary>월간 보고서 화면과 사용한 개발 스킬</summary>
+
 ![월간 보고서 — 요약·품질·발행 근거를 같은 본문에서 확인](docs/portfolio/images/workspace-20261023/report.png)
 
 [보고서 확대](docs/portfolio/images/workspace-20261023/report.png?raw=1) · [ONS 수집 상태 화면](docs/portfolio/images/portfolio-finish-20261023/ons-readme.png?raw=1) · [1440/768/390px 검증](docs/benchmarks/workspace-20261023.md) · [화면 사용법](docs/runbooks/operator.md).
@@ -115,6 +118,8 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 | [Web Design Guidelines](https://github.com/vercel-labs/agent-skills) | 링크·폼·주소 상태·포커스·웹 사용성 검사 |
 
 AI 도구의 사용 범위·버전·채택하지 않은 제안은 [스킬 기록](docs/development/skills.md)에 공개했습니다. 스킬은 개발 도구이며 제품 실행 의존성이 아닙니다.
+
+</details>
 
 ## 범위와 기록
 

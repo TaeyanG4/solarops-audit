@@ -63,3 +63,5 @@ kubectl --kubeconfig artifacts/kubeconfig -n solarops logs POD_NAME --tail=80
 `FAILURE_RECORD_WRITE_FAILED` 경고는 run_id·대상 저장소·원래 안전 코드를 남깁니다. 실패 기록만 best effort이며 정상 게시 트랜잭션 오류를 숨기지 않습니다. CLI는 원래 원인으로 종료하고 기존 active/cursor는 유지합니다. DB에 실패 기록을 남기지 못한 시도는 running으로 남을 수 있으므로 Airflow/Pod/CLI 로그와 기존 진단 절차를 대조합니다. 경과 시간만으로 실행 중인 작업을 실패로 바꾸지 않습니다.
 
 BR 입력 코드에서 `INVERTER`는 `total_active_power_w`, `STATION`은 `poa_irradiance_wm2`를 뜻합니다. `_VALUE_NOT_NUMERIC`는 해당 값, `_INTERPOLATION_INVALID`는 `interpolated_keys_` 접두 컬럼, `_DOCUMENT_COUNT_INVALID`는 `document_count_` 접두 컬럼의 파싱 실패입니다. 원문 값/경로/접속 정보는 로그에 포함하지 않습니다. 정렬 후 검증이므로 원본 레코드 번호는 제공하지 않습니다. raw 계보의 해당 파일·필드를 조사하세요.
+
+`RAW_OBJECT_CHECKSUM_MISMATCH`는 BR/ONS 공통 원본 캡처/기존 raw/S3 SHA메타데이터 불일치입니다. 입력 파싱 오류와 구별합니다. 원본과 로컬raw의 SHA, 계보 digest, S3메타데이터를 대조하고 복사중 변경 여부를 조사하세요. 기존 raw/active를 덮어쓰거나 삭제하지 말고 검증한 원본을 준비해 재시도합니다.

@@ -76,6 +76,8 @@ def failure_code(exc):
     """Persist only known domain codes; never exception text or connection details."""
     if isinstance(exc, (ValueError, RuntimeError)):
         code = str(exc).split(":", 1)[0]
+        if code == "RAW_OBJECT_CHECKSUM_MISMATCH":
+            return code
         if code in ERROR_CODES:
             return code
     if isinstance(exc, urllib.error.HTTPError):

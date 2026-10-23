@@ -45,3 +45,7 @@ BR 입력 버전은 선택 기간의 upsert이며 전체 철회 snapshot이 아�
 CSV/API의 `source_interpolation_ratio`는 확인된 true/전체 관측 비중이며 보간이 아닌 비중을 뜻하지 않습니다. 전부 불명일 때도 이 v2 필드는0일 수 있으므로 반드시 `observed_slots`와 `interpolation_unknown_slots`를 함께 읽습니다. HTML의 ‘알 수 없음’과 같은 사실을 숫자+불명 수로 전달하는 계약입니다.
 
 시간대 검증 범위는 UTC와 기존 뉴욕 DST23/25시간 시나리오입니다. 자정에 전환하는 모든 IANA 시간대의 날짜 경계는 검증하지 않았습니다. 임의 시간대를 운영에 적용하기 전에 해당 날짜 경계 검증이 필요합니다.
+
+v0.5.5 새 일별 manifest의 `source_inverter_bounds`는 그 날짜와 겹치는 인버터ID별 전체 원본 `start_utc`/`last_observed_utc`를 보존합니다. 마지막 시각은 마지막 관측 슬롯의 시작입니다. 설비대수/실제가동기간이 아니며 새 보고서의 `source_inverter_count`(CSV/HTML/API)로 분모변화를 조사할 수 있습니다. 과거 manifest에 기록이 없으면 null/기록없음이며 소급 추정하지 않습니다. 이 계보는 v2논리hash 밖이고 지표 계산은 그대로입니다.
+
+인버터 시각은 전체 원본에서 분모를 만들므로 요청밖행도 검증합니다. 기상은 분모를 만들지 않아 요청기간의 행과 SQL파싱불가행을 검증하며, 파싱가능한 요청밖 기상행을 전수 검증하지 않습니다. 한 ingest의 source_objects는 모두 같은 source_kind이며 첫객체로 필터하는 월조회는 이 쓰기계약에 한정됩니다.

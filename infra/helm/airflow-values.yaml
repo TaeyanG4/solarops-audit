@@ -1,9 +1,9 @@
 executor: LocalExecutor
 airflowVersion: "3.3.2"
 defaultAirflowRepository: solarops-airflow
-defaultAirflowTag: "0.5.4"
+defaultAirflowTag: "0.5.5"
 images:
-  airflow: {repository: solarops-airflow, tag: "0.5.4", pullPolicy: IfNotPresent}
+  airflow: {repository: solarops-airflow, tag: "0.5.5", pullPolicy: IfNotPresent}
 postgresql: {enabled: false}
 redis: {enabled: false}
 statsd: {enabled: false}

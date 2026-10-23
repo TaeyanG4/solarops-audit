@@ -1,6 +1,6 @@
 [project]
 name = "solarops-audit"
-version = "0.5.4"
+version = "0.5.5"
 description = "Reproducible photovoltaic data quality audits and estimated-energy reports"
 requires-python = ">=3.12,<3.13"
 dependencies = [

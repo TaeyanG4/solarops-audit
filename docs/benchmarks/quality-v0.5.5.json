@@ -1,0 +1,46 @@
+{
+  "release": "0.5.5",
+  "baseline_review_commit": "36ac6ff937b06a481988d9264c65ac1a9597a59a",
+  "normal_input": {
+    "normal_days": 7,
+    "normal_rows": 1342,
+    "logical_hashes_unchanged": true,
+    "inverter_removal_expected_slots": {
+      "before": 1344,
+      "after": 672
+    },
+    "limitation": "Per-inverter disappearance is accepted by source-bound denominator contract; not equipment inventory."
+  },
+  "checks": {
+    "offline": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "14",
+      "tests": "154",
+      "time": "33.720",
+      "timestamp": "2026-10-23T18:35:32.102890+09:00",
+      "hostname": "DESKTOP-BKFCA3T"
+    },
+    "services": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "13",
+      "time": "23.241",
+      "timestamp": "2026-10-23T18:35:54.929084+09:00",
+      "hostname": "DESKTOP-BKFCA3T"
+    }
+  },
+  "browser": {
+    "viewports": [
+      1440,
+      390
+    ],
+    "inverter_count": 2,
+    "horizontal_overflow": false,
+    "preview_and_browser_stopped": true
+  },
+  "deployment": "pending"
+}

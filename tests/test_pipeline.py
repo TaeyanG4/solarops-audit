@@ -235,6 +235,13 @@ def test_report_api_and_lineage(settings, sample):
     assert client.post(freshness_path).status_code == 405
     original_bytes = client.get(path + "manifest.json").content
     manifest = json.loads(original_bytes)
+    assert all(m["source_inverter_count"] == 2 for m in manifest["metrics"])
+    assert all(set(m["source_inverter_bounds"]) == {"1", "2"} for m in manifest["partitions"])
+    assert all(
+        b["start_utc"].endswith("+00:00") and b["last_observed_utc"].endswith("+00:00")
+        for m in manifest["partitions"]
+        for b in m["source_inverter_bounds"].values()
+    )
     catalog = Catalog(settings, read_only=True)
     legacy = deepcopy(manifest)
     legacy.pop("selection")
@@ -271,6 +278,25 @@ def test_report_api_and_lineage(settings, sample):
     assert changed["status"] == "changed" and changed["reason"] == "publication_changed"
     assert changed["report_partition_count"] == 7 and changed["current_partition_count"] == 9
     assert client.get(scoped_path).json()["current_partition_count"] == 7
+    assert client.get(path + "manifest.json").content == original_bytes
+    # Historical manifests have no observation inventory. New reports must
+    # disclose its absence, rather than invent a count from slot totals.
+    current_row = Catalog(settings).snapshot(settings.org, plant="DEMO_01")[0]
+    older_payload = dict(current_row["payload"])
+    older_payload.pop("source_inverter_bounds")
+    with Catalog(settings).engine.begin() as conn:
+        put(
+            conn,
+            active,
+            {column.name: current_row[column.name] for column in active.primary_key},
+            older_payload,
+            run_id=current_row["run_id"],
+        )
+    legacy_report = build_report(settings, "2024-04", "DEMO_01", "synthetic")
+    old_fields = json.loads(
+        client.get("/reports/" + legacy_report["report_id"] + "/manifest.json").content
+    )
+    assert any(m["source_inverter_count"] is None for m in old_fields["metrics"])
     assert client.get(path + "manifest.json").content == original_bytes
 
 

@@ -420,6 +420,7 @@ def publish_day(
         series_file = staging / "series.json"
         series_file.write_text(json.dumps(series, allow_nan=False), encoding="utf-8")
         series_uri = objects.upload(series_file, prefix + "/series.json")
+        day_start, day_end = day_window(day, settings.timezone)
         manifest = dict(
             key,
             run_id=run_id,
@@ -428,6 +429,11 @@ def publish_day(
             logical_content_hash=logical_hash,
             committed_at=now(),
             row_count=len(inv_rows),
+            source_inverter_bounds={
+                str(inv): {"start_utc": first.isoformat(), "last_observed_utc": last.isoformat()}
+                for inv, (first, last) in sorted(bounds.items())
+                if first < day_end and last >= day_start
+            },
             source_objects=source_info,
             series_uri=series_uri,
             series_sha256=checksum(series_file),

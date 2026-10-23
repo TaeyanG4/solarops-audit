@@ -106,8 +106,11 @@ def test_changed_source_during_capture_never_publishes_bad_raw(settings, sample)
     path = sample["inverter"]
     digest = checksum(path)
     path.write_text("changed", encoding="utf-8")
-    with pytest.raises(ValueError, match="checksum"):
+    with pytest.raises(ValueError, match="checksum") as error:
         store.raw(path, settings.org, digest)
+    from solarops.contracts.brpvgen import failure_code
+
+    assert failure_code(error.value) == "RAW_OBJECT_CHECKSUM_MISMATCH"
     assert not store.raw_path(settings.org, digest, path.name).exists()
 
 
@@ -312,6 +315,10 @@ def test_ons_conditional_download_and_failure_preserve_success(settings, tmp_pat
 
     failures = (
         (ValueError("ONS_SCHEMA_CHANGED"), "ONS_SCHEMA_CHANGED"),
+        (
+            ValueError("RAW_OBJECT_CHECKSUM_MISMATCH: private detail"),
+            "RAW_OBJECT_CHECKSUM_MISMATCH",
+        ),
         (ValueError("ONS_SOURCE_CONTRACT_CHANGED"), "ONS_SOURCE_CONTRACT_CHANGED"),
         (ValueError("ONS_CURSOR_CONFLICT: internal detail"), "ONS_CURSOR_CONFLICT"),
         (TimeoutError("private endpoint"), "ONS_TIMEOUT"),

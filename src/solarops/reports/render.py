@@ -31,7 +31,17 @@ def build_report(settings, period, plant=None, source_kind=None):
     directory = settings.root / "reports" / settings.org / report_id
     directory.mkdir(parents=True, exist_ok=False)
     manifests = [r["payload"] for r in snapshot]
-    metrics = [r["metric"] for r in snapshot]
+    # Observation-derived inventory, not confirmed installed/operating equipment.
+    # Older manifests did not record it: do not fabricate a count from row totals.
+    metrics = [
+        dict(
+            r["metric"],
+            source_inverter_count=len(r["payload"]["source_inverter_bounds"])
+            if "source_inverter_bounds" in r["payload"]
+            else None,
+        )
+        for r in snapshot
+    ]
     sources = {s["source_object_id"]: s for m in manifests for s in m["source_objects"]}
     expected_days = (date.fromisoformat(end) - date.fromisoformat(start)).days
     complete = all(

@@ -1,9 +1,9 @@
 {
-  "release_id": "0.5.4",
-  "app_version": "0.5.4",
+  "release_id": "0.5.5",
+  "app_version": "0.5.5",
   "calculation_version": "energy-interval-v2",
-  "worker_image": "solarops-worker:0.5.4",
-  "airflow_image": "solarops-airflow:0.5.4",
+  "worker_image": "solarops-worker:0.5.5",
+  "airflow_image": "solarops-airflow:0.5.5",
   "airflow_version": "3.3.2",
   "kubernetes_provider_version": "10.24.0",
   "python_minor": "3.12",

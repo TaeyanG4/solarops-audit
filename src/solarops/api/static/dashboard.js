@@ -1187,7 +1187,12 @@ function reportDocument(report, freshness) {
         "검토 구간",
       ],
       report.metrics.map((m) => [
-        `${m.plant_id} · ${m.local_date}`,
+        (() => {
+          const identity = node("div", `${m.plant_id} · ${m.local_date}`);
+          identity.append(node("p", `원본 인버터 ${m.source_inverter_count == null
+            ? "기록 없음" : `${number(m.source_inverter_count)}개`}`));
+          return identity;
+        })(),
         number(m.estimated_energy_kwh, 2),
         `${number(m.observed_slots)} / ${number(m.expected_slots)}`,
         `${number(m.missing_slots)} / ${number(m.invalid_slots)}`,
