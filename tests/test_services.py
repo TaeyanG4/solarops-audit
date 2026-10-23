@@ -129,3 +129,14 @@ def test_postgres_partition_publication(tmp_path, sample, monkeypatch, boundary)
         check_failed_partition(settings, sample, boundary)
     else:
         check_overlap(settings, sample, tmp_path, monkeypatch, boundary)
+
+
+@pytest.mark.services
+@pytest.mark.skipif(not os.getenv("SOLAROPS_TEST_SERVICES"), reason="Explicit service opt-in")
+def test_postgres_ons_incremental_cursor(tmp_path):
+    from tests.test_publication_boundaries import (
+        test_ons_incremental_correction_withdrawal_and_atomic_cursor,
+    )
+
+    settings = Settings(root=tmp_path, org="test-" + uuid.uuid4().hex[:12])
+    test_ons_incremental_correction_withdrawal_and_atomic_cursor(settings, tmp_path)

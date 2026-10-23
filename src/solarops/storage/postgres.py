@@ -78,6 +78,11 @@ active_reports = table(
     [Column("report_run_id", String, nullable=False)],
 )
 
+# ONS hourly source-native data is deliberately outside BR-PVGen energy analytics.
+collection_cursors = table("collection_cursor", ["org_id", "source_id", "period"])
+collection_partitions = table("collection_partition", ["org_id", "source_id", "day"])
+collection_runs = table("collection_run", ["org_id", "run_id"])
+
 
 def now():
     return datetime.now(UTC).isoformat()

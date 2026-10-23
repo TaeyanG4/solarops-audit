@@ -194,3 +194,102 @@ def test_slow_old_report_does_not_replace_newer_snapshot(settings, sample, monke
             )["report_id"]
             == report["report_id"]
         )
+
+
+def test_ons_incremental_correction_withdrawal_and_atomic_cursor(settings, tmp_path):
+    import uuid
+    from dataclasses import replace
+
+    from fastapi.testclient import TestClient
+
+    from solarops.acquisition.ons import cursor, publish, status
+    from solarops.api.app import create_app
+    from solarops.storage.minio import ObjectStore
+    from solarops.storage.postgres import Catalog
+    from tests.test_contracts import ons_csv
+
+    catalog, store = Catalog(settings), ObjectStore(settings)
+    p = tmp_path / "ons.csv"
+    values = [(1, 0, "1", "TIPO II-B", "A"), (2, 0, "2", "TIPO II-B", "A")]
+
+    def apply(rows, expected, fail=None):
+        ons_csv(p, rows)
+        return publish(catalog, store, p, "2026-10", expected, str(uuid.uuid4()), {}, fail)
+
+    first = apply(values, None)
+    identical = apply(values, first)
+    assert identical["changed_days"] == []
+    before = status(catalog, "2026-10")["partitions"]
+    changed = [(1, 0, "3", "TIPO II-B", "A"), values[1], (3, 0, "4", "TIPO II-B", "A")]
+    with pytest.raises(RuntimeError, match="PUBLICATION_FAILURE"):
+        apply(changed, identical, "during_commit")
+    assert cursor(catalog, "2026-10") == identical
+    assert status(catalog, "2026-10")["partitions"] == before
+    correction = apply(changed, identical)
+    assert correction["changed_days"] == ["2026-10-01", "2026-10-03"]
+    after = status(catalog, "2026-10")["partitions"]
+    assert before[1] == after[1]
+    with pytest.raises(ValueError, match="CURSOR_CONFLICT"):
+        apply(values, identical)
+    assert cursor(catalog, "2026-10") == correction
+    withdrawn = apply([changed[0], changed[2]], correction)
+    assert withdrawn["changed_days"] == ["2026-10-02"]
+    assert status(catalog, "2026-10")["partitions"][1]["state"] == "withdrawn"
+    client = TestClient(create_app(settings))
+    result = client.get("/api/v1/sources/ons/days/2026-10-01?limit=1").json()
+    assert result["items"][0]["generation_mwmed"] == 3
+    assert result["items"][0]["ts_utc"] is None
+    assert client.get("/api/v1/sources/ons?period=2026-13").status_code == 422
+    other = replace(settings, org=settings.org + "-other")
+    assert status(Catalog(other), "2026-10")["partitions"] == []
+    assert (
+        TestClient(create_app(other)).get("/api/v1/sources/ons/days/2026-10-01").status_code == 404
+    )
+    assert Catalog(settings).snapshot(settings.org) == []
+
+
+def test_ons_conditional_download_and_failure_preserve_success(settings, tmp_path, monkeypatch):
+    import json
+
+    from solarops.acquisition import ons
+    from tests.test_contracts import ons_csv
+
+    sample = ons_csv(tmp_path / "sample.csv", [(1, 0, "1", "TIPO II-B", "A")]).read_bytes()
+    calls = []
+
+    def download(url, path, etag=None, **kwargs):
+        if url == ons.API:
+            path.write_text(
+                json.dumps(
+                    {
+                        "success": True,
+                        "result": {
+                            "license_id": "cc-by",
+                            "resources": [{"url": ons.source_url("2026-10")}],
+                        },
+                    }
+                ),
+                encoding="utf-8",
+            )
+            return {}
+        calls.append(etag)
+        if etag:
+            return {"not_modified": True, "etag": etag}
+        path.write_bytes(sample)
+        return {"not_modified": False, "etag": '"v1"'}
+
+    monkeypatch.setattr(ons, "download", download)
+    first = ons.sync_month(settings, "2026-10")
+    second = ons.sync_month(settings, "2026-10")
+    assert calls == [None, '"v1"'] and second["changed_days"] == []
+    assert first["raw_sha256"] == second["raw_sha256"]
+
+    def failure(*args, **kwargs):
+        raise OSError("offline")
+
+    monkeypatch.setattr(ons, "download", failure)
+    with pytest.raises(OSError):
+        ons.sync_month(settings, "2026-10")
+    catalog = ons.Catalog(settings)
+    assert ons.cursor(catalog, "2026-10") == second
+    assert ons.status(catalog, "2026-10")["recent_attempts"][0]["status"] == "failed"

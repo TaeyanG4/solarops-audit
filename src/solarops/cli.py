@@ -1,8 +1,10 @@
 import argparse
 import json
+import os
 import platform
 import shutil
 import sys
+import time
 from pathlib import Path
 
 from solarops.config import Settings
@@ -33,6 +35,15 @@ def main(argv=None):
     admin = sub.add_parser("admin", help="Loopback-only host service manager on port 8504")
     admin.add_argument("--project-root", type=Path, default=Path.cwd())
     sub.add_parser("db-migrate")
+    ons = sub.add_parser(
+        "ons-sync", help="Collect ONS current/previous month; source-native MWmed only"
+    )
+    ons.add_argument("--period", help="Explicit YYYY-MM correction/backfill from 2022")
+    ons.add_argument(
+        "--as-of", help="YYYY-MM-DD schedule reference; checks previous and current month"
+    )
+    ons_status = sub.add_parser("ons-status", help="Read-only ONS collection status")
+    ons_status.add_argument("--period", required=True)
     inspect = sub.add_parser("inspect-runs", help="Read-only review of unfinished runs")
     inspect.add_argument("--older-than-minutes", type=int, default=60)
     inspect.add_argument("--limit", type=int, default=100)
@@ -97,7 +108,16 @@ def main(argv=None):
     p.add_argument("--host", choices=["127.0.0.1", "0.0.0.0"], default="127.0.0.1")
     args = parser.parse_args(argv)
     try:
+        began, cpu_began = time.perf_counter(), time.process_time()
         result = execute(args)
+        if os.getenv("SOLAROPS_PROFILE") == "1" and isinstance(result, dict):
+            import resource
+
+            result["profile"] = {
+                "wall_seconds": time.perf_counter() - began,
+                "cpu_seconds": time.process_time() - cpu_began,
+                "peak_rss_kib": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+            }
         if result is not None:
             print(json.dumps(result, indent=2, ensure_ascii=False, allow_nan=False))
         return 0
@@ -151,6 +171,18 @@ def execute(args):
             case "extract":
                 return safe_extract(args.archive, args.destination)
     settings = Settings()
+    if args.command == "ons-sync":
+        from solarops.acquisition.ons import sync
+
+        return sync(settings, args.period, args.as_of)
+    if args.command == "ons-status":
+        from solarops.acquisition.ons import status
+
+        catalog = Catalog(settings, read_only=True)
+        try:
+            return status(catalog, args.period)
+        finally:
+            catalog.engine.dispose()
     if args.command == "inspect-runs":
         from solarops.diagnostics import inspect_runs
 

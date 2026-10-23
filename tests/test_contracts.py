@@ -11,6 +11,78 @@ from solarops.normalize.parquet import normalize
 from solarops.pipeline import deduplicate, source_bounds
 
 
+def ons_csv(path, values):
+    """Small offline source-native fixture; (day, hour, value, mode, id) tuples."""
+    import csv
+
+    from solarops.acquisition.ons import FIELDS
+
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIELDS, delimiter=";")
+        writer.writeheader()
+        for day, hour, value, mode, entity in values:
+            writer.writerow(
+                dict(
+                    zip(
+                        FIELDS,
+                        [
+                            f"2026-10-{day:02d} {hour:02d}:00:00",
+                            "NE",
+                            "NORDESTE",
+                            "BA",
+                            "BAHIA",
+                            mode,
+                            "FOTOVOLTAICA",
+                            "Fotovoltaica",
+                            entity or "GROUP",
+                            entity,
+                            "-",
+                            value,
+                        ],
+                        strict=True,
+                    )
+                )
+            )
+    return path
+
+
+def test_ons_native_time_unit_basis_invalids_and_duplicate_conflict(tmp_path):
+    import json
+
+    from solarops.acquisition.ons import CONTRACT, parse
+
+    values = [
+        (1, 0, "0", "TIPO II-B", "A"),
+        (1, 1, "nan", "TIPO II-B", "A"),
+        (1, 0, "2", "Pequenas Usinas (Tipo III)", ""),
+        (1, 0, "3", "Pequenas Usinas (MMGD)", ""),
+    ]
+    path = ons_csv(tmp_path / "source.csv", values + [values[0]])
+    days, count = parse(path, "2026-10")
+    payload = json.loads(days["2026-10-01"][1])
+    assert count == 5 and payload["quality"]["rows"] == 4
+    assert payload["quality"]["duplicate_rows"] == 1
+    assert payload["quality"]["invalid_values"] == 1
+    assert payload["quality"]["missing_hour_labels_present_entities"] == 68
+    assert payload["quality"]["generation_basis_counts"] == {
+        "verified": 2,
+        "forecast": 1,
+        "unspecified": 1,
+    }
+    assert all(r["ts_utc"] is None for r in payload["items"])
+    assert CONTRACT["unit"] == "MWmed" and not CONTRACT["energy_conversion"]
+    ons_csv(path, values + [(1, 0, "9", "TIPO II-B", "A")])
+    with pytest.raises(ValueError, match="ONS_DUPLICATE_CONFLICT"):
+        parse(path, "2026-10")
+    with pytest.raises(ValueError, match="ONS_TIMESTAMP"):
+        parse(path, "2026-09")
+    path.write_text(
+        path.read_text(encoding="utf-8").replace("00:00:00", "00:30:00"), encoding="utf-8"
+    )
+    with pytest.raises(ValueError, match="ONS_TIMESTAMP"):
+        parse(path, "2026-10")
+
+
 def record(ts="2024-04-01T00:00:00Z", power="1000", inv=1, interpolated="false"):
     return normalize(
         {

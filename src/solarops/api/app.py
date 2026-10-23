@@ -93,6 +93,44 @@ def create_app(settings=None):
             raise HTTPException(503, "Artifact integrity check failed")
         return data
 
+    @app.get("/api/v1/sources/ons")
+    def ons_status(period: str = Query(pattern=r"^\d{4}-\d{2}$")):
+        from solarops.acquisition.ons import status
+
+        try:
+            return status(catalog, period)
+        except ValueError:
+            raise HTTPException(422, "Expected YYYY-MM from 2022-01") from None
+
+    @app.get("/api/v1/sources/ons/days/{day}")
+    def ons_day(day: str, offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=500)):
+        from solarops.acquisition.ons import CONTRACT, SOURCE
+        from solarops.storage.postgres import collection_partitions
+
+        try:
+            next_day(day)
+        except ValueError:
+            raise HTTPException(422, "Expected YYYY-MM-DD") from None
+        with catalog.engine.connect() as conn:
+            payload = conn.execute(
+                select(collection_partitions.c.payload).where(
+                    collection_partitions.c.org_id == settings.org,
+                    collection_partitions.c.source_id == SOURCE,
+                    collection_partitions.c.day == day,
+                )
+            ).scalar_one_or_none()
+        if payload is None:
+            raise HTTPException(404, "ONS source day not collected")
+        data = json.loads(artifact(payload["artifact_uri"], payload["artifact_sha256"]))
+        return {
+            "contract": CONTRACT,
+            "manifest": payload,
+            "total": len(data["items"]),
+            "items": data["items"][offset : offset + limit],
+            "offset": offset,
+            "limit": limit,
+        }
+
     @app.get("/health")
     def health():
         return {"status": "ok", "mode": "local-read-only", "version": __version__}

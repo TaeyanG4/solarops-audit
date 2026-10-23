@@ -1,4 +1,5 @@
 import copy
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 from airflow.dag_processing.dagbag import DagBag
@@ -10,6 +11,9 @@ expected = {
     "solarops_quality_daily",
     "solarops_report_monthly",
     "solarops_backfill_manual",
+    "solarops_ons_daily",
+    "solarops_public_benchmark_1",
+    "solarops_public_benchmark_2",
 }
 assert set(bag.dags) == expected, set(bag.dags)
 for dag in bag.dags.values():
@@ -27,9 +31,19 @@ for dag in bag.dags.values():
                     "dag": dag,
                     "run_id": "validation",
                     "ti": SimpleNamespace(task_id=task.task_id, try_number=1),
+                    "data_interval_end": datetime(2026, 10, 23, tzinfo=UTC),
                 }
             )
             args = task.arguments if hasattr(task, "arguments") else task.op_args[0]
+            if dag.dag_id == "solarops_ons_daily":
+                assert args == ["ons-sync", "--as-of", "2026-10-23"], args
+                assert dag.max_active_tasks == 1
+                continue
+            if dag.dag_id.startswith("solarops_public_benchmark_"):
+                assert args[args.index("--source-kind") + 1] == "public", args
+                assert args[args.index("--plant") + 1] == "PS_001", args
+                assert dag.max_active_tasks == int(dag.dag_id[-1])
+                continue
             if args[0] == "doctor":
                 continue
             assert args[args.index("--plant") + 1] == plant, args
@@ -41,4 +55,4 @@ for dag in bag.dags.values():
                 ), args
             if dag.dag_id == "solarops_report_monthly":
                 assert args[args.index("--period") + 1] == params["period"], args
-print("Validated 4 DAGs and public/synthetic templates; 0 import errors")
+print("Validated 7 DAGs, ONS schedule and public/synthetic templates; 0 import errors")
