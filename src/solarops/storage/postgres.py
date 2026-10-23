@@ -13,6 +13,7 @@ from sqlalchemy import (
     UniqueConstraint,
     create_engine,
     func,
+    literal,
     select,
     text,
 )
@@ -89,7 +90,7 @@ def put(conn, relation, key, payload, *, update_if=None, **extra):
     else:
         from sqlalchemy.dialects.sqlite import insert
     stmt = insert(relation).values(**values)
-    conn.execute(
+    return conn.execute(
         stmt.on_conflict_do_update(
             index_elements=list(key),
             set_={k: v for k, v in values.items() if k not in key},
@@ -104,11 +105,13 @@ def claim(conn, relation, key, payload, **extra):
         from sqlalchemy.dialects.postgresql import insert
     else:
         from sqlalchemy.dialects.sqlite import insert
-    conn.execute(
+    result = conn.execute(
         insert(relation)
         .values(**key, payload=payload, **extra)
         .on_conflict_do_nothing(index_elements=list(key))
+        .returning(literal(1))
     )
+    return result.scalar_one_or_none() == 1
 
 
 def read_only_url(database_url):

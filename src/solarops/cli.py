@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from solarops.config import Settings
+from solarops.runtime import release_info
 
 
 def doctor():
@@ -19,6 +20,7 @@ def doctor():
         "free_disk_gb": round(shutil.disk_usage(Path.cwd()).free / 1024**3, 2),
         "native_demo_ready": sys.version_info[:2] == (3, 12),
         "note": "Docker/kind/Helm are needed for infrastructure validation, not offline tests",
+        "release": release_info(),
     }
 
 
@@ -35,6 +37,9 @@ def main(argv=None):
     inspect.add_argument("--older-than-minutes", type=int, default=60)
     inspect.add_argument("--limit", type=int, default=100)
     inspect.add_argument("--offset", type=int, default=0)
+    inspect.add_argument(
+        "--run-id", help="Inspect one run, its active result and related Airflow attempts"
+    )
     source = sub.add_parser("source").add_subparsers(dest="source_command", required=True)
     source.add_parser("inspect")
     fetch = source.add_parser("fetch")
@@ -56,6 +61,11 @@ def main(argv=None):
         p.add_argument("--source-version", required=True)
         p.add_argument("--source-kind", choices=["synthetic", "public"], default="synthetic")
         p.add_argument("--fail-at", choices=["before_commit", "during_commit"])
+        p.add_argument(
+            "--restore",
+            action="store_true",
+            help="Explicitly restore a previously superseded source version; concurrency checks still apply",
+        )
         if command == "backfill":
             p.add_argument("--execute", action="store_true", help="Default is a dry-run plan")
     demo = sub.add_parser("demo")
@@ -144,7 +154,9 @@ def execute(args):
     if args.command == "inspect-runs":
         from solarops.diagnostics import inspect_runs
 
-        return inspect_runs(settings, args.older_than_minutes, args.limit, args.offset)
+        return inspect_runs(
+            settings, args.older_than_minutes, args.limit, args.offset, run_id=args.run_id
+        )
     if args.command == "replay":
         from solarops.replay import replay
 
@@ -191,6 +203,7 @@ def execute(args):
             args.source_version,
             args.source_kind,
             args.fail_at,
+            restore=args.restore,
         )
     if args.command == "analyze":
         if args.period:

@@ -1,4 +1,5 @@
 import copy
+from types import SimpleNamespace
 
 from airflow.dag_processing.dagbag import DagBag
 
@@ -20,7 +21,14 @@ for dag in bag.dags.values():
         params.update(source_kind=kind, plant=plant, source_version=f"{kind}-v1")
         for original in dag.tasks:
             task = copy.deepcopy(original)
-            task.render_template_fields({"params": params})
+            task.render_template_fields(
+                {
+                    "params": params,
+                    "dag": dag,
+                    "run_id": "validation",
+                    "ti": SimpleNamespace(task_id=task.task_id, try_number=1),
+                }
+            )
             args = task.arguments if hasattr(task, "arguments") else task.op_args[0]
             if args[0] == "doctor":
                 continue

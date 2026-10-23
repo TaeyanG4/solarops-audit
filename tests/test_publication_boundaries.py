@@ -6,12 +6,72 @@ from threading import Event
 import pytest
 from sqlalchemy import event, select
 
+from solarops import pipeline
 from solarops.acquisition.brpvgen import checksum
+from solarops.fixtures import generate
 from solarops.reports import render
 from solarops.storage import minio
 from solarops.storage.minio import ObjectStore
-from solarops.storage.postgres import Catalog, active_reports, reports
+from solarops.storage.postgres import Catalog, active_reports, plants, reports
 from tests.test_pipeline import run
+
+
+@pytest.mark.parametrize("mode", ["absent", "existing", "duplicate"])
+def test_overlapping_batches_cannot_replace_new_publication(
+    settings, sample, tmp_path, monkeypatch, mode
+):
+    if mode == "existing":
+        run(settings, sample, version="baseline", end="2024-04-04")
+    other = generate(tmp_path / "new-input")
+    new_version = "v1" if mode == "duplicate" else "v2"
+    if mode != "duplicate":
+        other["metadata"].write_text("id,nominal_power_mw\nDEMO_01,0.03\n", encoding="utf-8")
+    started, release = Event(), Event()
+    original = pipeline.publish_day
+
+    def delayed(*args, **kwargs):
+        if args[4] == "2024-04-02" and not started.is_set():
+            started.set()
+            assert release.wait(30)
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(pipeline, "publish_day", delayed)
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        older = pool.submit(run, settings, sample, end="2024-04-03")
+        try:
+            assert started.wait(30)
+            newer = run(settings, other, version=new_version, start="2024-04-02", end="2024-04-04")
+        finally:
+            release.set()
+        with pytest.raises(ValueError, match="PUBLICATION_CONFLICT"):
+            older.result(timeout=30)
+    catalog = Catalog(settings)
+    snapshot = catalog.snapshot(settings.org)
+    assert [r["run_id"] for r in snapshot[1:]] == [r["run_id"] for r in newer["results"]]
+    assert snapshot[0]["payload"]["active_source_version"] == "v1"
+    with catalog.engine.connect() as conn:
+        meta = conn.execute(
+            select(plants.c.payload).where(plants.c.org_id == settings.org)
+        ).scalar_one()
+        assert meta["nominal_power_kw"] == (20 if mode == "duplicate" else 30)
+    # Retrying the winning input is deterministic and preserves other dates.
+    retried = run(settings, other, version=new_version, start="2024-04-02", end="2024-04-04")
+    assert [r["logical_hash"] for r in retried["results"]] == [
+        r["logical_hash"] for r in newer["results"]
+    ]
+    assert catalog.snapshot(settings.org)[0]["run_id"] == snapshot[0]["run_id"]
+
+
+def test_historical_restore_is_explicit_and_audited(settings, sample):
+    first = run(settings, sample, end="2024-04-02")
+    newer = run(settings, sample, version="v2", end="2024-04-02")
+    with pytest.raises(ValueError, match="HISTORICAL_RESTORE_REQUIRES_FLAG"):
+        run(settings, sample, end="2024-04-02")
+    restored = run(settings, sample, end="2024-04-02", restore=True)
+    assert restored["results"][0]["logical_hash"] == first["results"][0]["logical_hash"]
+    manifest = Catalog(settings).snapshot(settings.org)[0]["payload"]
+    assert manifest["restore_requested"] is True
+    assert manifest["previous_run_id"] == newer["results"][0]["run_id"]
 
 
 def test_raw_copy_is_published_only_when_complete(settings, sample, monkeypatch):

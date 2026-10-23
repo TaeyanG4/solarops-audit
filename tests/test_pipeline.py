@@ -73,9 +73,13 @@ def test_old_calculation_version_not_double_counted(settings, sample):
 def test_failure_keeps_published_partition(settings, sample, failure):
     run(settings, sample)
     before = hashes(settings)
+    client = TestClient(create_app(settings))
+    before_plants = client.get("/api/v1/plants").json()
+    sample["metadata"].write_text("id,nominal_power_mw\nDEMO_01,0.03\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="INJECTED"):
-        run(settings, sample, fail_at=failure)
+        run(settings, sample, version="v2", fail_at=failure)
     assert hashes(settings) == before
+    assert client.get("/api/v1/plants").json() == before_plants
     with Catalog(settings).engine.connect() as c:
         assert c.execute(select(runs).where(runs.c.status == "failed")).first()
 

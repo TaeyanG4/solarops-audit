@@ -23,6 +23,7 @@ jobs:
       - run: node --check src/solarops/api/static/navigation.js
       - run: node --check src/solarops/api/static/admin.js
       - run: uv run python scripts/validation/check_docs.py
+      - run: uv run python scripts/release/release.py check
       - run: uv run pytest -q --junitxml=artifacts/pytest.xml
       - run: uv run solarops demo
       - run: uv run python scripts/demo/portfolio_demo.py --output data/ci/portfolio-demo

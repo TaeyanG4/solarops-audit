@@ -2,7 +2,11 @@
 
 import json
 import math
+import os
+import re
+import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 
 import duckdb
 import pyarrow as pa
@@ -15,12 +19,31 @@ def sql_quote(value):
     return "'" + str(value).replace("'", "''") + "'"
 
 
-def rows(path, kind, plant, start, end):
-    fields = headers(path, kind)
-    conn = duckdb.connect()
+def inverter_id(value):
+    """One canonical, nonnegative int64 ID in bounds, keys and Parquet."""
+    if not isinstance(value, str) or not re.fullmatch(r"0|[1-9][0-9]*", value):
+        raise ValueError("NONCANONICAL_INVERTER_ID")
+    result = int(value)
+    if result > 2**63 - 1:
+        raise ValueError("INVERTER_ID_OUT_OF_RANGE")
+    return result
+
+
+def configure_duckdb(conn):
     conn.execute("SET memory_limit='512MB'")
     conn.execute("SET threads=2")
     conn.execute("SET TimeZone='UTC'")
+    if directory := os.getenv("SOLAROPS_DUCKDB_TEMP_DIR"):
+        # Separate connections must never share spill files. Pod /tmp is writable.
+        path = Path(directory) / uuid.uuid4().hex
+        path.mkdir(parents=True, exist_ok=False)
+        conn.execute("SET temp_directory=" + sql_quote(path))
+
+
+def rows(path, kind, plant, start, end):
+    fields = headers(path, kind)
+    conn = duckdb.connect()
+    configure_duckdb(conn)
     order = (
         "TRY_CAST(datetime AS TIMESTAMPTZ), inverter_id"
         if kind == "inverter"
@@ -60,7 +83,7 @@ def normalize(raw, kind):
     count = int(count) if count not in (None, "") else None
     if count is not None and count < 0:
         raise ValueError("NEGATIVE_DOCUMENT_COUNT")
-    inv = int(raw["inverter_id"]) if kind == "inverter" else 0
+    inv = inverter_id(raw.get("inverter_id")) if kind == "inverter" else 0
     return {
         "ts_utc": dt.isoformat(),
         "plant_id": raw["ps_id"],

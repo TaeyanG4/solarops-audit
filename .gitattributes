@@ -5,6 +5,7 @@
 *.yml text eol=lf
 *.md text eol=lf
 Makefile text eol=lf
+infra/docker/airflow-constraints-3.12.txt text eol=lf
 # Preserve the archived plan byte-for-byte, including its original final newline.
 docs/plan/** -text whitespace=-blank-at-eof
 # Preserve the two migrated Windows work-log snapshots exactly.

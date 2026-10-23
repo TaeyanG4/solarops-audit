@@ -8,7 +8,7 @@ from solarops.analytics.metrics import analyze, day_window
 from solarops.config import identifier
 from solarops.contracts.brpvgen import flag, read_metadata
 from solarops.normalize.parquet import normalize
-from solarops.pipeline import deduplicate
+from solarops.pipeline import deduplicate, source_bounds
 
 
 def record(ts="2024-04-01T00:00:00Z", power="1000", inv=1, interpolated="false"):
@@ -73,6 +73,22 @@ def test_conflict_is_not_last_write_wins():
         deduplicate([record(power="1000"), record(power="2000")])
 
 
+def test_inverter_identity_is_consistent_in_bounds_and_rows(tmp_path):
+    for value in ("01", "+1", " 1", "1.0", "-1", "9223372036854775808"):
+        with pytest.raises(ValueError, match="INVERTER_ID"):
+            record(inv=value)
+        path = tmp_path / "aliases.csv"
+        path.write_text(
+            "datetime,ps_id,inverter_id\n"
+            f"2024-04-01T00:00:00Z,DEMO_01,{value}\n"
+            "2024-04-01T00:15:00Z,DEMO_01,1\n",
+            encoding="utf-8",
+        )
+        with pytest.raises(ValueError, match="INVERTER_ID"):
+            source_bounds(path, "DEMO_01", {"DEMO_01"})
+    assert record(inv="1")["inverter_id"] == 1
+
+
 @pytest.mark.parametrize(
     "interpolated,poa,minutes,expected",
     [
@@ -134,3 +150,30 @@ def test_zip_expansion_cap(tmp_path):
         z.writestr("a.csv", "x" * 100)
     with pytest.raises(ValueError):
         safe_extract(archive, tmp_path / "out", limit=10)
+
+
+def test_interrupted_extraction_is_not_visible_and_can_retry(tmp_path, monkeypatch):
+    from solarops.acquisition import brpvgen
+
+    archive, destination = tmp_path / "input.zip", tmp_path / "extracted"
+    content = b"datetime,value\n2024-04-01,100\n"
+    with zipfile.ZipFile(archive, "w") as z:
+        z.writestr("sample.csv", content)
+    original = brpvgen.shutil.copyfileobj
+
+    def interrupted(source, output, *args):
+        output.write(source.read(4))
+        raise OSError("interrupted")
+
+    monkeypatch.setattr(brpvgen.shutil, "copyfileobj", interrupted)
+    with pytest.raises(OSError, match="interrupted"):
+        safe_extract(archive, destination)
+    assert not (destination / "sample.csv").exists()
+    partial = list(destination.glob("*.partial-*"))[0]
+    assert partial.read_bytes() == content[:4]
+    monkeypatch.setattr(brpvgen.shutil, "copyfileobj", original)
+    safe_extract(archive, destination)
+    safe_extract(archive, destination)
+    assert (destination / "sample.csv").read_bytes() == content
+    assert partial.read_bytes() == content[:4]
+    assert archive.exists()

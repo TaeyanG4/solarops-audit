@@ -4,7 +4,7 @@ cd "$(dirname "$0")/../.."
 export PATH="$PWD/.tools:$PWD/.tools/linux-amd64:$PATH"
 export KUBECONFIG="$PWD/artifacts/kubeconfig"
 python3 scripts/ops/k8s-secrets.py
-kind load docker-image --name solarops solarops-worker:0.4.1 solarops-airflow:0.4.1 solarops-minio:2025-10-15
+kind load docker-image --name solarops solarops-worker:0.4.2 solarops-airflow:0.4.2 solarops-minio:2025-10-15
 kubectl apply -f infra/k8s/services.yaml
 kubectl apply -f infra/k8s/logs.yaml
 kubectl apply -f infra/generated/secrets.json

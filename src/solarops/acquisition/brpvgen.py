@@ -123,6 +123,19 @@ def safe_extract(archive: Path, destination: Path, limit=MAX_EXPANDED):
                 if checksum(target) != incoming:
                     raise ValueError("Existing extracted data differs")
                 continue
-            with z.open(item) as source, target.open("xb") as out:
+            # Each CSV becomes visible only after EOF/CRC, size and fsync succeed.
+            # Retain staging evidence (including interrupted copies); never overwrite
+            # a concurrent extractor's completed file or a pre-existing raw input.
+            staged = target.with_name(target.name + ".partial-" + uuid.uuid4().hex)
+            with z.open(item) as source, staged.open("xb") as out:
                 shutil.copyfileobj(source, out, 1024 * 1024)
+                out.flush()
+                os.fsync(out.fileno())
+            if staged.stat().st_size != item.file_size:
+                raise ValueError("Extracted size mismatch; partial retained")
+            try:
+                os.link(staged, target)
+            except FileExistsError:
+                if checksum(target) != checksum(staged):
+                    raise ValueError("Existing extracted data differs") from None
     return {"expanded_bytes": total, "destination": str(destination)}

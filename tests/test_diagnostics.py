@@ -94,3 +94,36 @@ def test_existing_sqlite_is_opened_read_only(settings):
     catalog = Catalog(settings)
     catalog.engine.dispose()
     assert inspect_runs(settings)["total_unfinished"] == 0
+
+
+def test_failed_attempt_links_retry_active_result_and_release(settings, sample, monkeypatch):
+    from tests.test_pipeline import run
+
+    for name, value in {
+        "DAG_ID": "daily",
+        "DAG_RUN_ID": "manual__test",
+        "TASK_ID": "publish",
+        "TASK_ATTEMPT": "1",
+        "POD_UID": "failed-pod",
+    }.items():
+        monkeypatch.setenv("SOLAROPS_" + name, value)
+    with pytest.raises(RuntimeError, match="INJECTED"):
+        run(settings, sample, end="2024-04-02", fail_at="during_commit")
+    with Catalog(settings).engine.connect() as conn:
+        failed = conn.execute(
+            select(runs.c.run_id).where(
+                runs.c.org_id == settings.org, runs.c.payload["kind"].as_string() == "partition"
+            )
+        ).scalar_one()
+    monkeypatch.setenv("SOLAROPS_TASK_ATTEMPT", "2")
+    monkeypatch.setenv("SOLAROPS_POD_UID", "retry-pod")
+    retry = run(settings, sample, end="2024-04-02")
+    detail = inspect_runs(settings, run_id=failed)
+    item = detail["item"]
+    assert item["stage"] == "publishing" and item["rows"] > 0
+    assert item["error_code"] == "INJECTED_DURING_COMMIT"
+    assert item["execution"]["pod_uid"] == "failed-pod"
+    assert item["release"]["release_id"] and item["release"]["git_revision"]
+    assert detail["active_result"]["run_id"] == retry["results"][0]["run_id"]
+    assert detail["related_attempts"][0]["run_id"] == retry["results"][0]["run_id"]
+    assert detail["related_attempts"][0]["execution"]["task_attempt"] == "2"

@@ -7,13 +7,21 @@ from datetime import UTC, date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
 import duckdb
-from sqlalchemy import select, text
+from sqlalchemy import select, text, update
 
 from solarops.acquisition.brpvgen import DOI, checksum
 from solarops.analytics.metrics import analyze, day_window
 from solarops.config import CALCULATION_VERSION, identifier
 from solarops.contracts.brpvgen import read_metadata
-from solarops.normalize.parquet import normalize, rows, sql_quote, write_parquet
+from solarops.normalize.parquet import (
+    configure_duckdb,
+    inverter_id,
+    normalize,
+    rows,
+    sql_quote,
+    write_parquet,
+)
+from solarops.runtime import execution_context, release_info
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import (
     Catalog,
@@ -39,8 +47,7 @@ def canonical_hash(value):
 
 def source_bounds(path, plant, metadata_ids):
     with duckdb.connect() as conn:
-        conn.execute("SET memory_limit='512MB'")
-        conn.execute("SET threads=2")
+        configure_duckdb(conn)
         q = f"read_csv({sql_quote(path)}, all_varchar=true)"
         unknown = {r[0] for r in conn.execute(f"SELECT DISTINCT ps_id FROM {q}").fetchall()} - set(
             metadata_ids
@@ -51,11 +58,12 @@ def source_bounds(path, plant, metadata_ids):
             f"SELECT inverter_id, min(try_cast(datetime AS TIMESTAMPTZ)), max(try_cast(datetime AS TIMESTAMPTZ)) FROM {q} WHERE ps_id=? GROUP BY inverter_id",
             [plant],
         ).fetchall()
-    return {
-        int(inv): (left.astimezone(UTC), right.astimezone(UTC))
-        for inv, left, right in data
-        if left and right
-    }
+    result = {}
+    for inv, left, right in data:
+        inv = inverter_id(inv)
+        if left and right:
+            result[inv] = (left.astimezone(UTC), right.astimezone(UTC))
+    return result
 
 
 def normalized_days(path, kind, plant, start, end, timezone):
@@ -93,6 +101,7 @@ def ingest(
     fail_at=None,
     poa_threshold=400,
     power_ratio=0.10,
+    restore=False,
 ):
     identifier(plant)
     identifier(source_version)
@@ -157,7 +166,45 @@ def ingest(
         existing = conn.execute(select(versions).filter_by(**version_key)).mappings().first()
         if existing and existing["payload"]["fingerprint"] != fingerprint:
             raise ValueError("SOURCE_VERSION_CONFLICT: use a new explicit version")
-        put(conn, plants, {"org_id": settings.org, "plant_id": plant}, meta[plant])
+    # Capture expected publications before any daily work. A slow batch cannot
+    # overwrite a publication that appeared while it was normalizing/uploading.
+    with catalog.engine.connect() as conn:
+        expected = {
+            row["partition_id"]: row
+            for row in conn.execute(
+                select(active).where(
+                    active.c.org_id == settings.org,
+                    active.c.plant_id == plant,
+                    active.c.report_timezone == settings.timezone,
+                    active.c.calculation_version == CALCULATION_VERSION,
+                    active.c.partition_id >= start,
+                    active.c.partition_id < end,
+                )
+            ).mappings()
+        }
+        expected_metadata = conn.execute(
+            select(plants.c.payload).filter_by(org_id=settings.org, plant_id=plant)
+        ).scalar_one_or_none()
+        # Includes pre-upgrade history; source-version names have no ordering.
+        prior_days = set(
+            conn.execute(
+                select(runs.c.payload["partition_id"].as_string()).where(
+                    runs.c.org_id == settings.org,
+                    runs.c.status == "committed",
+                    runs.c.payload["plant_id"].as_string() == plant,
+                    runs.c.payload["source_version"].as_string() == source_version,
+                    runs.c.payload["report_timezone"].as_string() == settings.timezone,
+                    runs.c.payload["calculation_version"].as_string() == CALCULATION_VERSION,
+                    runs.c.payload["partition_id"].as_string() >= start,
+                    runs.c.payload["partition_id"].as_string() < end,
+                )
+            ).scalars()
+        )
+    if not restore and any(
+        day in prior_days and row["payload"]["active_source_version"] != source_version
+        for day, row in expected.items()
+    ):
+        raise ValueError("HISTORICAL_RESTORE_REQUIRES_FLAG: use --restore for intentional rollback")
     batch_id = str(uuid.uuid4())
     batch_started = time.monotonic()
     batch_payload = {
@@ -170,6 +217,10 @@ def ingest(
         "source_kind": source_kind,
         "report_timezone": settings.timezone,
         "calculation_version": CALCULATION_VERSION,
+        "restore_requested": restore,
+        "release": release_info(),
+        "execution": execution_context(),
+        "stage": "processing_partitions",
     }
     with catalog.engine.begin() as conn:
         put(
@@ -218,6 +269,9 @@ def ingest(
                         poa_threshold,
                         power_ratio,
                         batch_id=batch_id,
+                        expected_run_id=expected[day]["run_id"] if day in expected else None,
+                        expected_metadata=expected_metadata,
+                        restore=restore,
                     )
                 )
             if inv_day and inv_day[0] == day:
@@ -235,6 +289,7 @@ def ingest(
                     "partitions": len(outcomes),
                     "rows": sum(r["rows"] for r in outcomes),
                     "elapsed_ms": round((time.monotonic() - batch_started) * 1000),
+                    "stage": "complete",
                 },
                 org_id=settings.org,
                 status="committed",
@@ -267,6 +322,9 @@ def publish_day(
     poa_threshold,
     power_ratio,
     batch_id=None,
+    expected_run_id=None,
+    expected_metadata=None,
+    restore=False,
 ):
     started = time.monotonic()
     run_id = str(uuid.uuid4())
@@ -287,6 +345,11 @@ def publish_day(
         source_version=version,
         started_at=now(),
         source_objects=source_info,
+        expected_run_id=expected_run_id,
+        restore_requested=restore,
+        release=release_info(),
+        execution=execution_context(),
+        stage="analyzing",
     )
     with catalog.engine.begin() as conn:
         put(conn, runs, {"run_id": run_id}, run_payload, org_id=settings.org, status="running")
@@ -330,6 +393,9 @@ def publish_day(
                 },
             }
         )
+        run_payload.update(stage="uploading", rows=len(inv_rows), station_rows=len(sta_rows))
+        with catalog.engine.begin() as conn:
+            put(conn, runs, {"run_id": run_id}, run_payload, org_id=settings.org, status="running")
         for kind, data, source in (
             ("inverter", inv_rows, source_info[1]),
             ("station", sta_rows, source_info[2]),
@@ -353,7 +419,12 @@ def publish_day(
             series_sha256=checksum(series_file),
             thresholds={"poa": poa_threshold, "ratio": power_ratio},
             metadata=meta,
+            previous_run_id=expected_run_id,
+            restore_requested=restore,
+            release=release_info(),
+            execution=execution_context(),
         )
+        run_payload["stage"] = "publishing"
         with catalog.engine.begin() as conn:
             put(
                 conn, runs, {"run_id": run_id}, run_payload, org_id=settings.org, status="validated"
@@ -364,12 +435,35 @@ def publish_day(
             if conn.dialect.name == "postgresql":
                 conn.execute(
                     text("SELECT pg_advisory_xact_lock(hashtextextended(:key,0))"),
-                    {"key": json.dumps(key, sort_keys=True)},
+                    {"key": json.dumps([settings.org, plant])},
                 )
             put(conn, metrics, {"run_id": run_id}, metric)
             put(conn, issues, {"run_id": run_id}, {"items": quality})
             put(conn, events, {"run_id": run_id}, {"items": candidates})
-            put(conn, active, key, manifest, run_id=run_id)
+            if expected_run_id is None:
+                changed = claim(conn, active, key, manifest, run_id=run_id)
+            else:
+                changed = (
+                    conn.execute(
+                        update(active)
+                        .filter_by(**key)
+                        .where(active.c.run_id == expected_run_id)
+                        .values(payload=manifest, run_id=run_id)
+                        .returning(active.c.run_id)
+                    ).scalar_one_or_none()
+                    == run_id
+                )
+            if not changed:
+                raise ValueError("PUBLICATION_CONFLICT: active changed; inspect and retry")
+            # PG serializes per plant; preceding writes serialize SQLite writers.
+            # Metadata and daily publication are committed in the same transaction.
+            plant_key = {"org_id": settings.org, "plant_id": plant}
+            current_metadata = conn.execute(
+                select(plants.c.payload).filter_by(**plant_key)
+            ).scalar_one_or_none()
+            if current_metadata not in (expected_metadata, meta):
+                raise ValueError("PLANT_METADATA_CONFLICT: metadata changed; inspect and retry")
+            put(conn, plants, plant_key, meta)
             if fail_at == "during_commit":
                 raise RuntimeError("INJECTED_DURING_COMMIT")
             put(
@@ -381,6 +475,7 @@ def publish_day(
                     finished_at=now(),
                     elapsed_ms=round((time.monotonic() - started) * 1000),
                     rows=len(inv_rows),
+                    stage="complete",
                 ),
                 org_id=settings.org,
                 status="committed",

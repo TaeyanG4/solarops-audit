@@ -4,7 +4,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-CALCULATION_VERSION = "energy-interval-v2"
+from solarops.runtime import RELEASE
+
+CALCULATION_VERSION = RELEASE["calculation_version"]
 SCHEMA_VERSION = "1"
 
 

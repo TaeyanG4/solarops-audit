@@ -27,6 +27,7 @@
 | `demo/` | `pilot_price.py` | 입력 가정에 따른 가격/원가 산술; 실제 매출 예측 아님 |
 | `data/` | `full_dataset.py` | 이미 받은 공개 51개 발전소를 처리; 부하·저장공간 사용 큼 |
 | `release/` | `package_source.py` | 버전을 읽어 소스 ZIP+SHA-256 목록 생성; 기존 ZIP 보존 |
+| `release/` | `release.py check/sync/build` | 단일 릴리스 명세와 Compose/Helm 선언 대조·동기화, 커밋된 소스로 두 이미지 빌드·커밋/이미지 ID 기록 |
 | `archive/` | `finalize_ui.py` | v0.1 일회성 텍스트 교체 이력. 현재 소스에 실행하지 않도록 즉시 종료 |
 
 새 스크립트는 목적에 맞는 폴더에 두고 도메인 로직은 `src/solarops/`의 공통 함수를 호출합니다. 실행 결과는 `artifacts/`나 `data/` 아래 별도 경로에 기록합니다. 원본 기획의 `docs/plan/scripts/`는 이 구조 개편과 무관하게 그대로 보존합니다.

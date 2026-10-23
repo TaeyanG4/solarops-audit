@@ -75,8 +75,40 @@ def inspect_runs(settings, older_than_minutes=60, limit=100, offset=0, at=None, 
                 ).all()
             )
             current_result, lookup_complete = None, False
+            related_attempts = []
             if run_id and rows:
                 payload = rows[0]["payload"]
+                execution = payload.get("execution", {})
+                identity = ("dag_id", "dag_run_id", "task_id")
+                if all(execution.get(key) for key in identity):
+                    related = select(runs).where(
+                        runs.c.org_id == settings.org,
+                        runs.c.payload["kind"].as_string() == payload.get("kind"),
+                        runs.c.run_id != run_id,
+                        *(
+                            runs.c.payload["execution"][key].as_string() == execution[key]
+                            for key in identity
+                        ),
+                    )
+                    if payload.get("partition_id"):
+                        related = related.where(
+                            runs.c.payload["plant_id"].as_string() == payload.get("plant_id"),
+                            runs.c.payload["partition_id"].as_string() == payload["partition_id"],
+                        )
+                    related_attempts = [
+                        {
+                            "run_id": r["run_id"],
+                            "status": r["status"],
+                            "execution": r["payload"].get("execution", {}),
+                            "stage": r["payload"].get("stage"),
+                            "error_code": r["payload"].get("error_code"),
+                        }
+                        for r in conn.execute(
+                            related.order_by(
+                                runs.c.payload["started_at"].as_string().desc(), runs.c.run_id
+                            ).limit(20)
+                        ).mappings()
+                    ]
                 scope = ("plant_id", "partition_id", "report_timezone", "calculation_version")
                 lookup_complete = all(payload.get(key) for key in scope)
                 if lookup_complete:
@@ -129,6 +161,11 @@ def inspect_runs(settings, older_than_minutes=60, limit=100, offset=0, at=None, 
                     "active_partition_count": published.get(row["run_id"], 0),
                     "active_child_partition_count": active_children.get(row["run_id"], 0),
                     "child_status_counts": children.get(row["run_id"], {}),
+                    "stage": payload.get("stage"),
+                    "rows": payload.get("rows"),
+                    "error_code": payload.get("error_code"),
+                    "execution": payload.get("execution", {}),
+                    "release": payload.get("release"),
                 }
             )
         if run_id:
@@ -140,6 +177,8 @@ def inspect_runs(settings, older_than_minutes=60, limit=100, offset=0, at=None, 
                 "item": items[0] if items else None,
                 "active_result_lookup_complete": lookup_complete,
                 "active_result": current_result,
+                "related_attempts": related_attempts,
+                "related_attempts_limit": 20,
             }
         return {
             "mode": "read-only",

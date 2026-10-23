@@ -1,10 +1,21 @@
 """Airflow only coordinates the same versioned application CLI."""
 
+import json
 import os
 import subprocess
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 
 from airflow.sdk import DAG, Param, task
+
+RELEASE = json.loads(
+    Path(
+        os.getenv(
+            "SOLAROPS_RELEASE_FILE",
+            str(Path(__file__).resolve().parents[1] / "src/solarops/release.json"),
+        )
+    ).read_text(encoding="utf-8")
+)
 
 
 def cli_task(task_id, arguments, fault=False):
@@ -13,6 +24,14 @@ def cli_task(task_id, arguments, fault=False):
         from kubernetes.client import models as k8s
 
         env = {"SOLAROPS_DATA_DIR": "/data", "SOLAROPS_SOURCE_DIR": "/data/source"}
+        env.update(
+            {
+                "SOLAROPS_DAG_ID": "{{ dag.dag_id }}",
+                "SOLAROPS_DAG_RUN_ID": "{{ run_id }}",
+                "SOLAROPS_TASK_ID": "{{ ti.task_id }}",
+                "SOLAROPS_TASK_ATTEMPT": "{{ ti.try_number }}",
+            }
+        )
         if fault:
             env["SOLAROPS_FAIL_ONCE_MARKER"] = "{{ params.fault_marker }}"
             env["SOLAROPS_TEST_DELAY"] = "{{ params.test_delay }}"
@@ -20,14 +39,23 @@ def cli_task(task_id, arguments, fault=False):
             task_id=task_id,
             name="solarops-" + task_id.replace("_", "-"),
             namespace="solarops",
-            image="solarops-worker:0.4.1",
+            image=RELEASE["worker_image"],
             image_pull_policy="IfNotPresent",
             cmds=["solarops"],
             arguments=arguments,
             in_cluster=True,
             service_account_name="solarops-worker",
             get_logs=True,
-            env_vars=env,
+            env_vars=[k8s.V1EnvVar(name=k, value=v) for k, v in env.items()]
+            + [
+                k8s.V1EnvVar(
+                    name="SOLAROPS_POD_" + key,
+                    value_from=k8s.V1EnvVarSource(
+                        field_ref=k8s.V1ObjectFieldSelector(field_path="metadata." + field)
+                    ),
+                )
+                for key, field in (("UID", "uid"), ("NAME", "name"), ("NAMESPACE", "namespace"))
+            ],
             env_from=[k8s.V1EnvFromSource(secret_ref=k8s.V1SecretEnvSource(name="solarops-app"))],
             volumes=[
                 k8s.V1Volume(
@@ -59,7 +87,18 @@ def cli_task(task_id, arguments, fault=False):
 
     @task(task_id=task_id, do_xcom_push=False)
     def local_cli(args, fault_marker="", test_delay="0"):
+        from airflow.sdk import get_current_context
+
         env = os.environ.copy()
+        context = get_current_context()
+        env.update(
+            {
+                "SOLAROPS_DAG_ID": context["dag"].dag_id,
+                "SOLAROPS_DAG_RUN_ID": context["run_id"],
+                "SOLAROPS_TASK_ID": context["ti"].task_id,
+                "SOLAROPS_TASK_ATTEMPT": str(context["ti"].try_number),
+            }
+        )
         if fault:
             env["SOLAROPS_FAIL_ONCE_MARKER"] = fault_marker
             env["SOLAROPS_TEST_DELAY"] = test_delay

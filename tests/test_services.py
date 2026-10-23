@@ -15,9 +15,19 @@ from solarops.fixtures import generate
 from solarops.reports.render import build_report
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog
+from tests.test_diagnostics import (
+    test_failed_attempt_links_retry_active_result_and_release as check_trace,
+)
 from tests.test_pipeline import run
+from tests.test_pipeline import test_failure_keeps_published_partition as check_failed_partition
 from tests.test_publication_boundaries import (
     test_failed_report_keeps_previous_publication as check_failed_report,
+)
+from tests.test_publication_boundaries import (
+    test_historical_restore_is_explicit_and_audited as check_restore,
+)
+from tests.test_publication_boundaries import (
+    test_overlapping_batches_cannot_replace_new_publication as check_overlap,
 )
 from tests.test_publication_boundaries import (
     test_slow_old_report_does_not_replace_newer_snapshot as check_report_order,
@@ -101,3 +111,21 @@ def test_postgres_report_publication(tmp_path, sample, monkeypatch, boundary):
         check_report_order(settings, sample, monkeypatch)
     else:
         check_failed_report(settings, sample, monkeypatch, boundary)
+
+
+@pytest.mark.services
+@pytest.mark.skipif(not os.getenv("SOLAROPS_TEST_SERVICES"), reason="Explicit service opt-in")
+@pytest.mark.parametrize(
+    "boundary",
+    ["absent", "existing", "duplicate", "restore", "before_commit", "during_commit", "trace"],
+)
+def test_postgres_partition_publication(tmp_path, sample, monkeypatch, boundary):
+    settings = Settings(root=tmp_path, org="test-" + uuid.uuid4().hex[:12])
+    if boundary == "trace":
+        check_trace(settings, sample, monkeypatch)
+    elif boundary == "restore":
+        check_restore(settings, sample)
+    elif boundary.endswith("commit"):
+        check_failed_partition(settings, sample, boundary)
+    else:
+        check_overlap(settings, sample, tmp_path, monkeypatch, boundary)

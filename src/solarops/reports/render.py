@@ -11,6 +11,7 @@ from solarops.acquisition.brpvgen import checksum
 from solarops.config import CALCULATION_VERSION
 from solarops.contracts.dates import month_bounds
 from solarops.pipeline import canonical_hash
+from solarops.runtime import execution_context, release_info
 from solarops.storage.minio import ObjectStore
 from solarops.storage.postgres import Catalog, active_reports, now, put, reports
 
@@ -54,6 +55,8 @@ def build_report(settings, period, plant=None, source_kind=None):
         "generated_at": generated_at,
         "timezone": settings.timezone,
         "calculation_version": CALCULATION_VERSION,
+        "release": release_info(),
+        "execution": execution_context(),
         "source_manifest_hash": canonical_hash(manifests),
         "source_kinds": sorted({s["source_kind"] for s in sources.values()}),
         "status": "complete" if complete else "partial_period",

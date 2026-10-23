@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-- [독립 기술 검토](docs/worklog/2026-10-23-independent-review.md): 별도 세션 검토와 본 세션의 합성 재현으로 ID 혼용 분모·중단 추출·실패 metadata·일별 역순 게시를 확인했습니다. 미수정이며 DATA-02→PUB-01→OPS-08을 먼저 계획했습니다. 실제 공개 자료 영향은 확인하지 않았고 앱/서비스는 변경하지 않았습니다.
+- [독립 기술 검토](docs/worklog/2026-10-23-independent-review.md): 별도 세션 검토와 본 세션의 합성 재현으로 ID 혼용 분모·중단 추출·실패 metadata·일별 역순 게시를 확인했습니다. [후속 구현](docs/worklog/2026-10-23-integrity-delivery.md)에서 DATA-02/PUB-01 수정과 로컬133·격리 서비스11검사를 완료했습니다. OPS-08 이미지 정렬/배포·OPS-09 실환경 추적 검증을 진행합니다.
 - [수집·아키텍처 최신화](docs/worklog/2026-10-23-data-architecture.md): 고정 BR-PVGen 수동 다운로드와 역사 구간 DAG를 구분했습니다. 13:11 KST Compose Airflow 중지·kind DAG4개 paused·진행/대기0건. [수집·확장 안내](docs/guides/data-ingestion.md), [아키텍처](docs/architecture/system.md), README를 실제 구현/배포 범위에 맞췄습니다.
 - [최신 기술 후속](docs/worklog/2026-10-23-technical-delivery.md): 선택형 실제 서비스 CI·보고서 게시 근거 비교·별도 인스턴스 복원·동시 부하 완료. 합성10만 건 동시4 깊은 페이지 p95 6409→679ms, 전후1080요청 오류0. dashboard `0.4.1-technical-final-20261023`, 이전 보고서·공개 overview·인덱스 전후 카탈로그 행 보존.
 
