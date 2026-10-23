@@ -210,7 +210,7 @@ AI 도구의 사용 범위·버전·채택하지 않은 제안은 [스킬 기록
 
 검증 대상은 로컬 엔지니어링 포트폴리오입니다. 고객 계약·매출·현장 고장 정답·고객 인증·외부 SLO·다른 물리 호스트의 재해복구는 미검증입니다. 저출력은 검토 후보이며 확정 고장이나 손실이 아닙니다. [현재 구현 상태](docs/IMPLEMENTATION_STATUS.md).
 
-라이선스: 이 비공개 저장소의 코드에는 아직 라이선스 파일이 없어 재사용 조건이 정해지지 않았습니다. 데이터는 BR-PVGen CC BY 4.0·ONS CC BY 조건을 따르고, 글꼴 Pretendard는 [SIL OFL 1.1](src/solarops/api/static/fonts/OFL.txt)입니다.
+라이선스: 저장소는 공개되어 있지만 코드에는 아직 라이선스 파일이 없어, 열람은 가능해도 재사용·수정·배포 권한은 부여되지 않습니다. 데이터는 BR-PVGen CC BY 4.0·ONS CC BY 조건을 따르고, 글꼴 Pretendard는 [SIL OFL 1.1](src/solarops/api/static/fonts/OFL.txt)입니다.
 
 ```text
 src/solarops/       CLI · 수집 · 분석 · 저장 · 보고서 · API

@@ -28,7 +28,7 @@ independent administrative origin 127.0.0.1:8504.
   interpolation is an overlapping attribute, not a fourth quality category.
 - No data is never converted to zero. Incomplete dates differ from missing slots.
 - Public BR-PVGen and synthetic demo are labeled separately; sources stay traceable.
-- Private repository; no customer data, public deployment or external messaging.
+- Public source repository (2026-10-23); no customer data, public deployment or external messaging.
 - Preserve raw data and original plans. Sensitive deletion requires permission.
 - User authorized a completely new visual design, replacing the former UI.
 - User chose grouped sidebar navigation and readable body/secondary text at 16/14px.

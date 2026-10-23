@@ -8,7 +8,8 @@ concurrency:
   cancel-in-progress: false
 jobs:
   services:
-    # Opt-in, private repository, one-job local runner; no hosted minutes required.
+    # Opt-in manual run on the owner's local runner. Public repository: keep this
+    # workflow_dispatch-only so fork pull requests can never reach the self-hosted runner.
     runs-on: [self-hosted, linux, x64, solarops-integration]
     timeout-minutes: 25
     defaults:

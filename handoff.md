@@ -6,7 +6,7 @@
 
 - **프로젝트 마무리(2026-10-23 사용자 요청).** 마지막 릴리스 v0.5.7(태그 `v0.5.7` = 이미지 빌드 커밋 `4700c65`), 실행 가능한 계획 없음, 로컬 서비스 모두 중지·데이터 보존. 다시 시작할 때는 아래 재개 지점을 따릅니다.
 
-- 최신 릴리스 **v0.5.7 / energy-interval-v2**, 선언 커밋 `4700c65`, Compose 대시보드·kind Airflow/KPO 배포 완료(22:00 KST 전후). [검사·배포](docs/benchmarks/quality-v0.5.7.md) · [릴리스·이미지](docs/releases/0.5.7.json) · [비공개 GitHub](https://github.com/TaeyanG4/solarops-audit).
+- 최신 릴리스 **v0.5.7 / energy-interval-v2**, 선언 커밋 `4700c65`, Compose 대시보드·kind Airflow/KPO 배포 완료(22:00 KST 전후). [검사·배포](docs/benchmarks/quality-v0.5.7.md) · [릴리스·이미지](docs/releases/0.5.7.json) · [공개 GitHub](https://github.com/TaeyanG4/solarops-audit)(10-23 사용자 요청으로 공개 전환, 이력 비밀값 검사 통과).
 - **독립 평가 반복 종료**(사용자 요청, 10-23): R5 Astra 96/Fable 94, R6 Fable 91(지적 5건 0.5.7 보완), R7은 시작 직후 중단해 점수 없음. [R6 판단](docs/reviews/2026-10-23-artifact-r6.md) · [종료·릴리스 기록](docs/worklog/2026-10-23-release-0.5.7.md).
 - **22:10 KST 전부 중지(사용자 요청, 데이터 삭제 없음)**: kind 노드 `solarops-control-plane`, Compose dashboard → minio/app-db를 `stop`, 랜딩 8507(PID 50104)·관리 8504(`admin.ps1 stop`) 종료. 열린 포트 0, 실행 컨테이너 0, 컨테이너는 Exited로 보존, 볼륨 5개(app-db·app-data·minio·airflow-db·airflow-logs) 유지. kind 중지로 ONS 정기 수집도 멈췄습니다.
 - 다시 켜기: 관리 `.\scripts\ops\admin.ps1 start` 후 [운영 절차](docs/runbooks/operator.md#8502가-열리지-않을-때) 또는 `docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio dashboard` → `/ready`. kind는 `docker start solarops-control-plane` 후 Pod Ready 확인(ONS 수집 재개). 랜딩은 `python -m http.server 8507 --bind 127.0.0.1 --directory landing`.

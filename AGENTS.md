@@ -5,7 +5,8 @@ tools/data. The archived plan's M0-only example and per-stage stop wording do no
 limit this request. Keep its technical acceptance gates and report actual evidence.
 
 - Preserve original files and raw data. Ask the user before sensitive/destructive deletion.
-- The user authorized a GitHub repository and code pushes. Keep it private unless requested otherwise.
+- The user authorized a GitHub repository and code pushes. The repository is public at the
+  user's request (2026-10-23); never commit secrets, raw datasets or personal data.
 - No customer data, external messages, paid services or public service deployment.
 - Use Python 3.12, locked dependencies, shared CLI for Airflow and Kubernetes.
 - Preserve interpolation/sample counts and source lineage. Energy is estimated;

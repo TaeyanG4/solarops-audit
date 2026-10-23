@@ -18,7 +18,7 @@
 | 외부 수집·일정 | BR-PVGen 역사 분석 + ONS 실제 증분 수집 | kind ONS9~10월167,424행·51일 게시, 매일14:00KST 활성. 다른 6개 DAG paused. [실행 근거](benchmarks/incremental-v0.5.0.md) |
 | Airflow·Compose·kind/KPO | 실제 실행·재시도·백필 검증 | 공개/합성 시나리오, Pod 중단 복구, 일별 해시 비교 |
 | 월별 UI·API·실행 이력 | 구현 및 브라우저/관련 검사 통과 | 단일 SELECT, 슬롯 가중 집계, 발전소별 조회·주소 복원·batch↔partition [탐색 검증](worklog/2026-10-23-run-navigation.md) |
-| 배포·품질 관리 | private GitHub, 현재 v0.5.7; 검사·배포별 범위를 명시 | [최신 검증](benchmarks/quality-v0.5.7.md), CI와 과거 검사는 날짜별 기록으로 구분 |
+| 배포·품질 관리 | 공개 GitHub(2026-10-23 전환), 현재 v0.5.7; 검사·배포별 범위를 명시 | [최신 검증](benchmarks/quality-v0.5.7.md), CI와 과거 검사는 날짜별 기록으로 구분 |
 | 진단·복원 | 읽기 전용 실행 진단, 합성 SQLite/파일 및 PostgreSQL/MinIO 복원 통과 | 7개 진단 테스트, SQLite 31파일, 서비스 27객체·dump 복원·API·raw 재처리 |
 | 문서·구조 | 점수 계획·근거·인계 체계 | README·목차·설치·기술 선택·운영 계약, plan·짧은 handoff·[날짜별 상세 기록](worklog/README.md) 연결 |
 | 고객·사업 검증 | 준비 자료만 있음 | 인터뷰/스키마 매핑/가격 산술; 실제 계약·매출 없음 |
