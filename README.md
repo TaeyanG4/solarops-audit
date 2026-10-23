@@ -95,7 +95,7 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 | 공개 일별 KPO 병렬 비교 | 동일 4일, 직렬 36.675초 → 동시 2개 19.339초. 결과 hash 4개 동일, CPU 합 24.3% 증가 | 단일 kind 호스트, 직렬 후 병렬 각 1회, 기동·캐시 영향 포함. 하나의 4일 CLI 배치와 비교하지 않음. [조건·기계 판독 결과](docs/benchmarks/incremental-v0.5.0.json) |
 | 실패·재현·최종 화면 | v0.5.1 기준 양 OS 각각 137통과·13제외, 격리 합성 7일 복구·보고서·종료, 1440/768/390px 확인 | 해당 버전의 과거 근거. [검증 기록](docs/benchmarks/portfolio-finish-20261023.md) · [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39915517455) |
 
-[최신 검사 CI](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml), [현재 계획](plan.md), [독립 평가 기준](docs/reviews/portfolio-rubric.md)을 함께 확인하세요. 기존 [Fable·Astra 모의 면접 평가](docs/reviews/2026-10-23-interview.md)의 후속 검토는 면접·개인 역량을 제외한 산출물 기준으로 진행합니다. 평가 점수는 품질 보증이 아니며 확인된 결함과 미실행 검사를 따로 기록합니다.
+[최신 산출물 독립 평가 R5](docs/reviews/2026-10-23-artifact-r5.md)는 같은 고정 커밋을 대상으로 완료했습니다. 면접·개인 역량은 제외하고 코드·실행 근거·문서를 검토했습니다. 평가 후 정정한 hash 문서와 남은 지표 계약·SQL 문서 확인은 [현재 계획](plan.md)에 구분했습니다. [다른 세션 재개 지점](handoff.md) · [최신 검사 CI](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml). 점수는 품질 보증이 아니며 원문·실행 검사·한계를 함께 보존합니다.
 
 실제 PostgreSQL/MinIO, 복구·동시 조회, 모바일 접근성, 버전별 무결성 등 상세 증거는 [문서 목차](docs/README.md)에 모았습니다. 단일 호스트 kind는 고가용성 근거가 아니며 일회 비교는 일반적인 처리량·확장성을 입증하지 않습니다. 자동 접근성 검사 통과도 실제 보조공학 검사나 인증을 대체하지 않습니다.
 

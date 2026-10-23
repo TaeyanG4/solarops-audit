@@ -4,38 +4,31 @@
 
 ## 현재 상태
 
-- 최신 코드 **v0.5.6** / 계산 `energy-interval-v2`: 보고서선택키·총품질이슈·읽기분석·성능표본 보완. [검사](docs/benchmarks/quality-v0.5.6.md). Compose대시보드·kindAirflow/KPO0.5.6배포완료. [이미지/구현 커밋](docs/releases/0.5.6.json). [GitHub](https://github.com/TaeyanG4/solarops-audit)는 비공개입니다.
-- DATA-03/PERF-03 완료: [ONS 증분 계약](docs/ons-source-contract.md), 성공 cursor와 변경 날짜 원자 게시, 별도 CLI/API, 실제 정기 수집과 공개4일 Airflow 병렬 비교. [실행 근거·한계](docs/benchmarks/incremental-v0.5.0.md).
-- ONS: Compose 10월 태양광 69,696행·21일, 같은 응답 재실행 변경 0개. kind 9~10월 167,424행·51일, 실제 scheduled KPO 성공. 두 환경의 10월 일별 hash 일치. 원문 시각/MWmed·검증/예측/미확정 보존, 기존 발전량에 합산하지 않습니다.
-- 공개 4일 실제 KPO: 직렬 36.675초→동시 2개 19.339초(47.3% 단축), hash 동일·오류 0, worker RSS 최대 427.78MiB. 총 CPU 24.3% 증가. 별도 DB/버킷이며 단일 호스트·각 1회·4개의 일별 task 비교입니다.
-- 최신 검증: 로컬140통과·14제외, 실제 격리 PostgreSQL/pinned MinIO13통과, [구현CI39936889247](https://github.com/TaeyanG4/solarops-audit/actions/runs/39936889247) 양OS성공. 새 합성7일 실패/재처리 동일·7DAG양모드·배포전후공개/ONS·기존보고서필드동일(selection추가). 세너비axe0은 v0.5.1 화면검사 근거입니다.
-- 실행: Compose app-db/minio/dashboard와 kind 가동, 앱/Airflow/KPO 선언 0.5.6. Compose Airflow 3개는 0.5.6으로 생성했지만 중지. kind 6서비스Pod Ready. kind **ONS만 활성**, 매일 14:00 KST, 다음 10-24 14시. 나머지 6DAG paused·진행/대기 0건. [수집 on/off](docs/runbooks/dags.md#ons-정기-수집-켜기끄기).
-- [전체 현황](http://127.0.0.1:8502/?view=overview&period=2024-04&source=public), [PS_001 보고서](http://127.0.0.1:8502/?view=reports&period=2024-04&source=public&plant=PS_001), [ONS API](http://127.0.0.1:8502/api/v1/sources/ons?period=2026-10). 데이터 출처의 [ONS 수집 상태 탭](http://127.0.0.1:8502/?view=sources&source_tab=ons&ons_period=2026-10)을 추가했습니다. 기존 분석 화면은 BR-PVGen입니다.
-- 공개 BR-PVGen 전체 51발전소/12,572일 v2는 Compose, kind 기존 공개는 PS_001 하루, 기본 native는 v1 보존본. 저장소 자동 동기화는 없습니다. [실사](docs/benchmarks/stack-authenticity-20261023.md).
-- [독립 관리 8504](http://127.0.0.1:8504/)는 별도 호스트 Python, `scripts/ops/admin.ps1 stop`으로 종료. [운영](docs/runbooks/operator.md#시스템-관리-8504). 시험 DB/버킷/완료 Pod/원본은 삭제하지 않았습니다.
-- 임시 preview8505와 데모8503/8506은 종료했습니다. 데이터·시험 컨테이너는 삭제하지 않았습니다.
-- 고객 계약·매출·현장 고장 정확도·외부 SLO·장시간 쓰기 부하는 미검증이며 공개 서비스 배포는 없습니다.
+- 최신 구현 **v0.5.6 / energy-interval-v2**, 구현 커밋 `4b9959e`, R5 평가 고정 커밋 `faa6f3b`. [릴리스·이미지](docs/releases/0.5.6.json) · [검증](docs/benchmarks/quality-v0.5.6.md) · [비공개 GitHub](https://github.com/TaeyanG4/solarops-audit).
+- **R5 Astra 96 / Fable 94, 각각 95이상 목표는 아직 미달. 두 평가 모두 종료.** [원문·수용·실행 근거](docs/reviews/2026-10-23-artifact-r5.md). 면접·개인 역량 평가는 제외합니다.
+- 각 평가자가 새 사본/venv에서 140통과·14제외, 격리 PostgreSQL/MinIO 13통과, 합성 7일 실패 보존/재처리·34개 파일 SQLite 복원을 실행했습니다. 호스트 symlink 1건 제외, 서비스 13건은 별도 실행. 원본 점수와 후속 정정은 구분합니다.
+- 2026-10-23 **20:59 KST 읽기 확인**: Compose app-db/minio/dashboard는 Exited(255), 8502 health/ready 연결 거부. kind 6개 서비스 Pod Ready, 관리 8504·별도 랜딩 8507 listening. Compose Airflow 3개는 Created/중지. 이번 인계에서 시작·종료하지 않았습니다.
+- [대시보드8502](http://127.0.0.1:8502/?view=overview&period=2024-04&source=public)는 현재 중지. 재시작: `docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio dashboard` 후 `/ready` 확인. [운영 절차](docs/runbooks/operator.md#8502가-열리지-않을-때). 관리 8504는 `scripts/ops/admin.ps1 stop`으로 별도 종료합니다.
+- kind ONS의 마지막 확인 설정은 매일 14:00 KST 활성, 다른 6개 DAG paused. 이번 인계에서는 Pod만 재확인했고 새 scheduled 실행은 확인하지 않았습니다. [일정 on/off](docs/runbooks/dags.md#ons-정기-수집-켜기끄기).
+- 공개 BR-PVGen 전체 51발전소/12,572일 v2는 Compose, kind의 BR 자료는 PS_001 하루, native는 v1 보존본. ONS의 기존 검증 범위는Compose 69,696행/21일·kind 167,424행/51일. 환경별 저장소는 독립입니다. [수집 근거](docs/benchmarks/incremental-v0.5.0.md).
+- 추정 kWh·검토 후보·누락/무효/보간을 구분합니다. ONS 원문 MWmed·시간 기준 미확정을 보존하고 기존 kWh에 합산하지 않습니다. 고객·매출·외부 SLO·장기 쓰기 부하는 미검증입니다.
 
 ## 다음 재개 지점
 
-- 사용자는 면접·개인 역량 검증을 생략했습니다. [고정 산출물 루브릭](docs/reviews/portfolio-rubric.md)으로 두 독립 평가 각각 95점 이상을 목표로 개선합니다. 이전 면접 점수와 새 기준 점수는 직접 비교하지 않습니다.
-- R4 Astra90/Fable92. 선택키충돌·품질집계·읽기·증거보완 검사·배포·CI완료, 새고정사본평가. [상세](docs/worklog/2026-10-23-quality-r5.md).
-- R3는 Astra96/Fable91이며 [원문·수용](docs/reviews/2026-10-23-artifact-r3.md)을 보존했습니다. 후속수정·검사·배포·CI 완료 후 새 평가에는 고정커밋 archive사본을 사용합니다.
-- R2는 Astra97/Fable90이며 [원문·수용](docs/reviews/2026-10-23-artifact-r2.md)을 보존했습니다. 2차 기록 실패의 원인 유실을 BR2/ONS1에서 재현해 수정·실제서비스검사·배포를 완료했습니다.
-- R1은 Fable95/Astra86이며 [원문/수용](docs/reviews/2026-10-23-artifact-r1.md)을 보존했습니다. v0.5.6 수정·검사·배포·CI를 완료했고 같은 커밋의 새 독립 평가를 진행합니다.
-- [plan](plan.md)의 REVIEW-02 진행 중이며 R1~R4 후속수정·검사·배포는 완료했습니다. BIZ-01은 사용자 요청으로 후순위입니다. 고정MinIO를 Compose/kind에 배포했으며 기존볼륨·공개/ONS응답·kind51파티션 보존을 확인했습니다.
-- 매일 10:00 KST 이 대화 자동 점검(`solarops`)을 설정했습니다. 의미 있는 개선 뒤에만 Fable(Claude Code)/Astra 새 세션에서 평가하며 목표 달성 시 중지합니다. 변화 없는 점수 재추첨은 하지 않습니다.
-- ONS는 이전/현재 월을 재확인하며 그보다 오래된 정정은 `ons-sync --period YYYY-MM`. 실패 시 월별 성공 cursor 유지, 충돌은 최신 상태에서 재시도. 원문 시간대를 추측해 UTC로 변환하지 않습니다.
-- kind 중지 시 정기 수집도 멈춥니다. ONS만 멈추려면 DAG pause. 현재 실행 중인 Pod까지 강제 종료하는 명령은 아닙니다. 두 환경 자료는 독립입니다.
-- 릴리스는 `scripts/release/release.py sync`→`uv lock`→`check`→구현커밋→`build`. 추가 테이블은 새 읽기 API 배포 전 `db-migrate`. 원본/과거 보고서 필드를 소급 변경하지 않습니다.
-- 단발성·낮은 영향 수정은 기존 검사/화면 확인 우선. 연구 스킬과 discoveries 절차는 사용하지 않습니다. UI 변경은 [디자인](DESIGN.md)·[탐색계약](docs/design/workspace-navigation.md) 기준입니다.
-- 원본·ZIP·`docs/plan/`·과거 증거 보존, 민감/파괴적 삭제는 사용자 허락 필요. 별도 작업의 skills-lock.json·.taste-skill/·landing/ 변경은 이번 커밋에 포함하지 않았습니다.
+1. AGENTS.md → 이 문서 → [plan.md](plan.md) → [R5 인계 상세](docs/worklog/2026-10-23-handoff-r5.md)를 읽습니다. INT-05(19점) → DOC-06(16점) → REVIEW-02(16점) 순서이며 BIZ-01은 사용자 요청으로 후순위입니다.
+2. INT-05: Fable이 합성 지표의 `interpolation_unknown_slots`를 제거해 보고서 KeyError를 재현했습니다. 실제 과거 v2 누락 여부·지원 계약부터 확인합니다. 현재 생성기는 해당 필드를 기록합니다. 원본 수정이나 무조건 0 대입은 하지 않습니다.
+3. DOC-06: `migrations/0001_catalog.sql`에 ONS 3개 테이블·PG 인덱스 2개가 없는 정적 불일치. 실제 `db-migrate` 경로와 baseline의 범위를 맞춥니다. 운영 DB 변경부터 시작할 필요는 없습니다.
+4. Astra의 org_id/hash 설명 오류는 계약·아키텍처·설계 사례·질문 4개 문서에서 정정했습니다. hash에는 org_id가 없고 조직 격리는 저장/조회 조건이 담당합니다. 계산·기존 자료 불변, 정정본 독립 확인은 미실행입니다.
+5. 의미 있는 보완·관련 검사 뒤 동일 고정 커밋을 새 Astra/Fable에 제공합니다. 목표/이전 점수·상대 피드백은 평가자에게 주지 않습니다. Fable은 Claude Code `--model fable`, R5 실제 모델 `claude-fable-5-1`; Astra 요청 `gpt-6-astra`, resolved ID 미제공입니다.
+6. 자동 점검 `solarops`는 10:00 KST 일정이나 **현재 PAUSED**. 이번 인계에서 변경하지 않았습니다. 진행 중인 독립 평가는 없으며 기존 R5를 중복 시작하지 않습니다.
+7. Git 제외 `artifacts/artifact-review-r5-20261023/`에 고정 사본·UTF-16LE Fable stream·JUnit·합성 근거·실행기를 보존했습니다. 원문/요약은 docs/reviews에 게시합니다. 임시 `update-handoff.py`·과거 `record.py`/`finish.py`는 재실행하지 않습니다.
+8. 별도 랜딩 세션의 `landing/`·이미지·skills-lock.json·.gitignore 및 공유문서 수정이 남아 있습니다. 이번 인계 커밋에서 제외했으며 전체 `git add .`·되돌리기·삭제를 하지 않습니다. 원본/ZIP/볼륨/과거 평가 보존, 민감한 삭제는 사용자 허락이 필요합니다.
 
 ## 최근 수행 요약
 
 | 일자 | 수행 영역과 결과 | 상세 |
 |---|---|---|
-| 10-23 | R4 Astra90/Fable92·선택키/품질집계/읽기·표본근거 | [R4 구현](docs/worklog/2026-10-23-quality-r5.md), [R3 구현](docs/worklog/2026-10-23-quality-r4.md) |
+| 10-23 | R5 Astra 96 / Fable 94·원문 보존·hash 설명 정정·다음 세션 인계 | [인계·검증](docs/worklog/2026-10-23-handoff-r5.md), [R4 구현](docs/worklog/2026-10-23-quality-r5.md) |
 | 10-23 | Fable·Astra 면접 평가·합성 경계 3개 재현·후속 21/19/16점 등록 | [평가·재현·전달](docs/worklog/2026-10-23-interview.md) |
 | 10-23 | PORT-01~04완료·ONS상태UI·0.5.1배포·격리재현·제출자료·최신CI | [최종 수행](docs/worklog/2026-10-23-portfolio-finish.md) |
 | 10-23 | ONS 실제 증분·정기 KPO·공개 DAG 동시 2개 비교, 0.5.0 배포·문서 갱신 | [수행·전달](docs/worklog/2026-10-23-incremental.md) |

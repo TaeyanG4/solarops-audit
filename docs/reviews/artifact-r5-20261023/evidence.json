@@ -1,0 +1,177 @@
+{
+  "reviewed_commit": "faa6f3baf8e1925ccc21f402419cf1333f2e5010",
+  "implementation_commit": "4b9959e232eccfcae1581c93d00bf3509c56549f",
+  "release": "0.5.6",
+  "archive_sha256": "81029212ac9dfd5bf657c12b68b964f73c20bd37b7efff9ca3e1c223e65d74b6",
+  "tracked_files": 303,
+  "parent_verified_archive_and_snapshot_hashes": true,
+  "original_scores": {
+    "astra": 96,
+    "fable": 94
+  },
+  "models": {
+    "astra_requested": "gpt-6-astra",
+    "astra_resolved": null,
+    "fable_reported_by_cli": [
+      "claude-fable-5-1"
+    ]
+  },
+  "fable_session_id": "ce4eec59-6435-4c71-827f-f0a03afdba85",
+  "fable_stream_encoding": "UTF-16LE with BOM",
+  "fable_stream_sha256": "61d4eea2aa6905b261bd7bd83c5614dcbed3b148163b928e72a63031589813fb",
+  "fable_denied_tool_requests": 8,
+  "original_report_sha256": {
+    "astra-review.md": "e0d0d3ac7a477c00191e52ca28ca8fa179de6ca877264dd129aa6767acd74122",
+    "astra-provenance.md": "43ccf3d0a01c30704b5e092225d4e2408cabd8d529dca48520a38a9c0f880f03",
+    "fable-review.md": "709edfe4d80030c95861fb5f895f82816dcaf06d20622a2f113acf591574f133"
+  },
+  "checks": {
+    "astra": {
+      "offline": {
+        "tests": "154",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "14",
+        "time": "43.209"
+      },
+      "services": {
+        "tests": "13",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "29.175"
+      },
+      "isolated_services": {
+        "containers": [
+          "solarops-quality-pg-fd882f18ef",
+          "solarops-quality-s3-fd882f18ef"
+        ],
+        "exit_code": 0,
+        "isolated": true,
+        "stopped": true,
+        "deleted": false
+      },
+      "tracked_files_changed": 0
+    },
+    "fable": {
+      "offline": {
+        "tests": "154",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "14",
+        "time": "41.400"
+      },
+      "services": {
+        "tests": "13",
+        "failures": "0",
+        "errors": "0",
+        "skipped": "0",
+        "time": "27.139"
+      },
+      "isolated_services": {
+        "containers": [
+          "solarops-quality-pg-52e5c9405b",
+          "solarops-quality-s3-52e5c9405b"
+        ],
+        "exit_code": 0,
+        "isolated": true,
+        "stopped": true,
+        "deleted": false
+      },
+      "tracked_files_changed": 0
+    }
+  },
+  "fable_missing_key_probe": {
+    "tool_use_id": "toolu_014Mh1JRDuD4TZ4WLWEsvQKU",
+    "result": {
+      "build_report": "KeyError: 'interpolation_unknown_slots'",
+      "fleet_overview": "ok",
+      "api_metrics": 200,
+      "api_overview": 200
+    }
+  },
+  "astra_focused_evidence": {
+    "org_hash": {
+      "org-a": {
+        "hash": "8b800f9be66783a673b7769a72050f202c29611dcd8a1a335c6bb3d362f44a88",
+        "own_partitions": 1,
+        "other_org_partitions": 0
+      },
+      "org-b": {
+        "hash": "8b800f9be66783a673b7769a72050f202c29611dcd8a1a335c6bb3d362f44a88",
+        "own_partitions": 1,
+        "other_org_partitions": 0
+      }
+    },
+    "org_hash_equal": true,
+    "historical_latency_recalculation": {
+      "cases": 27,
+      "requests": 1080,
+      "mismatches": []
+    },
+    "skipped": [
+      {
+        "name": "test_source_symlink_cannot_escape_root",
+        "reason": "Host does not permit test symlinks"
+      },
+      {
+        "name": "test_postgres_minio_transaction",
+        "reason": "Explicit Postgres/MinIO integration opt-in"
+      },
+      {
+        "name": "test_postgres_concurrent_version_claim",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_report_publication[ordering]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_report_publication[upload]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_report_publication[catalog]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_partition_publication[absent]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_partition_publication[existing]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_partition_publication[duplicate]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_partition_publication[restore]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_partition_publication[before_commit]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_partition_publication[during_commit]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_partition_publication[trace]",
+        "reason": "Explicit service opt-in"
+      },
+      {
+        "name": "test_postgres_ons_incremental_cursor",
+        "reason": "Explicit service opt-in"
+      }
+    ]
+  },
+  "git_lf_normalized_report_sha256": {
+    "astra-review.md": "a6058722e4aad9413f3d54d0a5c1401405805f13283ba7caf418bf9556461cff",
+    "astra-provenance.md": "8b60e2c3c1abc6ae7bdd9d70781dd2532f98651a213547baa042e6bd050a9cd4",
+    "fable-review.md": "4adefe903995ff4f53e0799067164223e8d7ae85a8ee619891319b6451a5a763"
+  },
+  "hash_note": "original_report_sha256 refers to local original bytes; Git normalizes Markdown line endings to LF without changing review text. git_lf_normalized_report_sha256 refers to committed blobs."
+}
