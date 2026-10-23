@@ -6,7 +6,7 @@
 
 | 목적 | 문서 |
 |---|---|
-| 5분 안에 실행 | [시연 순서](portfolio/DEMO_GUIDE.md), [설치·환경 변수](guides/setup.md) |
+| 5분 안에 실행 | [시연 순서](portfolio/DEMO_GUIDE.md), [설치·환경 변수](guides/setup.md), [새 PC에서 전체 스택 재현](guides/new-pc.md) |
 | 현재 진행도와 다음 과제 | [구현 상태](IMPLEMENTATION_STATUS.md), [점수 기반 계획](../plan.md), [인계·진행 기록](../handoff.md), [날짜별 상세 기록](worklog/README.md), [버전별 변경](../CHANGELOG.md) |
 | 독립 기술 검토 | [독립 세션 평가](reviews/2026-10-23-independent.md), [재현·수용/보류 판단](worklog/2026-10-23-independent-review.md) |
 | 독립 모의 면접 평가 | [Fable·Astra 비교와 코드 재현](reviews/2026-10-23-interview.md), [Astra 전문](reviews/2026-10-23-interview-astra.md), [Fable 전문](reviews/2026-10-23-interview-fable.md) |

@@ -15,6 +15,8 @@
 - 추정 kWh·검토 후보·누락/무효/보간을 구분합니다. ONS 원문 MWmed·시간 기준 미확정을 보존하고 기존 kWh에 합산하지 않습니다. 고객·매출·외부 SLO·장기 쓰기 부하는 미검증입니다.
 - [독립 랜딩 v6](http://127.0.0.1:8507/) 완료. 히어로 카드를 실제 공개 집계 기반 데모 창(전체 현황/월간 보고서/원본 계보)으로 교체, 보고서 문서형·계보 4단계 흐름, CSS 재작성. 1440/768/375 렌더·axe위반0, 미검증 범위는 [작업 기록](docs/worklog/2026-10-23-landing.md#v6-히어로-실제-데모-창과-전체-다듬기)·[QA](landing/QA.md). [실행](landing/README.md). 별도 loopback 정적 서버이며 FastAPI는 이 작업에서 변경하지 않았습니다.
 
+- **새 머신 전체 재현 검증 통과(10-23)**: README 명령 그대로 Compose·Airflow·kind+KPO·ONS 수집까지 빈 Ubuntu 머신에서 성공([실행](https://github.com/TaeyanG4/solarops-audit/actions/runs/39965762056), 수동/태그 workflow `reproduce.yaml`). 포맷한 PC는 [새 PC 가이드](docs/guides/new-pc.md).
+
 ## 다음 재개 지점
 
 1. AGENTS.md → 이 문서 → [plan.md](plan.md)를 읽습니다. 현재 실행 가능한 미완료 항목은 없고 BIZ-01은 사용자 요청으로 보류입니다.

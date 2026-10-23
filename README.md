@@ -51,7 +51,7 @@ WSL Ubuntu 또는 Linux 셸에서 저장소 루트로 이동해 실행합니다.
 
 ```bash
 make install          # Linux용 가상환경(.venv-linux)
-make up-local         # .env 비밀값 무작위 생성 → 이미지 빌드 → app-db · minio · dashboard 기동
+make up-local         # .env 비밀값 무작위 생성 → 이미지 빌드 → app-db · minio · dashboard 기동 → 스키마·버킷 준비
 make demo-services    # 실제 PostgreSQL · MinIO로 합성 데모
 make test-services    # 실제 서비스 검사 13개
 make airflow-up       # Compose Airflow
@@ -71,7 +71,7 @@ make k8s-smoke        # DAG를 실행해 KPO 작업 Pod 동작 확인
 
 공개 원본 전체(약 350MB 내려받기, 처리 8~16분)와 ONS 수집은 데모에 포함되지 않으며 [수집·처리 명령](docs/guides/data-ingestion.md)으로 별도 실행합니다.
 
-2·3번 절차는 이 프로젝트의 작업 PC(Windows + WSL2 Ubuntu 22.04 + Docker Desktop)에서 실제로 실행·운영했습니다. 아무것도 없는 새 머신에서 처음부터 다시 설치하는 검증은 아직 하지 않았습니다. 자세한 사전 준비·환경 변수·문제 해결은 [설치 안내](docs/guides/setup.md), 켜기·끄기는 [운영 절차](docs/runbooks/operator.md)와 [DAG 운영](docs/runbooks/dags.md)에 있습니다. 외부 공개 데모 사이트는 운영하지 않습니다.
+**새 머신 재현 검증:** 위 1·2·3번 명령과 ONS 수집(`make ons-sync`, ONS DAG)을 아무것도 없는 GitHub Ubuntu 머신에서 처음부터 자동 실행해 모두 통과했습니다([재현 실행 2026-10-23](https://github.com/TaeyanG4/solarops-audit/actions/runs/39965762056), [workflow](.github/workflows/reproduce.yaml)). 포맷한 Windows PC 기준 단계별 안내는 [새 PC 재현 가이드](docs/guides/new-pc.md)입니다. 자세한 사전 준비·환경 변수·문제 해결은 [설치 안내](docs/guides/setup.md), 켜기·끄기는 [운영 절차](docs/runbooks/operator.md)와 [DAG 운영](docs/runbooks/dags.md)에 있습니다. 외부 공개 데모 사이트는 운영하지 않습니다.
 
 ## 데이터와 숫자의 의미
 
@@ -170,6 +170,7 @@ Redis·Celery·StatsD·Triggerer·Flower는 쓰지 않습니다(LocalExecutor). 
 
 | 확인한 항목 | 결과 | 범위와 근거 |
 |---|---|---|
+| 새 머신 전체 재현 | Compose(PostgreSQL·MinIO·대시보드)·실제 DB 검사 13개·Airflow DAG 6종·kind Pod 6개·KPO 작업·ONS 실제 수집(2026-10 태양광 69,696행·21일) 모두 통과 | GitHub 기본 Ubuntu 머신에서 README 명령 그대로 1회. [실행 기록](https://github.com/TaeyanG4/solarops-audit/actions/runs/39965762056) |
 | v0.5.7 릴리스 검사·배포 | 오프라인 142통과·14제외, 실제 PostgreSQL/MinIO 13통과, Compose 배포 전후 응답 비교, kind 3개 rollout·6개 Pod Ready | 단일 로컬 호스트. 새 scheduled KPO·성능 재측정은 미실행. [검사·배포](docs/benchmarks/quality-v0.5.7.md) |
 | 공개 역사 자료 처리 | 51개 발전소, 인버터 14,400,480행, 일별 파티션 12,572개 | 과거 전체 처리 근거이며 매 커밋마다 전체를 재실행한 수치가 아님. [스택·자료 실사](docs/benchmarks/stack-authenticity-20261023.md) |
 | 실제 ONS 정기 수집 | kind 9~10월 태양광 167,424행·51일, 실제 scheduled KPO 성공. Compose 재확인 변경 0일 | 두 환경 저장소는 독립. [명령·원본 SHA·수집 결과](docs/benchmarks/incremental-v0.5.0.md) |

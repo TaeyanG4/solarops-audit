@@ -6,6 +6,8 @@
 
 ## 사전 준비
 
+포맷한 Windows PC에서 처음부터 전체 스택을 다시 띄우는 순서는 [새 PC 재현 가이드](new-pc.md)에 한 장으로 정리했습니다.
+
 | 경로 | 필요한 도구 | 확인 명령 |
 |---|---|---|
 | 네이티브 데모 | Git, [uv](https://docs.astral.sh/uv/getting-started/installation/) (Python 3.12는 uv가 받을 수 있음) | `uv --version` |
@@ -29,7 +31,7 @@ uv run solarops serve
 
 [대시보드](http://127.0.0.1:8501) · [API 문서](http://127.0.0.1:8501/docs)
 
-v0.4.1부터 `serve`는 저장소를 생성하지 않습니다. 위의 `demo`가 DB와 자료를 준비합니다. 자료 없이 빈 catalog만 준비하려면 같은 환경 설정에서 `uv run solarops db-migrate`를 먼저 실행하세요. `/health`는 프로세스 상태, `/ready`는 catalog 스키마와 설정된 객체 저장소 접근을 확인합니다. DB/스키마/버킷이 없으면 503이며, 전체 파일의 존재·무결성을 전수 검사하는 API는 아닙니다.
+v0.4.1부터 `serve`는 저장소를 생성하지 않습니다. 위의 `demo`가 DB와 자료를 준비합니다. 자료 없이 빈 catalog만 준비하려면 같은 환경 설정에서 `uv run solarops db-migrate`를 먼저 실행하세요. S3(MinIO)가 설정되어 있으면 버킷도 함께 만들며, 이미 있으면 그대로 둡니다. Compose의 `make up-local`은 마지막에 이 명령을 자동 실행합니다. `/health`는 프로세스 상태, `/ready`는 catalog 스키마와 설정된 객체 저장소 접근을 확인합니다. DB/스키마/버킷이 없으면 503이며, 전체 파일의 존재·무결성을 전수 검사하는 API는 아닙니다.
 
 기본 데모는 네트워크나 Docker 없이 합성 데이터 1주를 처리합니다. `data/`에 SQLite 카탈로그, 원본, Parquet, 보고서를 보존합니다. 실행 후 출력되는 `report.html`, `metrics.csv`, `manifest.json`은 브라우저·Excel·JSON 도구에서 볼 수 있습니다.
 
