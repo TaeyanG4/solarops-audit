@@ -241,7 +241,10 @@ def test_ons_incremental_correction_withdrawal_and_atomic_cursor(settings, tmp_p
     assert result["items"][0]["ts_utc"] is None
     assert client.get("/api/v1/sources/ons?period=2026-13").status_code == 422
     other = replace(settings, org=settings.org + "-other")
-    assert status(Catalog(other), "2026-10")["partitions"] == []
+    other_status = status(Catalog(other), "2026-10")
+    assert other_status["partitions"] == []
+    assert other_status["last_success"] is None
+    assert other_status["available_periods"] == []
     assert (
         TestClient(create_app(other)).get("/api/v1/sources/ons/days/2026-10-01").status_code == 404
     )
@@ -293,3 +296,36 @@ def test_ons_conditional_download_and_failure_preserve_success(settings, tmp_pat
     catalog = ons.Catalog(settings)
     assert ons.cursor(catalog, "2026-10") == second
     assert ons.status(catalog, "2026-10")["recent_attempts"][0]["status"] == "failed"
+    from fastapi.testclient import TestClient
+
+    from solarops.api.app import create_app
+
+    client = TestClient(create_app(settings))
+    result = client.get("/api/v1/sources/ons?period=2026-10").json()
+    assert result["last_success"] == second
+    assert result["recent_attempts"][0]["status"] == "failed"
+    assert result["available_periods"] == ["2026-10"]
+    assert result["storage"]["scheduler_status"] == "not_observed"
+    assert "database_url" not in result["storage"]
+    # Last success comes from the cursor even when >20 later failures hide it.
+    from solarops.storage.postgres import collection_runs, put
+
+    with catalog.engine.begin() as conn:
+        for i in range(21):
+            put(
+                conn,
+                collection_runs,
+                {"org_id": settings.org, "run_id": f"failure-{i}"},
+                {
+                    "source_id": ons.SOURCE,
+                    "period": "2026-10",
+                    "status": "failed",
+                    "finished_at": f"2099-10-23T00:00:{i:02d}+00:00",
+                },
+            )
+    result = client.get("/api/v1/sources/ons?period=2026-10").json()
+    assert len(result["recent_attempts"]) == 20
+    assert all(r["status"] == "failed" for r in result["recent_attempts"])
+    assert result["last_success"] == second
+    empty = client.get("/api/v1/sources/ons?period=2026-09").json()
+    assert empty["last_success"] is None and empty["partitions"] == []

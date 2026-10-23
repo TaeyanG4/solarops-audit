@@ -41,7 +41,7 @@ uv run solarops ons-status --period 2026-10
 
 - `GET /api/v1/sources/ons?period=2026-10`: 계약·일별 manifest·최근20회 실행.
 - `GET /api/v1/sources/ons/days/2026-10-01?offset=0&limit=100`: SHA검증 후 원문 포함 hourly 행, 최대500행/응답.
-- 기존 대시보드의 BR-PVGen `public` 필터·차트·보고서에는 합산하지 않습니다. 현재 ONS 조회는 CLI/API이며 별도 화면은 구현하지 않았습니다.
+- 기존 대시보드의 BR-PVGen `public` 필터·차트·보고서에는 합산하지 않습니다. ONS는 CLI/API와 데이터 출처의 별도 ONS 탭에서 조회합니다. 월별 성공 cursor·최근20개 시도·조직별 기록 월을 함께 반환하며 실패 후 이전 성공을 구분합니다. 저장소 표시에는 설정된 환경 이름과 저장소 종류만 포함하고 DSN·인증값은 노출하지 않습니다. 스케줄러 가동 상태는 조회하지 않습니다.
 
 Airflow `solarops_ons_daily`는 매일05:00UTC(14:00KST), `data_interval_end` 날짜의 이전/현재 월을 같은 CLI로 수집합니다. catchup=false, 동시 실행1개, 재시도2회, 생성 시 paused입니다. **정의된 주기와 실제 활성화 여부는 다릅니다.** 현재 실행/배포 근거는 [작업 기록](worklog/2026-10-23-incremental.md)에 기록합니다.
 

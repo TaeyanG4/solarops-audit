@@ -9,7 +9,7 @@
 | 5분 안에 실행 | [시연 순서](portfolio/DEMO_GUIDE.md), [설치·환경 변수](guides/setup.md) |
 | 현재 진행도와 다음 과제 | [구현 상태](IMPLEMENTATION_STATUS.md), [점수 기반 계획](../plan.md), [인계·진행 기록](../handoff.md), [날짜별 상세 기록](worklog/README.md), [버전별 변경](../CHANGELOG.md) |
 | 독립 기술 검토 | [독립 세션 평가](reviews/2026-10-23-independent.md), [재현·수용/보류 판단](worklog/2026-10-23-independent-review.md) |
-| 포트폴리오 설명 | [문제·설계·증거 사례](portfolio/CASE_STUDY.md) |
+| 포트폴리오 설명 | [한 쪽 제출 요약](portfolio/SUBMISSION.md), [설계 질문5개](portfolio/DESIGN_QUESTIONS.md), [문제·설계·증거 사례](portfolio/CASE_STUDY.md), [최종 검증](benchmarks/portfolio-finish-20261023.md) |
 | 기술 선택 이해 | [버전·선택 이유·대안](architecture/technology-stack.md), [아키텍처·배포 경계·데이터 흐름·트랜잭션](architecture/system.md) |
 | 실제 사용·자료 진위 | [실행 기술·원본 해시·독립 계산·합성 시험 구분](benchmarks/stack-authenticity-20261023.md) |
 | 데이터 출처 | [제작자·범위·라이선스·파일 다운로드](data-sources.md), [ONS 시간별 계약·증분 수집 API](ons-source-contract.md) |

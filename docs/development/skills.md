@@ -105,3 +105,10 @@ Agent Browser로 실제 공개 자료의 동일 상태와 별도 합성 재처�
 ## ONS 출처 계약 확인
 
 2026-10-23 DATA-03에서는 `pdf:pdf` 스킬로 ONS 공식 데이터 사전 PDF의 필드·단위·null/음수 규칙을 확인했습니다. 시간대나 구간 기준이 없다는 한계를 계약에 남겼습니다. UI 변경은 없으므로 디자인/브라우저 스킬을 재사용한 것으로 기록하지 않습니다. [출처 계약](../ons-source-contract.md) · [수행 기록](../worklog/2026-10-23-incremental.md).
+
+## 2026-10-23 제출 마감의 실제 사용
+
+- **UI UX Pro Max:** 기존 Energy Desk를 유지하고 수집 상태의 오류·빈 상태·출처·반응형 가이드를 검색했습니다. 새 시각 방향이나 프레임워크를 도입하지 않았습니다.
+- **Impeccable:** context로 PRODUCT/DESIGN을 읽고 Operate 화면의 craft-floor·audit를 적용했습니다. 정적 detector 0건, 렌더링에서 정의 목록 구조·모바일 버튼 줄바꿈을 찾아 수정했습니다.
+- **Agent Browser:** 실제 Compose 조회를1440/768/390px에서 확인하고 월 선택·일별 내역·빈 월·통신 실패·이전 성공 보존(브라우저 응답 모의)을 점검했습니다. [최종 근거](../benchmarks/portfolio-finish-20261023.md).
+- Web Design Guidelines와 연구 스킬은 이번 작업에서 실행하지 않았습니다. 과거 사용 기록과 구분합니다.

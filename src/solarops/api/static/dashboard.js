@@ -17,7 +17,14 @@ function readURLState() {
     runPlant: query.get("run_plant") || "",
     review: query.get("review") || "all",
     search: query.get("search") || "",
+    sourceTab: query.get("source_tab") === "ons" ? "ons" : "brpvgen",
+    onsPeriod: query.get("ons_period") || new Date().toISOString().slice(0, 7),
   };
+  if (
+    !/^20\d{2}-(0[1-9]|1[0-2])$/.test(next.onsPeriod) ||
+    next.onsPeriod < "2022-01"
+  )
+    next.onsPeriod = new Date().toISOString().slice(0, 7);
   if (!["all", "partial", "invalid", "missing"].includes(next.review))
     next.review = "all";
   if (
@@ -112,6 +119,10 @@ function workspaceURL(changes = {}) {
   });
   if (["reports", "series"].includes(next.view))
     params.set("plant", next.plant);
+  if (next.view === "sources" && next.sourceTab === "ons") {
+    params.set("source_tab", "ons");
+    params.set("ons_period", next.onsPeriod);
+  }
   if (next.view === "series") params.set("day", next.day);
   if (["overview", "plants"].includes(next.view)) {
     if (next.review !== "all") params.set("review", next.review);
@@ -316,8 +327,8 @@ function navigate(changes) {
   if (changes.view && changes.view !== state.view)
     window.scrollTo({ top: 0, behavior: "instant" });
   if (
-    state.view === "runs" &&
-    (!changes.view || changes.view === "runs") &&
+    ["runs", "sources"].includes(state.view) &&
+    (!changes.view || changes.view === state.view) &&
     workspaceURL(changes) !== workspaceURL()
   )
     history.pushState(null, "", workspaceURL(changes));
@@ -326,7 +337,7 @@ function navigate(changes) {
 }
 function syncURL() {
   history.replaceState(null, "", workspaceURL());
-  document.querySelectorAll("nav a").forEach((item) => {
+  document.querySelectorAll("#workspace-nav a").forEach((item) => {
     item.href = workspaceURL({ view: item.dataset.view });
   });
 }
@@ -1072,13 +1083,29 @@ function reportDocument(report, freshness) {
   freshnessNote.setAttribute("aria-atomic", "true");
   snapshot.append(freshnessNote);
   if (freshness.status === "changed")
-    snapshot.append(node("p",
-      "현재 자료를 반영하려면 운영자가 보고서를 다시 발행해야 합니다. 재처리로 근거만 달라진 경우도 있어 수치 변경이나 고장을 뜻하지 않습니다.",
-      "subtext"));
+    snapshot.append(
+      node(
+        "p",
+        "현재 자료를 반영하려면 운영자가 보고서를 다시 발행해야 합니다. 재처리로 근거만 달라진 경우도 있어 수치 변경이나 고장을 뜻하지 않습니다.",
+        "subtext",
+      ),
+    );
   else if (freshness.reason === "scope_not_recorded")
-    snapshot.append(node("p", "이전 보고서에는 생성 당시의 자료 선택 범위가 기록되지 않았습니다. 기존 보고서는 그대로 열람할 수 있습니다.", "subtext"));
+    snapshot.append(
+      node(
+        "p",
+        "이전 보고서에는 생성 당시의 자료 선택 범위가 기록되지 않았습니다. 기존 보고서는 그대로 열람할 수 있습니다.",
+        "subtext",
+      ),
+    );
   else if (freshness.status === "unavailable")
-    snapshot.append(node("p", "비교 근거를 확인하지 못했습니다. 저장소 상태를 확인한 뒤 새로고침해 주세요.", "subtext"));
+    snapshot.append(
+      node(
+        "p",
+        "비교 근거를 확인하지 못했습니다. 저장소 상태를 확인한 뒤 새로고침해 주세요.",
+        "subtext",
+      ),
+    );
   const inputVersions = [
     ...new Set(
       report.sources.map((source) => source.source_version || "기록 없음"),
@@ -1089,7 +1116,12 @@ function reportDocument(report, freshness) {
       ["생성 기준 시각", `${time(report.generated_at)} · 자료 조회 시작 기준`],
       ["입력 버전", inputVersions.join(" · ") || "기록 없음"],
       ["계산 버전", report.calculation_version || "기록 없음"],
-      ["현재 자료 비교", freshness.checked_at ? `${time(freshness.checked_at)} 조회 기준 · 실시간 감시 아님` : "조회하지 못함"],
+      [
+        "현재 자료 비교",
+        freshness.checked_at
+          ? `${time(freshness.checked_at)} 조회 기준 · 실시간 감시 아님`
+          : "조회하지 못함",
+      ],
     ]),
     node(
       "p",
@@ -1956,7 +1988,257 @@ async function quality(signal) {
   return overview(signal, "quality");
 }
 
+function sourceTabs() {
+  const nav = node("nav", undefined, "source-tabs");
+  nav.setAttribute("aria-label", "데이터 출처 선택");
+  for (const [key, label] of [
+    ["brpvgen", "BR-PVGen · 역사 분석"],
+    ["ons", "ONS · 수집 상태"],
+  ]) {
+    const tab = workspaceLink(label, { view: "sources", sourceTab: key });
+    tab.setAttribute(
+      "aria-current",
+      state.sourceTab === key ? "page" : "false",
+    );
+    nav.append(tab);
+  }
+  return nav;
+}
+
+async function onsSource(signal) {
+  const root = node("div", undefined, "sources-view ons-view");
+  root.append(
+    hero(
+      "ONS 수집 상태 확인하기",
+      "브라질 전력계통 운영기관의 시간별 발전 자료. 저장된 수집 기록과 원본 근거를 확인하세요.",
+    ),
+    sourceTabs(),
+  );
+  const data = await get(
+    `/api/v1/sources/ons?period=${encodeURIComponent(state.onsPeriod)}`,
+    signal,
+  );
+  const success = data.last_success,
+    latest = data.recent_attempts[0];
+  const environment = {
+    compose: "Docker Compose",
+    kubernetes: "Kubernetes",
+    native: "네이티브",
+    unspecified: "환경 이름 미설정",
+  }[data.storage.environment];
+  const scope = panel(
+    "조회 중인 저장소",
+    `${environment} · ${data.storage.catalog} / ${data.storage.objects === "s3" ? "S3 객체 저장소" : "로컬 파일"} · 조직 ${data.storage.org}`,
+  );
+  const controls = node("div", undefined, "inline-actions ons-controls");
+  const months = [...new Set([state.onsPeriod, ...data.available_periods])]
+    .sort()
+    .reverse();
+  controls.append(
+    select(
+      "원천 자료 월",
+      months.map((p) => [
+        p,
+        `${p}${data.available_periods.includes(p) ? "" : " · 기록 없음"}`,
+      ]),
+      state.onsPeriod,
+      (p) => navigate({ onsPeriod: p }),
+    ),
+    button("기록 새로고침", render),
+  );
+  scope.append(
+    controls,
+    node(
+      "p",
+      "이 화면은 현재 연결된 저장소만 읽습니다. Compose와 Kubernetes는 독립 저장소입니다. 스케줄러 가동 상태는 조회하지 않으며, 새로고침으로 수집을 실행하지 않습니다.",
+      "subtext",
+    ),
+  );
+  root.append(scope);
+
+  const attemptText = latest
+    ? { committed: "성공", failed: "실패", running: "실행 중으로 기록됨" }[
+        latest.status
+      ] || latest.status
+    : "시도 기록 없음";
+  const summary = panel("수집 결과", `${state.onsPeriod} · 태양광 원천 자료`);
+  const latestTime =
+    latest?.checked_at || latest?.finished_at || latest?.started_at;
+  const stats = node("dl", undefined, "collection-summary");
+  for (const [label, value, note] of [
+    ["최근 시도", attemptText, time(latestTime)],
+    [
+      "마지막 성공 확인",
+      success ? time(success.checked_at) : "성공 기록 없음",
+      "원천 관측 시각과 별개인 수집 확인 시각",
+    ],
+    [
+      "게시된 날짜",
+      success
+        ? `${data.partitions.filter((p) => p.state === "available").length}일`
+        : "—",
+      success
+        ? `${number(success.photovoltaic_rows)}개 태양광 행 · 월 전체 수록 보장 아님`
+        : "자료 없음은 발전량 0을 뜻하지 않습니다",
+    ],
+  ]) {
+    const entry = node("div");
+    const valueNode = node("dd", value);
+    valueNode.append(node("p", note, "subtext"));
+    entry.append(node("dt", label), valueNode);
+    stats.append(entry);
+  }
+  summary.append(stats);
+  if (latest?.status === "failed")
+    summary.append(
+      node(
+        "p",
+        success
+          ? "최근 수집은 실패했습니다. 아래 게시 자료와 마지막 성공 기록은 이전 성공 결과로 보존되어 있습니다."
+          : "최근 수집은 실패했고 보존된 성공 자료가 없습니다.",
+        "notice",
+      ),
+    );
+  if (latest?.status === "running")
+    summary.append(
+      node(
+        "p",
+        "완료 기록이 아직 없습니다. 저장된 실행 상태이며 실제 프로세스의 생존 여부를 보장하지 않습니다.",
+        "notice",
+      ),
+    );
+  if (!success) {
+    summary.append(
+      node(
+        "p",
+        "이 저장소와 월에는 성공적으로 게시된 ONS 자료가 없습니다. 기록이 있는 다른 월을 선택하거나 운영자가 ONS 수집 명령을 실행해야 합니다.",
+        "subtext",
+      ),
+    );
+  } else {
+    summary.append(
+      definitionList([
+        [
+          "마지막 성공의 변경 날짜",
+          success.changed_days.length
+            ? success.changed_days.join(" · ")
+            : "변경 0일 · 원천 응답을 재확인했으며 기존 게시 자료를 유지했습니다.",
+        ],
+        [
+          "수집 확인 시각",
+          "위 시간의 UTC 또는 +09:00 표기는 수집 이력의 시간대입니다. ONS 관측값의 시간대는 원천 사전에 미명시입니다.",
+        ],
+      ]),
+    );
+  }
+  root.append(summary);
+
+  const contract = panel(
+    "원본 해석 기준",
+    "MWmed는 원천의 시간별 평균 발전 값입니다. 이 화면은 kWh로 환산하거나 기존 추정 발전량에 합산하지 않습니다.",
+  );
+  contract.append(
+    definitionList([
+      [
+        "원문 시각",
+        "시간대와 시간 구간의 시작/끝 기준이 공식 사전에 명시되지 않아 source_time을 보존하고 ts_utc는 비워 둡니다.",
+      ],
+      [
+        "값의 근거",
+        "verified는 원천 분류상 검증 자료, forecast는 예측, unspecified는 미확정입니다. 원본 보간 여부·표본 수는 제공되지 않습니다.",
+      ],
+      ["이용 조건", "ONS 공개 자료 · CC BY · 세부 라이선스 버전 미명시"],
+    ]),
+  );
+  const links = node("div", undefined, "inline-actions");
+  for (const [label, href] of [
+    ["ONS 원본 데이터셋", data.contract.dataset_url],
+    ["공식 데이터 사전", data.contract.dictionary_url],
+    ["이 월의 상태 JSON", `/api/v1/sources/ons?period=${state.onsPeriod}`],
+  ]) {
+    const a = link(label + " (새 탭)", href);
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    links.append(a);
+  }
+  contract.append(links);
+  root.append(contract);
+
+  if (data.partitions.length) {
+    const days = panel(
+      "게시된 날짜와 근거",
+      "날짜는 원문 시각 기준입니다. 철회는 원천에서 사라진 날짜이며 과거 파일은 보존합니다.",
+    );
+    const details = node("details");
+    details.append(
+      node("summary", `일별 내역 ${data.partitions.length}개 펼치기`),
+    );
+    details.append(
+      table(
+        [
+          "원천 날짜",
+          "게시 상태",
+          "행 수",
+          "검증 / 예측 / 미확정",
+          "원문 조회",
+        ],
+        data.partitions.map((p) => {
+          const counts = p.generation_basis_counts || {};
+          const a = link(
+            "첫 100행 JSON (새 탭)",
+            `/api/v1/sources/ons/days/${p.day}?limit=100`,
+          );
+          a.target = "_blank";
+          a.rel = "noopener";
+          return [
+            p.day,
+            p.state === "withdrawn" ? "철회 · 과거 보존" : "게시됨",
+            number(p.rows),
+            p.state === "withdrawn"
+              ? "—"
+              : `${number(counts.verified || 0)} / ${number(counts.forecast || 0)} / ${number(counts.unspecified || 0)}`,
+            a,
+          ];
+        }),
+        "source-table",
+      ),
+    );
+    days.append(details);
+    if (success)
+      days.append(
+        definitionList([["마지막 성공 원본 SHA-256", success.raw_sha256]]),
+      );
+    root.append(days);
+  }
+  if (data.recent_attempts.length) {
+    const history = panel(
+      "최근 수집 시도",
+      "이 월의 최근 최대 20개 기록. 마지막 성공은 별도 성공 cursor에서 확인합니다.",
+    );
+    const details = node("details");
+    details.append(
+      node("summary", `수집 이력 ${data.recent_attempts.length}개 펼치기`),
+    );
+    details.append(
+      table(
+        ["수집 이력 시각", "상태", "변경 날짜 수", "오류"],
+        data.recent_attempts.map((r) => [
+          time(r.checked_at || r.finished_at || r.started_at),
+          badge(r.status),
+          r.status === "committed" ? number(r.changed_days.length) : "—",
+          r.error_code || "—",
+        ]),
+        "source-table",
+      ),
+    );
+    history.append(details);
+    root.append(history);
+  }
+  return root;
+}
+
 async function sources(signal) {
+  if (state.sourceTab === "ons") return onsSource(signal);
   const suffix = state.source === "all" ? "" : `&source_kind=${state.source}`;
   const data = await get(
     `/api/v1/overview?period=${encodeURIComponent(state.period)}${suffix}`,
@@ -1969,6 +2251,7 @@ async function sources(signal) {
       "공개 원본에서 분석 결과까지, 어디서 왔고 어떻게 해석해야 하는지 확인하세요.",
     ),
   );
+  root.append(sourceTabs());
   const scope = panel(
     "현재 조회 범위",
     `${state.period} · ${data.timezone} 기준`,
@@ -2078,12 +2361,16 @@ async function render() {
   $("#period").value = state.period;
   $("#source").value = state.source;
   window.syncWorkspaceControls?.();
-  $("#scope-controls").hidden = ["runs", "series", "system"].includes(
-    state.view,
-  );
+  $("#scope-controls").hidden =
+    (state.view === "sources" && state.sourceTab === "ons") ||
+    ["runs", "series", "system"].includes(state.view);
   $("#breadcrumb").textContent = names[state.view];
+  $("#time-basis").textContent =
+    state.view === "sources" && state.sourceTab === "ons"
+      ? "ONS 원문 시각 · 시간대 미명시 · 읽기 전용"
+      : "역사 자료 · 읽기 전용 · UTC 기준";
   document
-    .querySelectorAll("nav a")
+    .querySelectorAll("#workspace-nav a")
     .forEach((b) =>
       b.setAttribute(
         "aria-current",

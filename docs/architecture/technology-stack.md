@@ -2,9 +2,9 @@
 
 [문서 홈](../README.md) · [구조와 데이터 흐름](system.md)
 
-설정된 기술과 실제 사용 증거는 [2026-10-23 실행 스택·데이터 실사](../benchmarks/stack-authenticity-20261023.md)를 함께 확인합니다. 라이브러리 설치뿐 아니라 DB 조회·S3 객체·원본 계산·실제 KPO 이력을 대조했습니다. kind DAG는 paused이며 전체 공개 데이터 처리는 Compose, kind v2 검증은 공개 하루 범위입니다.
+설정된 기술과 실제 사용 증거는 [실행 스택·데이터 실사](../benchmarks/stack-authenticity-20261023.md)와 [v0.5.0 증분 수집·공개 DAG 측정](../benchmarks/incremental-v0.5.0.md)을 함께 확인합니다. 전체 BR-PVGen 처리는 Compose, kind의 기존 v2 결과는 공개 하루입니다. ONS 정기 수집은 kind의 독립 저장소를 사용하며 다른 6개 DAG는 중지 상태입니다(2026-10-23 확인).
 
-수집기는 BR-PVGen 고정 배포용 Python HTTP 다운로드이며 Airflow는 저장된 역사 구간을 재처리합니다. 신규 데이터 정기 수집과 다른 출처 연동은 현재 구현 범위 밖입니다. [수집·일정·확장 절차](../guides/data-ingestion.md)에서 실제 실행 상태와 코드 일정을 구분합니다.
+BR-PVGen은 고정 배포 다운로드·역사 구간 재처리입니다. ONS는 실제 갱신되는 월별 CSV를 매일 조건부 HTTP GET하고 변경 날짜만 게시합니다. ETag·원본 SHA·성공 cursor·기대 run ID 비교로 재처리와 역순 게시를 제어합니다. 원문 MWmed와 시각을 보존하며 시간대가 미명시라 기존 추정 kWh에 합산하지 않습니다. [수집·일정·확장 절차](../guides/data-ingestion.md).
 
 선택 기준은 로컬에서 재현 가능하고, 메모리 사용을 제한하며, 결과의 출처와 재시도 경계를 설명할 수 있는가입니다. 아래 버전은 직접 의존성 및 현재 인프라 설정 기준입니다. 전이 의존성은 [uv.lock](../../uv.lock), 배포된 이미지 식별자는 [image-versions.json](../image-versions.json)을 확인합니다.
 

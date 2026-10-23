@@ -399,6 +399,31 @@ def status(catalog, period):
     month(period)
     last = calendar.monthrange(int(period[:4]), int(period[5:]))[1]
     with catalog.engine.connect() as conn:
+        success = conn.execute(
+            select(collection_cursors.c.payload).where(
+                collection_cursors.c.org_id == catalog.settings.org,
+                collection_cursors.c.source_id == SOURCE,
+                collection_cursors.c.period == period,
+            )
+        ).scalar_one_or_none()
+        # Include failed-only months, without exposing other organizations or DSNs.
+        periods = (
+            conn.execute(
+                select(collection_cursors.c.period)
+                .where(
+                    collection_cursors.c.org_id == catalog.settings.org,
+                    collection_cursors.c.source_id == SOURCE,
+                )
+                .union(
+                    select(collection_runs.c.payload["period"].as_string()).where(
+                        collection_runs.c.org_id == catalog.settings.org,
+                        collection_runs.c.payload["source_id"].as_string() == SOURCE,
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
         partitions = (
             conn.execute(
                 select(collection_partitions.c.payload)
@@ -438,4 +463,15 @@ def status(catalog, period):
         "period": period,
         "partitions": partitions,
         "recent_attempts": attempts,
+        "last_success": success,
+        "available_periods": sorted((p for p in periods if p), reverse=True),
+        "storage": {
+            "environment": catalog.settings.environment
+            if catalog.settings.environment in {"compose", "kubernetes", "native"}
+            else "unspecified",
+            "catalog": catalog.engine.dialect.name,
+            "objects": "s3" if catalog.settings.s3_endpoint else "filesystem",
+            "org": catalog.settings.org,
+            "scheduler_status": "not_observed",
+        },
     }

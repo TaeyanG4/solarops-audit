@@ -1,6 +1,7 @@
 name: solarops-audit
 x-app-env: &app-env
   SOLAROPS_DATA_DIR: /data
+  SOLAROPS_ENVIRONMENT: compose
   SOLAROPS_SOURCE_DIR: /source
   SOLAROPS_DATABASE_URL: postgresql+psycopg://solarops:${APP_DB_PASSWORD:?run bootstrap}@app-db:5432/solarops
   SOLAROPS_S3_ENDPOINT: http://minio:9000
@@ -8,7 +9,7 @@ x-app-env: &app-env
   SOLAROPS_S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD:?run bootstrap}
   SOLAROPS_S3_BUCKET: solarops-demo
 x-airflow: &airflow
-  image: solarops-airflow:0.5.0
+  image: solarops-airflow:0.5.1
   build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: airflow}
   user: "50000:0"
   environment: &airflow-env
@@ -46,7 +47,7 @@ services:
     ports: ["127.0.0.1:59000:9000", "127.0.0.1:59001:9001"]
     volumes: ["minio:/data"]
   worker:
-    image: solarops-worker:0.5.0
+    image: solarops-worker:0.5.1
     user: "50000:0"
     build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
     environment: *app-env
@@ -56,7 +57,7 @@ services:
       app-db: {condition: service_healthy}
       minio: {condition: service_started}
   dashboard:
-    image: solarops-worker:0.5.0
+    image: solarops-worker:0.5.1
     user: "50000:0"
     build: {context: ../.., dockerfile: infra/docker/Dockerfile, target: worker}
     command: [serve, --host, 0.0.0.0, --port, "8501"]

@@ -2,7 +2,7 @@
 
 [문서 홈](../README.md) · [기술 선택](technology-stack.md) · [수집·일정·데이터 추가](../guides/data-ingestion.md)
 
-SolarOps는 **역사 CSV를 검증·분석해 일별 결과와 불변 보고서로 게시하는 배치 시스템**입니다. Python CLI가 처리와 쓰기를 담당하고 FastAPI 대시보드는 저장된 결과를 읽습니다. 같은 CLI를 네이티브, Compose, Airflow, Kubernetes 작업 Pod에서 실행합니다.
+SolarOps는 **역사 CSV 분석과 갱신 원천의 증분 수집을 수행하는 배치 시스템**입니다. Python CLI가 처리와 쓰기를 담당하고 FastAPI 대시보드는 저장된 결과를 읽습니다. 같은 CLI를 네이티브, Compose, Airflow, Kubernetes 작업 Pod에서 실행합니다. ONS의 원문 단위·시각은 BR-PVGen의 추정 에너지와 분리합니다.
 
 설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 앱 v0.5.0 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
 
@@ -135,7 +135,7 @@ DB와 객체 저장소 전체를 하나의 분산 트랜잭션으로 묶지는 �
 
 ## 구현·배포·검증의 범위
 
-Compose dashboard/worker/Airflow와 kind Airflow/KPO의 새 실행을0.4.2로 통일했습니다. [단일 명세](../../src/solarops/release.json)와 [커밋·이미지 ID](../releases/0.4.2.json)를 연결하고 CI에서 선언 드리프트를 검사합니다. Compose Airflow는 중지 상태이며 과거 완료 Pod·보고서는 보존합니다. Native/Compose/KPO의 작은 동일 표본과 실제 재시도·추적은 [v0.4.2 검증](../benchmarks/integrity-v0.4.2.md)에 있습니다.
+v0.5.0에서 Compose dashboard/worker/Airflow와 kind Airflow/KPO를 갱신했습니다. [단일 명세](../../src/solarops/release.json)와 [v0.5.0 커밋·이미지 ID](../releases/0.5.0.json)를 연결하고 CI에서 선언 드리프트를 검사합니다. Compose Airflow는 중지 상태이며 과거 완료 Pod·보고서는 보존합니다. v0.4.2 당시의 환경별 동일 표본·재시도 검증은 [역사 근거](../benchmarks/integrity-v0.4.2.md)로 유지합니다.
 
 | 주장 | 실행한 근거 / 한계 |
 |---|---|
@@ -143,7 +143,8 @@ Compose dashboard/worker/Airflow와 kind Airflow/KPO의 새 실행을0.4.2로 �
 | 실패 보존·재처리 | [v0.4.2](../benchmarks/integrity-v0.4.2.md): 실제 서비스12검사, 동시 게시·복원·실제KPO 재시도. 과거 공개 전체 검증은 별도 역사 기록 |
 | 보고서 비교·동시 읽기 | [최신 기술 측정](../benchmarks/technical-20261023.md). 합성10만 건·동시4의 깊은 페이지 p95 679ms, 동시8은 약2초; 동시 쓰기·장시간 부하 미검증 |
 | 복원 | 별도 PostgreSQL/MinIO 인스턴스에 합성27객체·7파티션 복원. 같은 물리 호스트이며 다른 호스트 재해복구·운영 RTO/RPO 증거는 아님 |
-| 외부 운영 | 현재 로컬 개발/시연 범위. 고객 업로드·다중 사용자 인증/권한·HTTPS 외부 서비스·신규 원천 정기 수집은 미구현 |
+| ONS 갱신 수집 | 실제 정기 KPO·9~10월 167,424 PV행·재실행 변경 0일. Compose/kind 저장소는 독립. [근거](../benchmarks/incremental-v0.5.0.md) |
+| 외부 운영 | 현재 로컬 개발/시연 범위. 고객 업로드·다중 사용자 인증/권한·HTTPS 외부 서비스는 미구현 |
 
 기술별 버전·대안·재검토 조건은 [기술 선택 문서](technology-stack.md), 실제 실행·종료는 [운영 안내](../runbooks/operator.md), 복구는 [백업·복원](../runbooks/backup-restore.md)을 따릅니다.
 

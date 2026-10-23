@@ -23,7 +23,11 @@ def cli_task(task_id, arguments, fault=False, extra_env=None, secret="solarops-a
         from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
         from kubernetes.client import models as k8s
 
-        env = {"SOLAROPS_DATA_DIR": "/data", "SOLAROPS_SOURCE_DIR": "/data/source"}
+        env = {
+            "SOLAROPS_DATA_DIR": "/data",
+            "SOLAROPS_SOURCE_DIR": "/data/source",
+            "SOLAROPS_ENVIRONMENT": "kubernetes",
+        }
         env.update(
             {
                 "SOLAROPS_DAG_ID": "{{ dag.dag_id }}",
