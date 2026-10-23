@@ -8,7 +8,7 @@
 
 [문서 홈](README.md) · [변경 이력](../CHANGELOG.md) · [기술 선택 근거](architecture/technology-stack.md) · [점수 기반 계획](../plan.md) · [진행·인계](../handoff.md)
 
-현재(2026-10-23): R5·R6 평가 지적을 0.5.7로 보완해 Compose 대시보드와 kind Airflow/KPO에 배포했습니다. 실행 가능한 미완료 항목은 없으며 BIZ-01은 보류입니다. 실행 중인 서비스 상태와 재개 절차는 [handoff](../handoff.md)에 둡니다.
+현재(2026-10-23, 마무리): R5·R6 평가 지적을 0.5.7로 보완해 Compose 대시보드와 kind Airflow/KPO에 배포·검증한 뒤 사용자 요청으로 프로젝트를 마무리했습니다. 실행 가능한 미완료 항목은 없고 BIZ-01은 보류입니다. 로컬 서비스는 데이터를 보존한 채 중지했으며 재개 절차는 [handoff](../handoff.md)에 둡니다.
 
 ## 현재 확보한 결과
 
