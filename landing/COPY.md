@@ -8,7 +8,7 @@ Hero: **태양광 데이터, / 숫자부터 근거까지**
 
 SolarOps Audit는 발전량의 추정치와 데이터 품질을 함께 보여주고, 월간 보고서의 숫자를 원본까지 연결합니다.
 
-Hero badge (v6): **BR-PVGen 공개 자료 · 2024년 4월 실제 집계**. Secondary CTA (v6): **검증 근거 보기** → evidence page; header action **로컬 데모 실행** → local demo instructions.
+Hero badge (v6): **BR-PVGen 공개 자료 · 2024년 4월 실제 집계**. Secondary CTA (v6): **검증 근거 보기** → evidence page; header action **로컬 데모 실행** → the running local dashboard `http://127.0.0.1:8502/?view=overview&period=2024-04&source=public` (new tab); center nav **실행 안내** → `evidence.html#demo` (run instructions).
 
 Primary CTA: **제품 화면 살펴보기** (scrolls to the in-hero demo window). Repeated preview/capture microcopy was removed at the user’s request. Provenance remains in the evidence page.
 

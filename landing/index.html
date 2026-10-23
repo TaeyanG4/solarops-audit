@@ -12,12 +12,12 @@
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
     <link
       rel="preload"
-      href="assets/fonts/PretendardLanding.woff2"
+      href="assets/fonts/PretendardLanding.woff2?v=6.1"
       as="font"
       type="font/woff2"
       crossorigin
     />
-    <link rel="stylesheet" href="styles.css?v=6" />
+    <link rel="stylesheet" href="styles.css?v=6.1" />
     <script>
       document.documentElement.classList.add("js");
     </script>
@@ -33,10 +33,15 @@
       >
       <nav aria-label="주 메뉴">
         <a href="#demo">제품 화면</a><a href="#workflow">데이터 품질</a
-        ><a href="#evidence">검증 근거</a><a href="#faq">자주 묻는 질문</a>
+        ><a href="#evidence">검증 근거</a><a href="evidence.html#demo">실행 안내</a
+        ><a href="#faq">자주 묻는 질문</a>
       </nav>
-      <a class="header-action" href="evidence.html#demo"
-        >로컬 데모 실행
+      <a
+        class="header-action"
+        href="http://127.0.0.1:8502/?view=overview&amp;period=2024-04&amp;source=public"
+        target="_blank"
+        rel="noopener"
+        >로컬 데모 실행<span class="sr-only"> (로컬 대시보드, 새 탭)</span>
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M5 12h14m-6-6 6 6-6 6" /></svg
       ></a>
