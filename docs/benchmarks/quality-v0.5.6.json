@@ -46,5 +46,53 @@
     },
     "stopped": true
   },
-  "deployment": "pending"
+  "deployment": {
+    "release": {
+      "release": {
+        "release_id": "0.5.6",
+        "app_version": "0.5.6",
+        "calculation_version": "energy-interval-v2",
+        "worker_image": "solarops-worker:0.5.6",
+        "airflow_image": "solarops-airflow:0.5.6",
+        "airflow_version": "3.3.2",
+        "kubernetes_provider_version": "10.24.0",
+        "python_minor": "3.12",
+        "airflow_constraints": "infra/docker/airflow-constraints-3.12.txt",
+        "airflow_constraints_sha256": "3d7765abc494ed07b647df25f431d5f6f170a77d41296a3055efb96c914b1efd"
+      },
+      "git_revision": "4b9959e232eccfcae1581c93d00bf3509c56549f",
+      "images": {
+        "solarops-worker:0.5.6": "sha256:bbbff6c90a722b23ba1837930a2c3b95268dfc4865b38c0b165c70c9a9e0fc92",
+        "solarops-airflow:0.5.6": "sha256:bf601fad32c4ef03d53e7bea99f79ed7246749dc85896440c42b86eb17e6a8a8"
+      }
+    },
+    "after": {
+      "/health": {
+        "status": "ok",
+        "mode": "local-read-only",
+        "version": "0.5.6"
+      },
+      "/ready": {
+        "status": "ready"
+      },
+      "/api/v1/overview?period=2024-04&source_kind=public": "66b9e370a330e33b6d03536dd345771f405b2789c8c64831531ad0cf6517fc77",
+      "report_ids": [
+        "81ac930f-839e-4bbf-8b01-5918a1218795",
+        "efb86ace-c41c-4ad9-ad6d-8eaee618e60a",
+        "a4fbf16f-a877-4ed0-b35a-e4f7f49ebda9"
+      ],
+      "/api/v1/reports?period=2024-04&source_kind=public": "4f9c731fd48c776997771e352fca11bb6921caa344531cc1afe4f851c49da745",
+      "/api/v1/sources/ons?period=2026-10": "26ad4be01a59d73704a51f965f6ca8a23ca0c63d51ebce7c09459e07d9432bab"
+    },
+    "ci": "https://github.com/TaeyanG4/solarops-audit/actions/runs/39936889247",
+    "ci_windows_ubuntu": "success",
+    "kind_ready_service_pods": 6,
+    "dag_modes": [
+      "local",
+      "kubernetes"
+    ],
+    "dag_count": 7,
+    "compose_airflow": "created/stopped",
+    "new_scheduled_kpo": false
+  }
 }

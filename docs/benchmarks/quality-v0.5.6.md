@@ -9,4 +9,6 @@
 - Agent Browser의 독립 합성preview에서 1440/768/390px 선택라벨·8개목록·정확한발행UUID전환·뒤로가기·가로넘침없음을 확인. 390px axe36pass/0violation/1incomplete(숨긴popover aria-controls참조 대상이 DOM에 있음을 직접확인). 열린popover색대비는 자동판단불가2노드이며 새색상변경없음. 해당preview8505/브라우저종료·자료보존. 모바일제목의 한국어단어줄바꿈을 보완했습니다.
 - 과거 합성조회1,080개 [지연표본·산식](evidence/technical-20261023/README.md)을 추가. 전27조건 p50/p95·오류수를 재계산해 원요약과 일치. 새성능실측이 아니며 영구부하suite를 추가하지 않았습니다.
 
-새 active키는 기존행을 삭제하지 않습니다. 선택미기록/파일조회불가인 과거 보고서는 추측해 합치지 않으며 과거충돌로 가려진 보고서를 자동복원하지 않습니다. [호환/집계 계약](../data-contract.md#보고서-선택과-품질-건수-v056). 인버터 관측분모/장기조회물질화 한계는 유지합니다. 배포·CI 결과는 완료 뒤 기록합니다.
+새 active키는 기존행을 삭제하지 않습니다. 선택미기록/파일조회불가인 과거 보고서는 추측해 합치지 않으며 과거충돌로 가려진 보고서를 자동복원하지 않습니다. [호환/집계 계약](../data-contract.md#보고서-선택과-품질-건수-v056). 인버터 관측분모/장기조회물질화 한계는 유지합니다. 배포·CI도 완료했습니다.
+
+[구현4b9959e/이미지](../releases/0.5.6.json)의0.5.6을 Compose대시보드·kindAirflow/KPO에 반영했습니다. health0.5.6/ready·kind6서비스PodReady·3rollout성공·양모드7DAG정상. ComposeAirflow3개는생성후중지. [CI39936889247](https://github.com/TaeyanG4/solarops-audit/actions/runs/39936889247) Windows/Ubuntu성공. 공개overview·ONS응답동일, 기존보고서3ID와 기존필드응답동일(selection추가필드는비교제외). 원본·과거보고서재발행/삭제없음. 새정기KPO나공개전체재처리를이번버전에서실행했다고주장하지않습니다.
