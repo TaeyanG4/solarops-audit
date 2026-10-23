@@ -1,0 +1,75 @@
+{
+  "date": "2026-10-23",
+  "timezone": "Asia/Seoul",
+  "release": "0.5.1",
+  "implementation_commit": "ee791cbec296be9bd37c9ad9c762383ed4dcec34",
+  "ci_url": "https://github.com/TaeyanG4/solarops-audit/actions/runs/39915517455",
+  "local_tests": {
+    "passed": 136,
+    "skipped": 14
+  },
+  "ci_each_os": {
+    "passed": 137,
+    "skipped": 13
+  },
+  "demo": {
+    "server_stopped": true,
+    "dataset": "synthetic only; no network or customer data",
+    "active_partitions": 7,
+    "failed_publish_kept_active_data": true,
+    "replay_hashes_identical": true,
+    "batch_status_counts": {
+      "committed": 2,
+      "failed": 1
+    },
+    "report_id": "09c45c95-940f-46b5-b28e-f8edd8dfbf79",
+    "evidence_sha256": "cf9e033bd659a72c05e1ba47ab702a384f0d390919f46afde84d787b3dde9d5c"
+  },
+  "public_response_sha256": {
+    "/api/v1/overview?period=2024-04&source_kind=public": "5821a74f3857a1e2db8e51374233d33979a1076b0a6883683c28b3082932eeb4",
+    "/api/v1/reports?period=2024-04&source_kind=public": "a7f93beb3b441de4b3572afe783f4efa093519662e5a2087941f1c47778dcd50"
+  },
+  "axe": {
+    "1440": {
+      "inapplicable": 53,
+      "incomplete": 1,
+      "passes": 36,
+      "violations": 0
+    },
+    "768": {
+      "inapplicable": 53,
+      "incomplete": 1,
+      "passes": 36,
+      "violations": 0
+    },
+    "390": {
+      "inapplicable": 53,
+      "incomplete": 1,
+      "passes": 36,
+      "violations": 0
+    },
+    "days-390": {
+      "inapplicable": 48,
+      "incomplete": 1,
+      "passes": 41,
+      "violations": 0
+    }
+  },
+  "images": {
+    "before-sources-1440.png": {
+      "sha256": "e38e6c8386aee1bcecf85eb2d3a7d4c64a05358833750f15f8604340931cc334"
+    },
+    "ons-1440.png": {
+      "sha256": "eb5eb1b9755454d0829690bcd1a40ebe8d29d141af996dea1884e5f683be48d1"
+    },
+    "ons-390.png": {
+      "sha256": "b6e8c1f0b1b03b4d423754f843e1fe0342a70190d6213f00b3da45ce57868261"
+    },
+    "ons-768.png": {
+      "sha256": "c1c86adff60540c13876e5b3e83d866feef1a6f557a2dbd489ac8834c49a5d2d"
+    },
+    "ons-readme.png": {
+      "sha256": "ca603d5fb00ec1ab7d7c0e352d9802bd9a3f99b7c3319b8694827494780b8d61"
+    }
+  }
+}

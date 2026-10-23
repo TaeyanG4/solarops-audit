@@ -78,6 +78,10 @@ ONS의 MWmed·원문 시각·verified/forecast/unspecified를 보존합니다. �
 
 [다운로드→처리→보고서 명령, 환경별 저장 위치, 새 출처·정기 수집 확장 순서](docs/guides/data-ingestion.md)를 정리했습니다. 고객 업로드와 실시간 SCADA 연동은 현재 구현 범위에 포함되지 않습니다.
 
+![ONS 수집 상태: 실제 Compose 저장소, 마지막 성공과 변경 날짜](docs/portfolio/images/portfolio-finish-20261023/ons-readme.png)
+
+*실제 ONS 자료의 저장 기록입니다.820 CSS px·DPR2로 촬영해 축소 편집하지 않았습니다. [원본 확대](docs/portfolio/images/portfolio-finish-20261023/ons-readme.png?raw=1) · [전후/1440/768/390px](docs/portfolio/images/portfolio-finish-20261023/README.md).*
+
 ## 화면에서 확인할 수 있는 것
 
 | 화면 | 할 수 있는 일 |
@@ -185,6 +189,7 @@ flowchart LR
 
 | 항목 | 확인한 결과 | 근거 |
 |---|---|---|
+| v0.5.1 제출 마감 | 로컬136통과·14제외, CI양OS각137통과·13제외. ONS세너비·axe0, 격리7일 복구/조회/종료 | [최종 검증](docs/benchmarks/portfolio-finish-20261023.md) · [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39915517455) |
 | v0.5.0 수집·공개 병렬 실행 | Ubuntu/Windows 각각137통과·13제외, 실제 서비스13검사·7DAG양모드, 실제 ONS정기KPO | [구현 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39910321487) · [실행 증거](docs/benchmarks/incremental-v0.5.0.md) |
 | 이전 기술 후속 | 기능 `4d8b28c`의 실제 PostgreSQL/MinIO CI 5통과·로컬 관련 21통과, 보고서 근거 비교 3너비 확인 | [선택형 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39897515593) · [수행 기록](docs/worklog/2026-10-23-technical-delivery.md) |
 | 동시 조회·독립 인스턴스 복원 | 합성10만 건·동시4 깊은 페이지 p95 6409→679ms, 전후1080요청 오류0. 같은 호스트 별도 PostgreSQL/MinIO로 27객체·7파티션 복원 | [자원·측정 조건·한계](docs/benchmarks/technical-20261023.md) |

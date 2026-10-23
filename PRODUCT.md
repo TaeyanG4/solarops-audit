@@ -44,3 +44,10 @@ and system administration. Shared styled selectors and monthly report vocabulary
 See [data contract](docs/data-contract.md), [sources](docs/data-sources.md),
 [planning](plan.md) and [handoff](handoff.md). Real customers, business performance,
 physical-device usability and screen-reader behavior remain unverified.
+
+## ONS collection status extension
+
+The existing Sources destination also reads ONS collection attempts and the last
+successful monthly cursor from the connected store. Compose and kind stores remain
+independent. This UI does not observe scheduler liveness or trigger collection.
+Source-native MWmed and unspecified timezone stay separate from estimated energy.
