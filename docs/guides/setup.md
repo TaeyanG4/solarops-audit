@@ -4,6 +4,16 @@
 
 모든 명령은 저장소 루트에서 실행합니다. 네이티브 합성 데모 → Compose → kind 순서로 필요한 단계까지만 진행하세요. 저장소는 비공개이므로 clone에는 허가된 GitHub 계정이 필요합니다. 의존성 최초 설치에는 네트워크가 필요하며, 설치 후 합성 처리는 외부 자료 다운로드 없이 실행됩니다.
 
+## 사전 준비
+
+| 경로 | 필요한 도구 | 확인 명령 |
+|---|---|---|
+| 네이티브 데모 | Git, [uv](https://docs.astral.sh/uv/getting-started/installation/) (Python 3.12는 uv가 받을 수 있음) | `uv --version` |
+| Compose · Airflow | 위 항목 + Docker Engine/Docker Desktop(Linux 엔진), Windows는 WSL2 Ubuntu와 그 안의 `make` · `python3` · `uv` · `curl` | `docker version`, `make --version` |
+| Kubernetes (kind) | 위 항목 + [kubectl](https://kubernetes.io/docs/tasks/tools/). kind 0.33.0 · Helm 3.19.0은 `scripts/ops/install-k8s-tools.sh`가 SHA-256을 확인해 `.tools/`에 받음 | `kubectl version --client` |
+
+Compose 첫 실행은 이미지 빌드(특히 MinIO 고정 소스 빌드) 때문에 오래 걸리고 네트워크가 필요합니다. kind는 Compose와 별도로 DB·MinIO·Airflow를 띄우므로 메모리가 작으면 Compose를 중지하고 진행하세요. 이 절차는 작업 PC(Windows + WSL2 Ubuntu 22.04 + Docker Desktop)에서 실행·운영했으며, 빈 머신에서 처음부터 다시 설치하는 검증은 아직 하지 않았습니다.
+
 ## 빠른 실행
 
 [Python 3.12](https://www.python.org/downloads/)와 [uv](https://docs.astral.sh/uv/getting-started/installation/), Git이 필요합니다. Windows PowerShell, macOS/Linux 셸에서:

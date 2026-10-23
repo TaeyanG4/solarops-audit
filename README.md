@@ -19,7 +19,15 @@
 
 ## 빠른 실행
 
-Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/), Git을 준비합니다. 비공개 저장소 접근 권한이 필요합니다.
+실행 경로는 세 가지입니다. 아래로 갈수록 미리 설치할 것이 많으며, 보고 싶은 단계까지만 진행하면 됩니다. **1번의 4줄만으로는 Compose·Kubernetes가 뜨지 않습니다.**
+
+| 경로 | 보여주는 것 | 미리 설치할 것 |
+|---|---|---|
+| 1. Python 데모 | 검증 · 실패 시 이전 결과 보존 · 재처리 해시 일치 · 보고서 | Git, [uv](https://docs.astral.sh/uv/getting-started/installation/) (Python 3.12는 uv가 받을 수 있음) |
+| 2. Docker Compose + Airflow | 실제 PostgreSQL · MinIO · 대시보드 · Airflow UI | 1번 + Docker(Windows는 Docker Desktop + WSL2 Ubuntu), WSL/Linux 안의 `make` · `python3` · `uv` |
+| 3. Kubernetes (kind) | Airflow가 작업마다 Pod를 만드는 KubernetesPodOperator 실행 | 2번 + [kubectl](https://kubernetes.io/docs/tasks/tools/). kind 0.33.0 · Helm 3.19.0은 스크립트가 체크섬을 확인해 내려받음. 여유 메모리(작으면 Compose를 끄고 진행) |
+
+### 1. Python 데모 (Docker 없음)
 
 ```text
 git clone https://github.com/TaeyanG4/solarops-audit.git
@@ -28,18 +36,42 @@ uv sync --frozen
 uv run python scripts/demo/portfolio_demo.py --serve
 ```
 
-출력되는 `http://127.0.0.1:8503/`을 **명령을 실행한 PC**에서 엽니다. Docker·공개 원본 다운로드 없이 합성 7일 자료의 다음 흐름을 재현합니다. 최초 의존성 설치에는 네트워크가 필요할 수 있습니다.
+출력되는 `http://127.0.0.1:8503/`을 **명령을 실행한 PC**에서 엽니다. 공개 원본 다운로드 없이 합성 7일 자료로 다음 흐름을 재현합니다. 최초 의존성 설치에는 네트워크가 필요합니다.
 
 1. 정상 처리와 7개 일별 결과 게시.
 2. 커밋 도중 실패 주입, 이전 결과 보존 확인.
 3. 재처리 후 논리 해시 일치 확인.
 4. 월간 보고서와 `evidence.json` 생성.
 
-이 데모는 Docker를 쓰지 않으므로 컨테이너·볼륨을 모두 지운 PC에서도 위 4줄로 재현됩니다. 2026-10-23 새 clone에서 확인: `uv sync --frozen` 후 데모 3.2초, 실패 후 이전 결과 보존·재처리 해시 일치 모두 `true`. 단, 공개 원본 전체 처리 결과와 Compose·kind에 쌓인 ONS 수집 자료는 데모에 포함되지 않으며, 지우면 [수집·처리 명령](docs/guides/data-ingestion.md)으로 다시 내려받아 처리해야 합니다.
+Docker를 쓰지 않으므로 컨테이너·볼륨이 없는 PC에서도 재현됩니다. 2026-10-23 새 clone에서 확인: `uv sync --frozen` 후 데모 3.2초, 이전 결과 보존·재처리 해시 일치 모두 `true`. 서버는 **Ctrl+C**로 종료하고, 서버 없이 검증하려면 `--serve`를 생략합니다. [시연·결과 확인](docs/portfolio/DEMO_GUIDE.md).
 
-서버는 같은 터미널에서 **Ctrl+C**로 종료합니다. 각 실행은 새 폴더를 만들고 기존 자료를 보존합니다. 서버 없이 검증하려면 `--serve`를 생략합니다. [시연·결과 확인](docs/portfolio/DEMO_GUIDE.md) · [전체 설치 안내](docs/guides/setup.md).
+### 2. Docker Compose + Airflow
 
-실제 PostgreSQL·MinIO·Airflow/Kubernetes 시연은 선택 경로입니다. [설치](docs/guides/setup.md), [수집·처리 명령](docs/guides/data-ingestion.md), [서비스 시작·종료](docs/runbooks/operator.md), [DAG 운영](docs/runbooks/dags.md)에 절차를 분리했습니다. 이 작업 PC의 현재 포트와 프로세스는 [handoff](handoff.md)에 기록합니다. 외부 공개 데모 사이트는 운영하지 않습니다.
+WSL Ubuntu 또는 Linux 셸에서 저장소 루트로 이동해 실행합니다.
+
+```bash
+make install          # Linux용 가상환경(.venv-linux)
+make up-local         # .env 비밀값 무작위 생성 → 이미지 빌드 → app-db · minio · dashboard 기동
+make demo-services    # 실제 PostgreSQL · MinIO로 합성 데모
+make test-services    # 실제 서비스 검사 13개
+make airflow-up       # Compose Airflow
+make dag-validate     # DAG 불러오기 검사
+```
+
+대시보드 `127.0.0.1:8502`, Airflow `127.0.0.1:8080`. 첫 실행은 이미지 빌드 때문에 오래 걸립니다. 특히 MinIO는 공식 이미지 대신 고정 버전 소스를 빌드합니다. `make down-local`은 컨테이너를 **중지**만 하고 볼륨을 지우지 않습니다.
+
+### 3. Kubernetes (kind + Airflow + KPO)
+
+```bash
+bash scripts/ops/install-k8s-tools.sh   # kind · Helm 내려받기(체크섬 확인), kubectl 확인
+make k8s-bootstrap    # kind 클러스터 생성(kubeconfig는 artifacts/에 보관)
+make k8s-deploy       # 이미지를 kind에 로드하고 Airflow를 Helm으로 배포
+make k8s-smoke        # DAG를 실행해 KPO 작업 Pod 동작 확인
+```
+
+공개 원본 전체(약 350MB 내려받기, 처리 8~16분)와 ONS 수집은 데모에 포함되지 않으며 [수집·처리 명령](docs/guides/data-ingestion.md)으로 별도 실행합니다.
+
+2·3번 절차는 이 프로젝트의 작업 PC(Windows + WSL2 Ubuntu 22.04 + Docker Desktop)에서 실제로 실행·운영했습니다. 아무것도 없는 새 머신에서 처음부터 다시 설치하는 검증은 아직 하지 않았습니다. 자세한 사전 준비·환경 변수·문제 해결은 [설치 안내](docs/guides/setup.md), 켜기·끄기는 [운영 절차](docs/runbooks/operator.md)와 [DAG 운영](docs/runbooks/dags.md)에 있습니다. 외부 공개 데모 사이트는 운영하지 않습니다.
 
 ## 데이터와 숫자의 의미
 
@@ -93,36 +125,44 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 
 [환경별 아키텍처·게시 경계](docs/architecture/system.md) · [버전·대안·비용·재검토 조건](docs/architecture/technology-stack.md) · [설계 결정 ADR](docs/README.md#설계-결정-기록).
 
-<details>
-<summary>실행 구성 요소와 컨테이너별 역할 (Docker Desktop 목록 설명)</summary>
+## 실행 구성 요소와 컨테이너 역할
 
-**실제 시스템** — 평소 사용하는 구성입니다. 같은 Python CLI(`solarops`)와 같은 이미지를 씁니다.
+같은 Python CLI(`solarops`)와 같은 이미지를 세 환경에서 씁니다. Compose와 kind는 DB·MinIO·Airflow를 **각자 따로** 가지며 자료를 자동 동기화하지 않습니다. [환경별 아키텍처](docs/architecture/system.md) · [켜기·끄기](docs/runbooks/operator.md).
 
-| 컨테이너 / 프로세스 | 위치 | 역할 |
+**Docker Compose** (Docker Desktop에 `solarops-audit-*`로 보임)
+
+| 컨테이너 | 이미지 | 역할 |
 |---|---|---|
-| `solarops-audit-app-db-1` (`postgres:16.10`) | Compose | 활성 카탈로그 DB: 게시된 일별 결과의 포인터·계보·실행 이력·보고서 목록 |
-| `solarops-audit-minio-1` (`solarops-minio`) | Compose | S3 API 객체 저장소: 원본 CSV·Parquet·시계열·보고서 파일(바이트)과 SHA-256 |
-| `solarops-audit-dashboard-1` (`solarops-worker`) | Compose | FastAPI 대시보드·읽기 API `127.0.0.1:8502` (읽기 전용) |
-| `solarops-audit-worker-run-*` | Compose `jobs` 프로필 | `docker compose run worker …`로 CLI 작업을 한 번 실행할 때 생기는 일회성 컨테이너 |
-| `solarops-audit-airflow-{db,init,api,scheduler,dag-processor}` | Compose `airflow` 프로필 | Compose 쪽 Airflow(선택). 평소에는 만들어 둔 채 중지 |
-| `solarops-control-plane` (`kindest/node`) | kind | 1노드 로컬 쿠버네티스. 안에서 Pod로 Airflow api-server·scheduler·dag-processor·Airflow DB, 별도 app-db·MinIO가 돌고, 작업마다 KubernetesPodOperator가 `solarops-worker` Pod를 만듭니다. kind의 DB·MinIO·ONS 수집 자료가 이 컨테이너의 볼륨에 있으므로 **삭제하면 kind 자료가 사라집니다** |
-| 관리 서버 `127.0.0.1:8504` | 호스트 Python 프로세스 | 위 컨테이너를 켜고 끄는 로컬 관리 화면(`scripts/ops/admin.ps1`) |
-| 랜딩 `127.0.0.1:8507` | 호스트 `http.server` | 정적 제품 소개 페이지(`landing/`) |
+| `solarops-audit-app-db-1` | `postgres:16.10` | 활성 카탈로그 DB: 게시된 일별 결과의 포인터·계보·실행 이력·보고서 목록 |
+| `solarops-audit-minio-1` | `solarops-minio` | S3 API 객체 저장소: 원본 CSV·Parquet·시계열·보고서 파일과 SHA-256 |
+| `solarops-audit-dashboard-1` | `solarops-worker` | FastAPI 대시보드·읽기 API `127.0.0.1:8502` (읽기 전용) |
+| `solarops-audit-worker-run-*` | `solarops-worker` | `docker compose run worker …`로 CLI 작업을 한 번 실행할 때 생기는 일회성 컨테이너 |
+| `solarops-audit-airflow-db/init/api/scheduler/dag-processor` | `postgres` · `solarops-airflow` | Compose 쪽 Airflow(선택, `make airflow-up`). Airflow 상태 DB, 초기화, UI(8080), 일정 실행, DAG 읽기 |
 
-Compose와 kind는 DB·MinIO·Airflow를 **각자 따로** 가지며 자료를 자동 동기화하지 않습니다. [환경별 아키텍처](docs/architecture/system.md) · [켜기·끄기](docs/runbooks/operator.md).
+**Kubernetes (kind)** — Docker Desktop에는 노드 컨테이너 `solarops-control-plane` **하나**만 보이고, 그 안에서 `solarops` 네임스페이스의 Pod 6개가 돕니다.
 
-**검증용 임시 컨테이너** — 실제 PostgreSQL/MinIO로 검사할 때마다 새 이름으로 만들고, 증거 보존 원칙에 따라 중지만 하고 남겨 둔 것들입니다. 시스템 동작에는 필요 없습니다.
+| Pod | 정의 위치 | 역할 |
+|---|---|---|
+| `airflow-api-server` | [Helm 값](infra/helm/airflow-values.yaml) (Airflow 차트 1.22.0) | Airflow 웹 UI와 REST API |
+| `airflow-scheduler` | Helm | 일정에 맞춰 DAG 실행을 결정하고 LocalExecutor로 태스크를 시작. 태스크가 KPO로 작업 Pod를 만듦. 로그 정리 보조 컨테이너 포함 2개 컨테이너 |
+| `airflow-dag-processor` | Helm | `dags/` 파일을 읽어 DAG 목록과 구조를 갱신. 보조 컨테이너 포함 |
+| `airflow-db` | [`infra/k8s/services.yaml`](infra/k8s/services.yaml) | Airflow 메타데이터 PostgreSQL(실행 이력·상태·재시도 기록) |
+| `app-db` | `infra/k8s/services.yaml` | kind 쪽 SolarOps 카탈로그 PostgreSQL (Compose의 app-db와 별개) |
+| `minio` | `infra/k8s/services.yaml` | kind 쪽 S3 객체 저장소 (Compose의 MinIO와 별개) |
+| 작업 Pod (일시적) | [`dags/solarops_factory.py`](dags/solarops_factory.py)의 KubernetesPodOperator | 태스크 1개 = Pod 1개. `solarops-worker` 이미지로 CLI를 실행하고 종료. 조사용으로 완료 Pod를 남김 |
+
+Redis·Celery·StatsD·Triggerer·Flower는 쓰지 않습니다(LocalExecutor). kind의 DB·MinIO·ONS 수집 자료는 노드 컨테이너의 볼륨에 있으므로 **`solarops-control-plane`을 지우면 kind 자료가 사라집니다.** 관리 서버 `127.0.0.1:8504`(`scripts/ops/admin.ps1`)와 랜딩 `127.0.0.1:8507`은 컨테이너가 아닌 PC의 Python 프로세스입니다.
+
+**검증용 임시 컨테이너** — 실제 PostgreSQL/MinIO로 검사할 때마다 새 이름으로 만들고 증거 보존 원칙에 따라 중지만 해 둔 것입니다. 시스템 동작에는 필요 없습니다.
 
 | 이름 패턴 | 만든 곳 | 용도 |
 |---|---|---|
 | `solarops-ci-pg-*`, `solarops-ci-s3-*` | [`.github/workflows/services.yaml`](.github/workflows/services.yaml) | 실제 서비스 CI 검사 |
 | `solarops-restore-pg-*`, `solarops-restore-s3-*` | [`scripts/validation/service_restore_drill.py`](scripts/validation/service_restore_drill.py) | 별도 DB·버킷 백업/복원 시험 |
 | `solarops-quality-pg-*`, `solarops-quality-s3-*` | 독립 평가·릴리스 때 실행한 서비스 검사 도우미(Git 제외 `artifacts/`) | 격리된 PostgreSQL/MinIO 13개 검사, 실행마다 한 쌍 |
-| `solarops-integrity-*`, `solarops-incremental-*`, `solarops-load-*`, `solarops-release*`, `solarops-dagcheck*`, `solarops-dags*`, `solarops-dag-*`, `solarops-ons-050*`, `solarops-portfolio-*`, `solarops-migrate-050`, `solarops-airflow-lock*`, `solarops-*pinned*` | 과거 버전 검증 명령(일부 도우미는 Git 제외 `artifacts/`) | 게시 무결성·ONS 증분·동시 조회 부하·릴리스 비교·DAG 점검·미리보기·이미지 고정 확인 |
+| `solarops-integrity-*`, `-incremental-*`, `-load-*`, `-release*`, `-dagcheck*`, `-dags*`, `-dag-*`, `-ons-050*`, `-portfolio-*`, `-migrate-050`, `-airflow-lock*`, `-*pinned*` | 과거 버전 검증 명령(일부 도우미는 Git 제외 `artifacts/`) | 게시 무결성·ONS 증분·동시 조회 부하·릴리스 비교·DAG 점검·미리보기·이미지 고정 확인 |
 
-정리하려면 위 **실제 시스템**(특히 `solarops-control-plane`과 `solarops-audit_*` 볼륨)을 제외하고 검증용 컨테이너만 지웁니다. 지운 뒤에도 빠른 실행의 데모와 테스트는 그대로 재현됩니다.
-
-</details>
+정리하려면 위 Compose·kind 구성(특히 `solarops-control-plane`과 `solarops-audit_*` 볼륨)을 제외하고 검증용 컨테이너만 지웁니다. 지워도 빠른 실행의 데모와 테스트는 그대로 재현됩니다.
 
 ## 실행 근거와 한계
 
