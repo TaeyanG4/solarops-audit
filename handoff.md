@@ -19,7 +19,7 @@
 
 1. AGENTS.md → 이 문서 → [plan.md](plan.md)를 읽습니다. 현재 실행 가능한 미완료 항목은 없고 BIZ-01은 사용자 요청으로 보류입니다.
 2. 독립 평가는 종료했습니다. 다시 요청받으면 R6 방식(고정 커밋 사본·같은 prompt, Git 제외 `artifacts/artifact-review-r6-20261023/`)으로 실행하고, 평가자 사용량 문제는 AGENTS 규칙대로 일시중지합니다.
-3. 10-23 Docker 정리(사용자 승인): 검증용 컨테이너 74개·옛 SolarOps 이미지 태그 41개·빌드 캐시 전부 삭제(약 99.7GB). 남은 것은 Compose 9개(app-db·minio·dashboard·Airflow 5개, Airflow는 0.5.7로 재생성·미시작)·kind 노드·SolarOps 이미지 5개·데이터 볼륨 전부. 고아가 된 검증용 이름 없는 볼륨 23개(1.39GB)는 데이터라 남겨 두었고 삭제는 사용자 결정. 정리 후 Compose `/ready`·overview 값 확인 뒤 다시 중지. 남은 사용자 결정: 코드 라이선스, GitHub topics, 랜딩 이전 캡처 19장.
+3. 10-23 Docker 정리(사용자 승인): 검증용 컨테이너 74개·옛 SolarOps 이미지 태그 41개·빌드 캐시 전부 삭제(약 99.7GB). 남은 것은 Compose 9개(app-db·minio·dashboard·Airflow 5개, Airflow는 0.5.7로 재생성·미시작)·kind 노드·SolarOps 이미지 5개·데이터 볼륨 전부. 이어서 사용자 승인으로 고아 검증 볼륨 23개(1.39GB)도 삭제해 볼륨은 7개(SolarOps 5·kind 노드·codex-lb)만 남았습니다. 정리 후 Compose `/ready`·overview 값 확인 뒤 다시 중지. 남은 사용자 결정: 코드 라이선스, GitHub topics, 랜딩 이전 캡처 19장.
 4. 릴리스는 `release.json` 변경 → `release.py sync` → `uv lock` → `check` → 구현 커밋 → `build` → Compose `up -d --no-deps dashboard` → WSL `bash scripts/ops/k8s-refresh.sh`. 계산 버전이 바뀌면 과거 결과를 소급 변경하지 않습니다.
 5. 현재 모든 로컬 서비스가 중지 상태입니다(위 다시 켜기 참고). kind를 멈추면 ONS 정기 수집도 멈춥니다. ONS만 멈추려면 DAG pause. 원본/ZIP/볼륨/과거 평가 보존, 민감한 삭제는 사용자 허락이 필요합니다.
 6. 단발성·낮은 영향 수정은 기존 검사/화면 확인 우선. UI 변경은 [디자인](DESIGN.md)·[탐색계약](docs/design/workspace-navigation.md), 랜딩은 [landing/DESIGN.md](landing/DESIGN.md) 기준입니다.
