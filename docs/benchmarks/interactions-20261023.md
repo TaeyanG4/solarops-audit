@@ -54,6 +54,7 @@
 | 불변 확인 | 시계열·overview API 응답 전후 동일, 관리자 operation 전후 동일, JS 페이지 오류 0 |
 | 배포 | 8502 HTML/JS/controls/CSS와 8504 HTML/JS가 작업 소스와 SHA-256 일치 |
 | 정적·문서 검사 | Ruff 검사·70파일 형식, JS 문법, 로컬 링크493·스크립트 참조57·원본 기획 체크섬8개, diff 공백 검사 통과 |
+| GitHub CI (`a416080`) | Windows/Ubuntu 각각 **127 passed, 5 skipped**, 합성 데모·복원·wheel·소스 패키징 성공. [실행39881009706](https://github.com/TaeyanG4/solarops-audit/actions/runs/39881009706) |
 
 관리 중지 확인창은 열고 **취소**했으며 실제 시작·중지 요청은 제출하지 않았습니다. 이번 작업에서 전체 수명주기 시험을 다시 수행했다고 주장하지 않습니다. 그 검사는 [이전 범위](workspace-20261023.md)에 있습니다.
 

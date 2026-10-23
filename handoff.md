@@ -10,7 +10,7 @@
 - [후속 UI-04](docs/benchmarks/interactions-20261023.md): 선택창 바깥 스크롤 닫힘·내부 스크롤 유지, 시스템관리 직접 진입·세 탭, 실제 차트 null 구간 설명. 원본 전력390개 빈 필드 확인. Python31통과·브라우저303명령·axe18회 위반0, API 동일. 이미지 `0.4.1-ui04-20261023` 배포.
 - [PS_001 보고서](http://127.0.0.1:8502/?view=reports&period=2024-04&source=public&plant=PS_001)는 iframe 없는 통합 본문입니다. 독립 인쇄 HTML도 새 양식으로 발행했고 이전UUID·원본 자료를 보존했습니다.
 - 로컬 검사: Python126통과·6제외, Agent Browser107+195명령, axe3+23회 위반0, API 동일. 별도 최종 UI검수는 `ship`. [범위·한계·근거](docs/benchmarks/workspace-20261023.md).
-- 기능 커밋 `0618ce1` 비공개 GitHub 반영. [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39841897047)는 Windows/Ubuntu 각각127통과·5제외, 합성 데모·복원·wheel·소스 패키징 모두 성공했습니다. DESIGN/sidecar·README·캡처·스킬 목적도 갱신했습니다.
+- 최신 기능 커밋 `a416080` 비공개 GitHub 반영. [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39881009706)는 Windows/Ubuntu 각각127통과·5제외, 합성 데모·복원·wheel·소스 패키징 모두 성공했습니다. DESIGN·README·전후 캡처·스킬 목적·운영 안내도 갱신했습니다.
 - 실행 상태: Compose app-db/minio/dashboard와 SolarOps kind 실행, Compose Airflow중지. kind서비스6Pod Ready이나 DAG4개 paused. kind v2는 공개하루, 전체공개 v2는 Compose에 있습니다. [독립 관리8504](http://127.0.0.1:8504/)는 별도 호스트 Python이며 `scripts/ops/admin.ps1 stop`으로 종료합니다. [on/off 안내](docs/runbooks/operator.md#시스템-관리-8504).
 - 실제 전체중지→기본3서비스시작→kind시작을 검증했습니다. 다른 Docker프로젝트는 유지했고, kind노드 실행을 모든Pod준비 완료로 해석하지 않습니다.
 - 실제 고객 계약·매출·현장 고장 정확도·외부 운영 SLO는 검증하지 않았습니다.
