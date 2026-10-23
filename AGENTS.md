@@ -15,6 +15,17 @@ limit this request. Keep its technical acceptance gates and report actual eviden
 - Test parsing, duplicate conflicts, UTC, missing slots, replay and failed publication.
 - Distinguish executed checks from unverified infrastructure and business hypotheses.
 
+## Proportionate validation (user requested)
+
+- Do not add permanent regression tests or dedicated validation scripts by default
+  for one-off, low-impact fixes such as UI styling or minor interactions. Prefer
+  existing checks and a focused manual/browser check of the changed behavior.
+- Add or extend regression coverage only when recurrence or impact justifies its
+  maintenance cost, especially for data integrity, calculations, publication and
+  security. Prefer extending a relevant existing test over creating another suite.
+- Keep verification proportional to the change. Do not repeatedly run broad suites
+  after relevant checks pass unless new changes, failures or unresolved risks warrant it.
+
 ## Planning and continuity (user requested)
 
 - Read AGENTS.md, handoff.md, then plan.md when resuming; follow links to dated
