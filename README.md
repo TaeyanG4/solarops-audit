@@ -159,7 +159,7 @@ flowchart LR
 | 열린 목록 스크롤 유지 | 닫힘 동작을 교체, 269명령·3너비·열린 목록 axe6회 위반0, API 동일 | [목록 회귀](docs/benchmarks/select-anchor-20261023.md) |
 | 서비스 제어 | 실제 전체 중지→기본 3서비스 시작→kind 시작, 독립 관리 서버 유지·다른 프로젝트 보존 | [관리 검증과 한계](docs/benchmarks/workspace-20261023.md) |
 | 최신 로컬 회귀 | Python 126통과·6제외, Ruff·4개 JS 문법·wheel 정적 자산 확인 | [최신 수행 기록](docs/worklog/2026-10-23-workspace.md) |
-| 회귀·전달 | 기능 커밋 `a416080`의 Windows/Ubuntu 각각 **127통과·5제외**, 합성 복원·wheel·소스 패키징 성공 | [검증 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39881009706) |
+| 회귀·전달 | 기능 커밋 `cf1c5bf`의 Windows/Ubuntu 각각 **127통과·5제외**, 합성 복원·wheel·소스 패키징 성공 | [검증 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39884449073) |
 | 월별 조회 | HTTP 53회 → 1회. 같은 로컬 조건 5회 중앙값 703.239ms → 12.576ms | [측정 조건](docs/benchmarks/workspace-v0.3.0.md) |
 
 조회 측정은 응답 범위와 요청 방식이 달라 일반적인 성능 배수로 해석하지 않습니다. 자동 접근성 위반 0건은 WCAG 인증이 아니며 실제 모바일 기기·스크린리더·다른 브라우저는 미검증입니다. 과거 전체 처리를 매번 재실행한 것으로 표현하지 않습니다.

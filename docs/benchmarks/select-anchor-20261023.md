@@ -22,6 +22,7 @@
 | 닫힘·포커스 | Escape·Tab·바깥 클릭, 버튼이 화면에서 완전히 나간 경우 닫힘, Escape 포커스 유지 |
 | 접근성·계약 | 열린 목록 axe6회 위반0, JS 오류0, overview/시계열 API와 관리operation 전후 동일 |
 | 정적·배포 | JS 문법·Ruff·70파일 형식 통과. HTTP controls.js SHA-256이 로컬 소스와 일치 |
+| GitHub CI | 기능 `cf1c5bf`, Windows/Ubuntu 각각127통과·5제외, 합성 데모·복원·wheel·소스 패키징 성공. [실행39884449073](https://github.com/TaeyanG4/solarops-audit/actions/runs/39884449073) |
 
 ```text
 uv run python -u scripts/validation/interaction_browser.py --selectors-only --output artifacts/select-anchor-new

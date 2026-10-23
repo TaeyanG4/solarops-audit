@@ -14,3 +14,4 @@
 - UI UX Pro Max·Impeccable·Agent Browser를 적용했습니다. controls.js detector `[]`, JS 문법·Ruff/형식70파일 통과. API와 관리operation 전후 동일입니다.
 - dashboard만 `0.4.1-select-anchor-20261023` 이미지로 교체하고 HTTP/로컬controls.js 해시를 대조했습니다. DB·MinIO·kind·원본은 보존했고 전용 브라우저를 닫았습니다.
 - 실제 기기·다른 브라우저·핀치 확대·가상 키보드·스크린리더는 미검증입니다. 기존 닫힘 캡처는 역사 기록으로 유지하고 최신 동작을 DESIGN·README·handoff에 반영했습니다.
+- 기능 `cf1c5bf`을 비공개 GitHub에 반영했습니다. [CI39884449073](https://github.com/TaeyanG4/solarops-audit/actions/runs/39884449073)는 Windows/Ubuntu 각각127통과·5제외, 합성 데모·복원·패키징 성공입니다. 완료 UI-05는 plan에서 제거했으며 문서513링크·58스크립트참조·원본기획checksum8개를 확인했습니다.
