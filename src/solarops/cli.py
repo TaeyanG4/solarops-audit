@@ -214,8 +214,16 @@ def execute(args):
             args.dry_run == "true",
         )
     if args.command == "db-migrate":
+        from solarops.storage.minio import ObjectStore
+
         Catalog(settings)
-        return {"status": "ready", "schema_version": "1"}
+        # A fresh install has no bucket yet; /ready needs both. Idempotent, never deletes.
+        store = ObjectStore(settings)
+        return {
+            "status": "ready",
+            "schema_version": "1",
+            "object_store": f"s3://{store.bucket}" if store.client else "local files",
+        }
     if args.command in ("demo", "backfill"):
         from datetime import date
 

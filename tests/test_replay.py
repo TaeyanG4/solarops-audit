@@ -176,3 +176,7 @@ def test_cli_plan_and_scoped_month_analysis(settings, public_layout, monkeypatch
     assert main(["report", "--period", "2024-04"]) == 1
     capsys.readouterr()
     assert not absent.exists()
+    # db-migrate is the explicit way to prepare an empty catalog (and bucket when S3 is set).
+    assert main(["db-migrate"]) == 0
+    assert json.loads(capsys.readouterr().out)["object_store"] == "local files"
+    assert absent.exists()
