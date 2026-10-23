@@ -1,5 +1,7 @@
 # SolarOps Audit
 
+[![SolarOps checks](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml/badge.svg)](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml) [![Clean-machine reproduction](https://github.com/TaeyanG4/solarops-audit/actions/workflows/reproduce.yaml/badge.svg)](https://github.com/TaeyanG4/solarops-audit/actions/workflows/reproduce.yaml)
+
 **공개 태양광 데이터를 검증하고, 실패·정정·재처리 이후에도 보고서 숫자를 원본까지 추적하는 배치 데이터 파이프라인.**
 
 관측 슬롯이 모두 있어도 값이 모두 유효한 것은 아닙니다. SolarOps는 무효·누락·원본 보간을 구분하고, 검증한 결과만 게시하며, 실패하면 이전 결과를 유지합니다. Python 공통 CLI를 로컬, Docker, Airflow의 Kubernetes 작업 Pod에서 사용합니다.
@@ -109,15 +111,24 @@ flowchart LR
     OBJ --> API
 ```
 
-| 기술 | 선택 이유와 역할 |
-|---|---|
-| Python 3.12 · uv | 처리·CLI·검사를 통합하고 앱 의존성을 잠금 |
-| DuckDB · Arrow/Parquet | 외부 정렬과 제한된 배치, 명시 스키마·열 형식 저장. 전체 CSV를 한 번에 Python 메모리에 적재하지 않음 |
-| PostgreSQL · SQLAlchemy | 활성 결과·계보의 트랜잭션과 동시 게시 제어. SQLite는 서버 없는 재현 경로 |
-| MinIO · S3 API | 원본·산출물의 바이트 저장. 파일 저장소와 같은 인터페이스, 실제 서비스 검사 별도 제공 |
-| Airflow · Docker · KubernetesPodOperator | 일정·재시도·백필·실행 이력과 작업별 자원 격리. 핵심 계산은 공통 CLI에 유지 |
-| FastAPI · HTML/CSS/JS · Jinja2 | 읽기 API·대시보드·독립 HTML 보고서를 같은 패키지로 전달 |
-| pytest · Ruff · GitHub Actions | 계약·실패·동시성·조직 격리 검사, Windows/Ubuntu 재현·패키징 |
+각 기술이 **이 프로젝트에서 실제로 하는 일**과 **없으면 생기는 문제**입니다. 버전·대안·비용·재검토 조건은 [기술 스택 문서](docs/architecture/technology-stack.md)에 있습니다.
+
+| 기술 | 이 프로젝트에서 하는 일 | 왜 필요한가 (없으면) | 실행 위치 |
+|---|---|---|---|
+| **Python 3.12 · uv** | 수집·검증·계산·게시·보고서를 하나의 CLI(`solarops`)로 묶음. uv가 의존성을 `uv.lock`으로 고정 | 모든 환경이 같은 코드를 실행. 고정하지 않으면 PC마다 패키지 버전이 달라 결과가 흔들림 | 로컬, 모든 컨테이너·Pod |
+| **DuckDB** | 수백 MB 원본 CSV를 메모리 한도(512MB) 안에서 걸러 하루씩 정렬해 넘김 | 1,440만 행을 한 번에 메모리에 올리지 않음. 없으면 큰 원본에서 메모리 부족 | 처리 단계 |
+| **Apache Arrow · Parquet** | 정규화한 관측값을 타입이 고정된 열 형식 파일로 저장, 원본 추가 필드는 `raw_json`으로 보존 | CSV보다 타입이 정확하고 작음. 재처리·대조 시 같은 스키마 보장 | 객체 저장소 |
+| **PostgreSQL** (SQLite) | "현재 게시된 결과"를 가리키는 카탈로그·계보·실행 이력·보고서 목록 | 게시 전환을 트랜잭션 하나로 처리해 반쯤 게시된 상태가 없음. 동시 작업 충돌 방지. SQLite는 서버 없는 데모용 | Compose `app-db`, kind `app-db` |
+| **SQLAlchemy** | SQLite와 PostgreSQL을 같은 코드로 사용 | 데모와 서비스가 같은 게시 로직을 공유 | 앱 내부 |
+| **MinIO (S3 API)** | 원본 파일, Parquet, 시계열, 보고서 같은 큰 파일을 SHA-256과 함께 보관 | 여러 컨테이너·Pod가 HTTP로 같은 저장소를 공유. 클라우드 S3로 코드 수정 없이 이동 가능 | Compose `minio`, kind `minio` |
+| **FastAPI · HTML/CSS/JS** | 읽기 전용 API와 대시보드(8502) | 별도 프런트엔드 빌드 없이 결과를 화면으로 확인 | Compose `dashboard` |
+| **Jinja2** | 원본 계보가 담긴 독립 HTML 월간 보고서 생성 | 서버 없이 파일 하나로 공유 가능한 보고서 | 보고서 생성 단계 |
+| **Docker · Compose** | PostgreSQL·MinIO·대시보드·Airflow를 버전 고정 이미지로 한 번에 띄움 | "내 PC에서는 됨" 문제를 없앰. 새 머신에서도 같은 구성 | 로컬 Docker |
+| **Apache Airflow** | 매일 정해진 시각 실행, 실패 시 재시도, 과거 날짜 백필, 실행 기록 | cron으로는 재시도·백필·이력·실행 상태를 직접 만들어야 함. 계산 로직은 없고 CLI만 호출 | Compose Airflow, kind Pod 3개 |
+| **KubernetesPodOperator (KPO)** | Airflow 태스크 하나마다 별도 Pod를 띄워 CLI 실행(CPU·메모리 제한, root 아님, 읽기 전용) | 작업끼리, 작업과 스케줄러가 서로 영향을 주지 않음. 실패한 Pod를 남겨 조사 가능 | kind 작업 Pod |
+| **Kubernetes · kind · Helm** | kind는 PC 안의 1노드 쿠버네티스, Helm은 Airflow를 고정 차트 버전으로 설치 | 클라우드 비용 없이 실제 Pod·서비스 DNS·볼륨·롤아웃·재시도를 검증. 고가용성 증거는 아님 | `solarops-control-plane` |
+| **ONS 수집기** | 브라질 ONS 공개 S3의 월별 CSV를 매일 조건부로 받아 태양광 행만, 원문 단위·시각 그대로 보관 | 계속 갱신되는 실제 원천의 정정·변경 날짜만 안전하게 반영하는 증분 처리 시연 | Compose worker, kind KPO |
+| **pytest · Ruff · GitHub Actions** | 데이터 계약·실패 보존·동시성·조직 격리 검사, 코드 스타일, Windows·Ubuntu 자동 검사와 새 머신 전체 재현 | 수정이 기존 보장을 깨지 않는지 매 푸시마다 확인 | GitHub 기본 머신 |
 
 객체 업로드와 DB는 분산 트랜잭션으로 묶지 않습니다. 객체를 먼저 저장하고 검증한 뒤 활성 포인터를 바꿉니다. 실패한 객체는 게시되지 않은 증거로 남습니다. BR-PVGen은 일별 원자성, ONS는 월별 성공 cursor와 변경 날짜의 원자성을 보장합니다.
 
