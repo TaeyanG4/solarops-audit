@@ -153,7 +153,7 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 
 Redis·Celery·StatsD·Triggerer·Flower는 쓰지 않습니다(LocalExecutor). kind의 DB·MinIO·ONS 수집 자료는 노드 컨테이너의 볼륨에 있으므로 **`solarops-control-plane`을 지우면 kind 자료가 사라집니다.** 관리 서버 `127.0.0.1:8504`(`scripts/ops/admin.ps1`)와 랜딩 `127.0.0.1:8507`은 컨테이너가 아닌 PC의 Python 프로세스입니다.
 
-**검증용 임시 컨테이너** — 실제 PostgreSQL/MinIO로 검사할 때마다 새 이름으로 만들고 증거 보존 원칙에 따라 중지만 해 둔 것입니다. 시스템 동작에는 필요 없습니다.
+**검증용 임시 컨테이너** — 실제 PostgreSQL/MinIO로 검사할 때마다 새 이름으로 만들고 중지만 해 두는 컨테이너입니다. 시스템 동작에는 필요 없으며, 2026-10-23에 그때까지 쌓인 74개와 옛 버전 이미지 41개·빌드 캐시를 정리했습니다. 검사를 다시 실행하면 같은 이름 패턴으로 다시 생깁니다.
 
 | 이름 패턴 | 만든 곳 | 용도 |
 |---|---|---|
@@ -162,7 +162,7 @@ Redis·Celery·StatsD·Triggerer·Flower는 쓰지 않습니다(LocalExecutor). 
 | `solarops-quality-pg-*`, `solarops-quality-s3-*` | 독립 평가·릴리스 때 실행한 서비스 검사 도우미(Git 제외 `artifacts/`) | 격리된 PostgreSQL/MinIO 13개 검사, 실행마다 한 쌍 |
 | `solarops-integrity-*`, `-incremental-*`, `-load-*`, `-release*`, `-dagcheck*`, `-dags*`, `-dag-*`, `-ons-050*`, `-portfolio-*`, `-migrate-050`, `-airflow-lock*`, `-*pinned*` | 과거 버전 검증 명령(일부 도우미는 Git 제외 `artifacts/`) | 게시 무결성·ONS 증분·동시 조회 부하·릴리스 비교·DAG 점검·미리보기·이미지 고정 확인 |
 
-정리하려면 위 Compose·kind 구성(특히 `solarops-control-plane`과 `solarops-audit_*` 볼륨)을 제외하고 검증용 컨테이너만 지웁니다. 지워도 빠른 실행의 데모와 테스트는 그대로 재현됩니다.
+정리할 때는 위 Compose·kind 구성(특히 `solarops-control-plane`과 `solarops-audit_*` 볼륨)을 제외하고 검증용 컨테이너만 지웁니다. 필요한 이미지는 `solarops-worker`·`solarops-airflow`(현재 버전), `solarops-minio:2025-10-15-pinned`, `postgres:16.10-bookworm`, `kindest/node:v1.35.0` 5개입니다. 지워도 빠른 실행의 데모와 테스트는 그대로 재현됩니다.
 
 ## 실행 근거와 한계
 
