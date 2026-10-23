@@ -42,6 +42,8 @@ BR 입력 버전은 선택 기간의 upsert이며 전체 철회 snapshot이 아�
 
 보간 true 비중의 분모는 전체 관측 수입니다. v0.5.3 보고서/화면은 모두 불명일 때 “알 수 없음”, 일부 불명일 때 “확인된 비중 · 불명 N슬롯”, 명시 False일 때0%로 표시합니다. 새 manifest의 `observed_slots`·`interpolation_unknown_slots`와 일별 unknown 수를 함께 보존합니다. 기존 v2 지표/논리hash와 과거 보고서는 바꾸지 않습니다.
 
+일별 지표 행의 `interpolation_unknown_slots`와 보고서가 읽는 슬롯·추정 kWh·보간 비중·검토 후보 필드는 최초 MVP(`9652200`)부터 계산 v1/v2 모든 생성기가 기록한 필수 필드입니다. 이 필드가 없는 행은 지원하지 않습니다. 보고서 생성은 디렉터리·객체를 만들기 전에 `METRIC_CONTRACT_MISMATCH`로 중단하며, 불명을 0이나 확인된 값으로 채우지 않습니다. 기존 행·hash·발행 보고서는 바꾸지 않습니다.
+
 CSV/API의 `source_interpolation_ratio`는 확인된 true/전체 관측 비중이며 보간이 아닌 비중을 뜻하지 않습니다. 전부 불명일 때도 이 v2 필드는0일 수 있으므로 반드시 `observed_slots`와 `interpolation_unknown_slots`를 함께 읽습니다. HTML의 ‘알 수 없음’과 같은 사실을 숫자+불명 수로 전달하는 계약입니다.
 
 시간대 검증 범위는 UTC와 기존 뉴욕 DST23/25시간 시나리오입니다. 자정에 전환하는 모든 IANA 시간대의 날짜 경계는 검증하지 않았습니다. 임의 시간대를 운영에 적용하기 전에 해당 날짜 경계 검증이 필요합니다.

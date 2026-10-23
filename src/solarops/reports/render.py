@@ -19,6 +19,22 @@ from solarops.storage.postgres import Catalog, active_reports, now, put, reports
 env = Environment(
     loader=FileSystemLoader(Path(__file__).parent / "templates"), autoescape=select_autoescape()
 )
+# Every stored metric written by this code base (v1 and v2) carries these fields.
+# A row without them is outside the contract: stop instead of guessing a value.
+REQUIRED_METRIC_FIELDS = frozenset(
+    {
+        "local_date",
+        "estimated_energy_kwh",
+        "expected_slots",
+        "observed_slots",
+        "valid_slots",
+        "missing_slots",
+        "invalid_slots",
+        "source_interpolation_ratio",
+        "interpolation_unknown_slots",
+        "review_candidate_count",
+    }
+)
 
 
 def build_report(settings, period, plant=None, source_kind=None):
@@ -30,6 +46,8 @@ def build_report(settings, period, plant=None, source_kind=None):
     snapshot = catalog.snapshot(settings.org, start, end, plant, source_kind)
     if not snapshot:
         raise ValueError("NO_ACTIVE_PARTITIONS")
+    if any(not REQUIRED_METRIC_FIELDS <= r["metric"].keys() for r in snapshot):
+        raise ValueError("METRIC_CONTRACT_MISMATCH")
     report_id = str(uuid.uuid4())
     directory = settings.root / "reports" / settings.org / report_id
     directory.mkdir(parents=True, exist_ok=False)

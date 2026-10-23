@@ -38,7 +38,7 @@ kind는 재해복구 저장소가 아닙니다. 고객 도입 전 PostgreSQL dum
 
 ## BR 입력·오류 코드와 범위 축소
 
-새 실패의 `error_code`는 허용된 계약 코드 또는 `BR_INPUT_INVALID`(파싱/값), `BR_CATALOG_ERROR`(DB), `BR_OBJECT_STORE_ERROR`(S3), `BR_IO_ERROR`(파일), `BR_UNEXPECTED_ERROR`입니다. catalog·quarantine·CLI에 원문 값/접속 문자열을 복사하지 않습니다. 원인은 권한이 있는 로컬 원본/태스크 로그에서 확인하며 과거 오류 기록은 소급 변경하지 않습니다.
+보고서 생성의 `METRIC_CONTRACT_MISMATCH`는 활성 일별 지표 행에 필수 필드가 없다는 뜻입니다. 수동 DB 수정·외부 적재 여부를 확인하고 해당 날짜를 재처리하며, 필드를 임의 값으로 채우지 않습니다. 새 실패의 `error_code`는 허용된 계약 코드 또는 `BR_INPUT_INVALID`(파싱/값), `BR_CATALOG_ERROR`(DB), `BR_OBJECT_STORE_ERROR`(S3), `BR_IO_ERROR`(파일), `BR_UNEXPECTED_ERROR`입니다. catalog·quarantine·CLI에 원문 값/접속 문자열을 복사하지 않습니다. 원인은 권한이 있는 로컬 원본/태스크 로그에서 확인하며 과거 오류 기록은 소급 변경하지 않습니다.
 
 `SOURCE_RANGE_SHRINK`는 요청 안에 이미 게시한 날짜가 새 인버터 전체 관측 범위에서 빠졌다는 뜻입니다. 첫 날짜를 게시하기 전에 중단하고 이전 active를 유지합니다. 잘린 파일인지 먼저 조사하고 완전한 원본과 새 버전을 준비하거나 실제 지원 날짜로 요청을 좁힙니다. BR 날짜 철회 기능은 없으므로 DB/객체를 임의 삭제해 해결하지 않습니다. ONS는 별도 월 snapshot 철회 계약입니다.
 

@@ -1,5 +1,6 @@
 import zipfile
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
 
@@ -277,3 +278,15 @@ def test_interrupted_extraction_is_not_visible_and_can_retry(tmp_path, monkeypat
     assert (destination / "sample.csv").read_bytes() == content
     assert partial.read_bytes() == content[:4]
     assert archive.exists()
+
+
+def test_reference_sql_baseline_covers_catalog_model():
+    from solarops.storage import postgres as catalog_model
+
+    sql = (Path(__file__).resolve().parents[1] / "migrations/0001_catalog.sql").read_text(
+        encoding="utf-8"
+    )
+    for relation in catalog_model.metadata.sorted_tables:
+        assert f"CREATE TABLE {relation.name} (" in sql
+        for index in relation.indexes:
+            assert f"CREATE INDEX {index.name} ON {relation.name} " in sql

@@ -16,14 +16,14 @@
 
 ## 다음 재개 지점
 
-1. AGENTS.md → 이 문서 → [plan.md](plan.md) → [R5 인계 상세](docs/worklog/2026-10-23-handoff-r5.md)를 읽습니다. INT-05(19점) → DOC-06(16점) → REVIEW-02(16점) 순서이며 BIZ-01은 사용자 요청으로 후순위입니다.
-2. INT-05: Fable이 합성 지표의 `interpolation_unknown_slots`를 제거해 보고서 KeyError를 재현했습니다. 실제 과거 v2 누락 여부·지원 계약부터 확인합니다. 현재 생성기는 해당 필드를 기록합니다. 원본 수정이나 무조건 0 대입은 하지 않습니다.
-3. DOC-06: `migrations/0001_catalog.sql`에 ONS 3개 테이블·PG 인덱스 2개가 없는 정적 불일치. 실제 `db-migrate` 경로와 baseline의 범위를 맞춥니다. 운영 DB 변경부터 시작할 필요는 없습니다.
+1. AGENTS.md → 이 문서 → [plan.md](plan.md) → [R6 기록](docs/worklog/2026-10-23-review-r6.md)을 읽습니다. 실행 가능 항목은 REVIEW-02뿐이며 BIZ-01은 사용자 요청으로 후순위입니다.
+2. INT-05 완료: 지표 필수 필드(`interpolation_unknown_slots` 등)는 최초 MVP부터 기록되므로 누락 행은 보고서 생성 전 `METRIC_CONTRACT_MISMATCH`로 중단합니다(0 대입 없음). Unreleased, 0.5.6 이미지 불변.
+3. DOC-06 완료: `migrations/0001_catalog.sql`을 현행 모델에서 재생성(13테이블·인덱스2), 임시 PostgreSQL16.10 적용 확인, 정적 대조 검사 추가. 지원 경로는 `db-migrate`.
 4. Astra의 org_id/hash 설명 오류는 계약·아키텍처·설계 사례·질문 4개 문서에서 정정했습니다. hash에는 org_id가 없고 조직 격리는 저장/조회 조건이 담당합니다. 계산·기존 자료 불변, 정정본 독립 확인은 미실행입니다.
-5. 의미 있는 보완·관련 검사 뒤 동일 고정 커밋을 새 Astra/Fable에 제공합니다. 목표/이전 점수·상대 피드백은 평가자에게 주지 않습니다. Fable은 Claude Code `--model fable`, R5 실제 모델 `claude-fable-5-1`; Astra 요청 `gpt-6-astra`, resolved ID 미제공입니다.
+5. 사용자 지시(10-23): INT-05·DOC-06 완료 후 새 고정 커밋으로 Astra/Fable R6를 실행하고 두 평가 각각 95점 이상까지 개선을 반복합니다. 의미 있는 보완·관련 검사 뒤 동일 고정 커밋을 새 Astra/Fable에 제공합니다. 목표/이전 점수·상대 피드백은 평가자에게 주지 않습니다. Fable은 Claude Code `--model fable`, R5 실제 모델 `claude-fable-5-1`; Astra 요청 `gpt-6-astra`, resolved ID 미제공입니다.
 6. 자동 점검 `solarops`는 10:00 KST 일정이나 **현재 PAUSED**. 이번 인계에서 변경하지 않았습니다. 진행 중인 독립 평가는 없으며 기존 R5를 중복 시작하지 않습니다.
 7. Git 제외 `artifacts/artifact-review-r5-20261023/`에 고정 사본·UTF-16LE Fable stream·JUnit·합성 근거·실행기를 보존했습니다. 원문/요약은 docs/reviews에 게시합니다. 임시 `update-handoff.py`·과거 `record.py`/`finish.py`는 재실행하지 않습니다.
-8. 별도 랜딩 세션의 `landing/`·이미지·skills-lock.json·.gitignore 및 공유문서 수정이 남아 있습니다. 이번 인계 커밋에서 제외했으며 전체 `git add .`·되돌리기·삭제를 하지 않습니다. 원본/ZIP/볼륨/과거 평가 보존, 민감한 삭제는 사용자 허락이 필요합니다.
+8. 랜딩 v6와 캡처는 커밋 `41ce3d6`·`b8e79b1`로 정리했습니다. 남은 미커밋 `skills-lock.json`·`.gitignore`(`.taste-skill/`)는 랜딩 스킬 설치분이며 전체 `git add .`·되돌리기·삭제를 하지 않습니다. 원본/ZIP/볼륨/과거 평가 보존, 민감한 삭제는 사용자 허락이 필요합니다.
 
 ## 최근 수행 요약
 

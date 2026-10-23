@@ -11,7 +11,7 @@ from sqlalchemy import event, select, text, update
 from sqlalchemy.exc import OperationalError
 
 from solarops.api.app import create_app
-from solarops.contracts.brpvgen import read_metadata
+from solarops.contracts.brpvgen import failure_code, read_metadata
 from solarops.fixtures import generate
 from solarops.reports.render import build_report
 from solarops.storage import minio, postgres
@@ -150,6 +150,21 @@ def test_series_and_report_integrity_and_legacy_compatibility(settings, sample):
         assert client.get(report_url).status_code == 200
         series_path.write_text("{broken", encoding="utf-8")
         assert client.get(series_url).status_code == 503
+    # Metrics have always carried the unknown-interpolation count; a row without it
+    # is outside the contract and must not become an implicit 0% / known value.
+    tampered = dict(partition["metric"])
+    tampered.pop("interpolation_unknown_slots")
+    with catalog.engine.begin() as conn:
+        conn.execute(
+            update(postgres.metrics)
+            .where(postgres.metrics.c.run_id == partition["run_id"])
+            .values(payload=tampered)
+        )
+    report_dirs = set((settings.root / "reports" / settings.org).iterdir())
+    with pytest.raises(ValueError, match="METRIC_CONTRACT_MISMATCH") as failure:
+        build_report(settings, "2024-04")
+    assert failure_code(failure.value) == "METRIC_CONTRACT_MISMATCH"
+    assert set((settings.root / "reports" / settings.org).iterdir()) == report_dirs
 
 
 def test_concurrent_different_inputs_cannot_claim_same_version(settings, tmp_path, monkeypatch):
