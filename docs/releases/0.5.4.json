@@ -1,0 +1,19 @@
+{
+  "release": {
+    "release_id": "0.5.4",
+    "app_version": "0.5.4",
+    "calculation_version": "energy-interval-v2",
+    "worker_image": "solarops-worker:0.5.4",
+    "airflow_image": "solarops-airflow:0.5.4",
+    "airflow_version": "3.3.2",
+    "kubernetes_provider_version": "10.24.0",
+    "python_minor": "3.12",
+    "airflow_constraints": "infra/docker/airflow-constraints-3.12.txt",
+    "airflow_constraints_sha256": "3d7765abc494ed07b647df25f431d5f6f170a77d41296a3055efb96c914b1efd"
+  },
+  "git_revision": "93ad341219de368068a22cb347ca74b8f43f6130",
+  "images": {
+    "solarops-worker:0.5.4": "sha256:e870950f489982b4f3f401cc8997d1b83420a1fbb6d8815e17d9405ad53021a6",
+    "solarops-airflow:0.5.4": "sha256:127643351888e907ec179d0bb3a2cda53e786f3a5c2dae6c63c3ce2b0a4a7597"
+  }
+}

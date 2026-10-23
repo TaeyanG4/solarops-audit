@@ -20,4 +20,6 @@
 
 MinIO 소스SHA·기반digest는 [v0.5.3 빌드 근거](quality-v0.5.3.md#minio-빌드-입력)를 사용합니다. 기존/고정 이미지 내부 `/usr/local/bin/minio` SHA256은 모두 `fbc76569ea811e9c8602fd9993e9c854d0f543e50696ab12c11cdfc0ff8457b1`입니다. Go캐시 사용 빌드이며 두 호스트의 깨끗한 재빌드 동등성을 의미하지 않습니다.
 
-현재 선언은 `solarops-minio:2025-10-15-pinned`이며 kind 단일 저장소는 Recreate로 두 Pod가 동시에 같은 볼륨에 접근하지 않게 합니다. 이번 앱/MinIO 배포·CI 확인은 진행 중이며 완료 결과를 아래에 추가합니다. Airflow constraints는 버전 고정이며 설치 wheel별 hash 강제는 아닙니다.
+현재 선언은 `solarops-minio:2025-10-15-pinned`이며 kind 단일 저장소는 Recreate로 두 Pod가 동시에 같은 볼륨에 접근하지 않게 합니다. Compose/kind MinIO를 해당 이미지로 실제 교체했고 기존 볼륨을 유지했습니다. Compose의 공개2API·ONS상태API SHA256과 kind의 ONS cursor2개/partition51개 내용 해시가 전후 동일합니다. Airflow constraints는 버전 고정이며 설치 wheel별 hash 강제는 아닙니다.
+
+앱/작업이미지0.5.4의 [구현SHA·이미지ID](../releases/0.5.4.json)를 기록했습니다. Compose dashboard health0.5.4/ready정상, Compose Airflow3개는 생성한 중지 상태입니다. kind Helm16·3rollout·6서비스Pod Ready, 양모드7DAG검사 통과. [구현CI39930138177](https://github.com/TaeyanG4/solarops-audit/actions/runs/39930138177) 양OS성공. 새 정기KPO나 공개전체 재처리는 이번에 실행하지 않았습니다.
