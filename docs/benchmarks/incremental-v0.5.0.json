@@ -1,0 +1,129 @@
+{
+  "implementation_revision": "853de23c785f9b9539ff363e46b0210d94c85878",
+  "source": {
+    "kind_months": [
+      {
+        "period": "2026-09",
+        "input_rows": 519840,
+        "photovoltaic_rows": 97728,
+        "raw_sha256": "3376ff881a7cbf234e8defd8ff703d800f32616f43fd2df32c120d9a0173f68e"
+      },
+      {
+        "period": "2026-10",
+        "input_rows": 365040,
+        "photovoltaic_rows": 69696,
+        "raw_sha256": "d6779647f5d803e1a140e184ee30086ce1f2c7d1bdab4a52cbdec1f96d6bccbe"
+      }
+    ],
+    "kind_partition_count": 51,
+    "compose_repeat_changed_days": [],
+    "compose_kind_october_hashes_equal": true,
+    "legacy_api_byte_identical": true
+  },
+  "benchmark": [
+    {
+      "concurrency": 1,
+      "dag_run": "benchmark-1792735720-1",
+      "state": {
+        "state": "success",
+        "start_date": "2026-10-23T06:08:51.242723+00:00",
+        "end_date": "2026-10-23T06:09:27.917808+00:00"
+      },
+      "dag_wall_seconds": 36.675085,
+      "worker_cpu_seconds": 16.4697148,
+      "peak_worker_rss_kib": 437684,
+      "rows": 14976,
+      "db_delta": {
+        "xact_commit": 95,
+        "xact_rollback": 10,
+        "blks_read": 12,
+        "blks_hit": 9563,
+        "tup_returned": 14001,
+        "tup_fetched": 5316,
+        "tup_inserted": 33,
+        "tup_updated": 19
+      },
+      "s3_new_objects": 15,
+      "s3_new_bytes": 149174614,
+      "service_usage": {
+        "minio-79789db8c4-rtz97": {
+          "cpu_seconds": 0.608877,
+          "sampled_peak_memory_bytes": 134959104
+        },
+        "app-db-58b49755d9-cmbdh": {
+          "cpu_seconds": 0.350173,
+          "sampled_peak_memory_bytes": 39829504
+        }
+      },
+      "actual_max_workers": 1,
+      "hashes": {
+        "public_day_1": "e0257b94947e022f784e4f9f6cd9d0d12d18413eb78384da209302c4d318683e",
+        "public_day_2": "4cfee2a26db34eaa1530fe94c9976ca83a38230f551af5d5f1d820d8e296ab34",
+        "public_day_3": "164171c55e310980e31a78917b46c05e9de198e7af94ccf99c87a9cd61e7b428",
+        "public_day_4": "5be5dd84613c0df7eefca45c66af6df94b9e4b8ba36ae74bac95a49b8cd8232e"
+      }
+    },
+    {
+      "concurrency": 2,
+      "dag_run": "benchmark-1792735720-2",
+      "state": {
+        "state": "success",
+        "start_date": "2026-10-23T06:09:50.765407+00:00",
+        "end_date": "2026-10-23T06:10:10.104636+00:00"
+      },
+      "dag_wall_seconds": 19.339229,
+      "worker_cpu_seconds": 20.4684592,
+      "peak_worker_rss_kib": 438044,
+      "rows": 14976,
+      "db_delta": {
+        "xact_commit": 95,
+        "xact_rollback": 10,
+        "blks_read": 12,
+        "blks_hit": 9570,
+        "tup_returned": 13994,
+        "tup_fetched": 5313,
+        "tup_inserted": 33,
+        "tup_updated": 19
+      },
+      "s3_new_objects": 15,
+      "s3_new_bytes": 149174614,
+      "service_usage": {
+        "app-db-58b49755d9-cmbdh": {
+          "cpu_seconds": 0.308066,
+          "sampled_peak_memory_bytes": 56713216
+        },
+        "minio-79789db8c4-rtz97": {
+          "cpu_seconds": 1.086442,
+          "sampled_peak_memory_bytes": 192651264
+        }
+      },
+      "actual_max_workers": 2,
+      "hashes": {
+        "public_day_1": "e0257b94947e022f784e4f9f6cd9d0d12d18413eb78384da209302c4d318683e",
+        "public_day_2": "4cfee2a26db34eaa1530fe94c9976ca83a38230f551af5d5f1d820d8e296ab34",
+        "public_day_3": "164171c55e310980e31a78917b46c05e9de198e7af94ccf99c87a9cd61e7b428",
+        "public_day_4": "5be5dd84613c0df7eefca45c66af6df94b9e4b8ba36ae74bac95a49b8cd8232e"
+      }
+    }
+  ],
+  "benchmark_scope": "single kind host; serial then parallel once; four daily tasks in both; no comparison against one four-day CLI batch; net S3 bytes not request latency",
+  "validation": {
+    "offline_passed": 136,
+    "offline_skipped": 14,
+    "services_passed": 13,
+    "dags_imported_in_both_modes": 7,
+    "ci": {
+      "run_url": "https://github.com/TaeyanG4/solarops-audit/actions/runs/39910321487",
+      "revision": "853de23c785f9b9539ff363e46b0210d94c85878",
+      "ubuntu": {
+        "passed": 137,
+        "skipped": 13
+      },
+      "windows": {
+        "passed": 137,
+        "skipped": 13
+      },
+      "conclusion": "success"
+    }
+  }
+}

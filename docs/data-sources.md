@@ -51,7 +51,7 @@ uv run solarops source extract data/source/BR-PVGen_meteorological.zip data/sour
 
 다운로드는 분석 결과를 자동 생성하지 않습니다. 환경 설정과 replay·보고서 생성은 [설치 안내](guides/setup.md)를 따릅니다. 다운로드 후 배포 checksum을 확인하고, SHA-256 및 manifest로 수집 근거를 보존합니다.
 
-현재 수집기는 이 고정 record의 4개 파일 전용이며 최신 배포 탐색·정기 다운로드는 없습니다. Airflow 일정은 이미 준비된 과거 CSV를 처리합니다. 새 버전이나 다른 데이터셋은 DOI·라이선스까지 맞는 별도 수집·계보 경로가 필요합니다. [실제 스케줄 상태·데이터 추가 절차](guides/data-ingestion.md).
+BR-PVGen 수집기는 이 고정 record의4개 파일 전용이며 최신 배포 탐색·정기 다운로드는 없습니다. Airflow 일정은 이미 준비된 과거 CSV를 처리합니다. 새 버전이나 다른 데이터셋은 DOI·라이선스까지 맞는 별도 수집·계보 경로가 필요합니다. [실제 스케줄 상태·데이터 추가 절차](guides/data-ingestion.md).
 
 ## 원천에서 화면까지
 
@@ -82,3 +82,7 @@ SolarOps의 변경은 정규화, 품질 분류, 일별 처리, 추정 에너지 
 이 표기는 배포 Readme의 권장 인용을 따릅니다. 관련 IEEE Access 논문은 원문에서 in press로 안내하며 DOI는 제공되지 않아 여기에 추정해 넣지 않았습니다. 이 저장소의 분석·시각화는 SolarOps의 가공 결과입니다.
 
 원문·API 메타데이터·파일별 manifest는 로컬 `data/source/`에, 이번 출처 확인의 요약은 `artifacts/docs-refresh-20261023/source-metadata.json`에 보존했습니다. 로컬 증거 경로는 Git 제외이며, GitHub 독자는 위 배포 URL과 [계약 문서](data-contract.md)로 출처를 확인할 수 있습니다.
+
+## ONS 갱신 원천 (v0.5.0)
+
+추가 원천은 브라질 ONS의 [시간별 발전 공개자료](https://dados.ons.org.br/dataset/geracao-usina-2)입니다. 월별 CSV의 태양광 행을 수집하며 MWmed·원문 시각·검증/예측/미확정 유형을 보존합니다. 라이선스 metadata는 `cc-by`이며 버전은 명시되지 않았습니다. BR-PVGen과 다른 식별자·주기·의미이므로 기존 에너지 지표에 섞지 않습니다. [공식 사전·계약·수집/조회](ons-source-contract.md) · [실제 수집 증거](worklog/2026-10-23-incremental.md).

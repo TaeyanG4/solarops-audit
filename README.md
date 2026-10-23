@@ -10,9 +10,11 @@
 
 **최근 기술 개선:** 보고서의 발행 당시 근거와 현재 자료를 비교하고, 실제 PostgreSQL·MinIO 검사를 선택형 CI에 연결했습니다. 별도 인스턴스 복원과 합성10만 건 동시 조회를 검증했고, 정렬 인덱스로 동시4개의 깊은 페이지 p95가6409→679ms로 줄었습니다. [조건·검사·한계](docs/benchmarks/technical-20261023.md) · [보고서 상태 화면](docs/portfolio/images/technical-20261023/README.md). 이전 등록 월·진단·발전소 조회 개선은 [기록](docs/worklog/2026-10-23-usability.md)에 있습니다.
 
+**v0.5.0 증분 수집·병렬 검증:** ONS의 실제 갱신 원천을 추가했습니다. kind의 정기 수집으로9~10월 태양광167,424행을 게시했고, 같은10월 재실행은 변경 날짜0개였습니다. 별도 저장소에서 공개4일을 실제 Airflow KPO로 비교해 직렬36.7초→동시2개19.3초(47% 단축), 결과hash동일·오류0을 확인했습니다. 총CPU는 증가했으며 단일호스트 표본입니다. [조건·실행 근거·한계](docs/benchmarks/incremental-v0.5.0.md) · [ONS 의미·수집/조회](docs/ons-source-contract.md).
+
 **v0.4.2 무결성·실행 정렬:** 독립 검토에서 재현한 ID 혼용, 중단 추출, 실패 metadata 반영, 역순 게시를 수정했습니다. 실제 PostgreSQL·MinIO12검사 통과, Native·Compose·Airflow KPO의 7일 논리 해시와 보고서 지표가 일치합니다. 실행에는 Git 릴리스·Airflow 재시도·Pod UID를 기록하고 dashboard와 kind도 같은 이미지로 교체했습니다. [수정·실행 증거와 한계](docs/benchmarks/integrity-v0.4.2.md) · [다음 계획](plan.md). 기존 공개 자료에서 해당 결함이 발생했다고 확인한 것은 아닙니다.
 
-**데이터 출처:** [BR-PVGen / Zenodo](https://zenodo.org/records/21511487) · 브라질 51개 발전소의 공개 역사 자료 · CC BY 4.0. 합성 데모는 별도로 표시하며 화면의 발전량은 추정치입니다.
+**대시보드 데이터 출처:** [BR-PVGen / Zenodo](https://zenodo.org/records/21511487) · 브라질 51개 발전소의 공개 역사 자료 · CC BY 4.0. 합성 데모는 별도로 표시하며 화면의 발전량은 추정치입니다.
 
 **실제로 작동하는가?** 2026-10-23 실행 서비스·DB·객체를 직접 점검했습니다. 원본 4개는 Zenodo 게시 체크섬과 일치하고, 대표 하루의 독립 계산값이 DB·API·보고서·Kubernetes 결과와 일치합니다. Airflow/KPO 실행 이력도 확인했으며, 합성 장애 시험과 공개 데이터 처리를 구분합니다. [기술스택·데이터 실사와 한계](docs/benchmarks/stack-authenticity-20261023.md).
 
@@ -43,6 +45,7 @@
 | 구분 | 출처와 범위 | 프로젝트에서의 용도 |
 |---|---|---|
 | 공개 자료 (`public`) | 브라질 51개 발전소, 2024-03-26~2025-06-09, 15분 간격. 발전소별 수록 기간은 다름 | 실제 CSV 계약 검증, 전체 처리, 품질 분석과 공개 자료 시연 |
+| ONS 시간별 발전 | ONS 갱신 월별 CSV, MWmed, 일부 그룹 예측 포함 | 별도 증분 수집·출처 추적 CLI/API. 기존 발전량에 합산하지 않음 |
 | 합성 데모 (`synthetic`) | [프로젝트 생성기](src/solarops/fixtures.py)의 DEMO_01, 기본 1주 | Docker 없는 시연, 누락·무효·실패 주입·재처리 검사 |
 | 화면의 “전체” | 공개와 합성 자료를 함께 조회 | 편의 필터. 실제 발전소 수나 공개 데이터 실적으로 합산해 해석하지 않음 |
 
@@ -56,18 +59,21 @@
 
 ## 수집 주기와 데이터 추가
 
-**현재 신규 데이터를 정기적으로 가져오지는 않습니다.** `source fetch`로 고정된 BR-PVGen V.1을 다운로드하고 `ingest` / `replay`로 저장된 CSV를 처리합니다. 화면 새로고침은 저장된 결과 조회이며 다운로드나 분석을 시작하지 않습니다.
+**두 수집 경로를 구분합니다.** BR-PVGen V.1은 고정된 역사 자료를 명시적으로 다운로드·재처리합니다. v0.5.0의 ONS 수집기는 실제 갱신되는 월별 공개 CSV를 조건부 GET하고, 수정·추가된 날짜만 새로 게시합니다. 화면 새로고침은 저장된 결과 조회입니다.
 
-| 작업 | 구현된 주기와 범위 | 2026-10-23 확인 상태 |
+| 작업 | 주기와 범위 | 처리 방식 |
 |---|---|---|
-| 원본 다운로드 | 명시적 CLI 실행. 새 배포 버전 자동 탐색 없음 | 정기 수집 DAG 없음 |
-| 일별 적재 DAG | 매일 02:00 UTC / 11:00 KST에 **지정된 과거 구간** 재처리 | Compose Airflow 중지, kind DAG paused |
-| 월간 보고서 DAG | 매월 2일 03:00 UTC / 12:00 KST에 **지정된 월** 보고서 생성 | 같은 상태; 기간 자동 이동 없음 |
-| 품질 조회·백필 DAG | 수동 실행 | kind의 전체 DAG 4개 paused, 진행/대기 배치 0건 |
+| BR-PVGen 다운로드 | 명시적 CLI | 고정 Zenodo 배포, 최신 버전 자동 탐색 없음 |
+| BR-PVGen 적재·월간 보고 | 기존 과거 구간/월을 재처리 | 기존4개 DAG는 paused 유지 |
+| ONS 증분 수집 | 매일05:00UTC /14:00KST, 이전·현재 월 | 같은 응답 재처리0, 정정/지연 날짜만 게시, 실패 시 성공 cursor 유지 |
+| 공개 DAG 성능시험 | 수동, 동일 PS_001 공개4일 | 격리 DB·버킷에서 동시1/2 비교, 종료 후 paused |
 
-기본 DAG는 합성 DEMO_01의 2024년 4월 자료를 사용합니다. unpause만 하면 과거 고정 구간을 반복하므로 실시간 수집으로 바뀌지 않습니다. [실제 점검 근거](docs/worklog/2026-10-23-data-architecture.md).
+현재 kind에서는 ONS DAG만 활성화했고 나머지6개는 paused입니다. Compose Airflow는 중지 상태입니다.
 
-**데이터 확장은 가능합니다.** 현재 자료의 다른 발전소·월은 기존 처리기로 분석할 수 있으며, 이 PC의 Compose에는 V.1 전체 51개 발전소가 이미 처리되어 있습니다. 2024년 4월 화면의 5개는 월 필터에 따른 수입니다. 새로운 BR-PVGen 버전이나 다른 공개 API/CSV는 수집기·스키마 adapter·출처 등록을 추가해야 합니다. 현재 `public`은 BR-PVGen DOI·라이선스로 기록되므로 다른 자료를 같은 옵션으로 넣으면 안 됩니다.
+ONS의 MWmed·원문 시각·verified/forecast/unspecified를 보존합니다. 공식 사전에 시간대가 없어 UTC로 가정하거나 기존 발전량에 합산하지 않습니다. 새 자료는 [별도 CLI/API](docs/ons-source-contract.md)로 조회하며 현재 대시보드의 `public` 필터는 BR-PVGen입니다. [실행 상태·증거](docs/worklog/2026-10-23-incremental.md).
+
+
+**데이터 확장은 가능합니다.** 현재 자료의 다른 발전소·월은 기존 처리기로 분석할 수 있으며, 이 PC의 Compose에는 V.1 전체 51개 발전소가 이미 처리되어 있습니다. 2024년 4월 화면의 5개는 월 필터에 따른 수입니다. ONS는 별도 adapter·출처·성공 cursor로 추가했습니다. 또 다른 공개 API/CSV나 새 BR-PVGen 버전은 각 출처의 계약 확인이 필요합니다. 현재 `public`은 BR-PVGen DOI·라이선스로 기록되므로 다른 자료를 같은 옵션으로 넣으면 안 됩니다.
 
 [다운로드→처리→보고서 명령, 환경별 저장 위치, 새 출처·정기 수집 확장 순서](docs/guides/data-ingestion.md)를 정리했습니다. 고객 업로드와 실시간 SCADA 연동은 현재 구현 범위에 포함되지 않습니다.
 
@@ -143,6 +149,8 @@ docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio 
 
 ```mermaid
 flowchart LR
+    ONS[ONS 월별 갱신 원천] --> INC[별도 증분 수집 · 원문 시각/MWmed]
+    INC --> CUR[변경 날짜 JSON + 성공 cursor]
     Z[Zenodo 고정 배포] -->|명시적 다운로드| A[보존 CSV / 합성 fixture]
     A --> B[공통 Python CLI]
     H[Airflow · 선택적 KPO] -.->|과거 구간 재처리| B

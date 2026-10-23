@@ -12,7 +12,7 @@
 | 포트폴리오 설명 | [문제·설계·증거 사례](portfolio/CASE_STUDY.md) |
 | 기술 선택 이해 | [버전·선택 이유·대안](architecture/technology-stack.md), [아키텍처·배포 경계·데이터 흐름·트랜잭션](architecture/system.md) |
 | 실제 사용·자료 진위 | [실행 기술·원본 해시·독립 계산·합성 시험 구분](benchmarks/stack-authenticity-20261023.md) |
-| 데이터 출처 | [제작자·범위·라이선스·파일 다운로드](data-sources.md) |
+| 데이터 출처 | [제작자·범위·라이선스·파일 다운로드](data-sources.md), [ONS 시간별 계약·증분 수집 API](ons-source-contract.md) |
 | 수집 주기·데이터 추가 | [실제 자동화 상태·처리 명령·새 출처 연동 범위](guides/data-ingestion.md) |
 | 데이터 해석 | [실제 CSV 스키마·품질·에너지 계약](data-contract.md) |
 | 로컬 운영 | [화면·보고서](runbooks/operator.md), [DAG·백필](runbooks/dags.md), [실패·진단](runbooks/recovery.md), [백업·복원 시험](runbooks/backup-restore.md) |
@@ -37,3 +37,5 @@
 현재 UI: [방향과 추가 요건](design/workspace-navigation.md) · [전후 화면·검증 결과](benchmarks/workspace-20261023.md). 초기 전체 현황 개선은 [과거 검증](benchmarks/overview-redesign-20261023.md)으로 보존합니다.
 
 `plan/`은 [원본 기획](plan/00_START_HERE.md)과 [SHA-256 목록](plan/MANIFEST.sha256)을 보존하는 영역입니다. 과거 예시 프롬프트·중단 조건·계획은 현재 실행 결과나 사용자의 현재 지시와 구별합니다. 최신 상태는 위 구현 상태 문서가 기준입니다.
+
+최신 v0.5.0: [ONS 실제 정기 수집·Airflow 공개 병렬 측정](benchmarks/incremental-v0.5.0.md) · [릴리스 이미지](releases/0.5.0.json).

@@ -2,7 +2,7 @@
 
 [수집 주기·데이터 추가](../guides/data-ingestion.md) · [아키텍처](../architecture/system.md)
 
-**이 DAG들은 다운로드하지 않습니다.** 2026-10-23 13:11 KST 점검에서 Compose Airflow는 중지, kind DAG 4개는 모두 paused, 진행/대기 배치는 0건이었습니다. [확인 근거](../worklog/2026-10-23-data-architecture.md). 아래 일정은 코드에 설정된 주기이며 현재 신규 원천 수집이 실행 중이라는 뜻이 아닙니다.
+BR-PVGen의 기존4개 DAG는 저장된 역사 자료를 재처리합니다. v0.5.0에는 실제 ONS 갱신 원천을 확인하는1개 DAG와 수동 공개 성능시험2개 DAG가 추가되었습니다. 총7개이며 모두 최초 생성 시 paused입니다. 실제 활성화 상태와 검증 근거는 [작업 기록](../worklog/2026-10-23-incremental.md)을 확인합니다.
 
 | DAG | 역할 | 일정 |
 |---|---|---|
@@ -10,8 +10,10 @@
 | solarops_quality_daily | 지정 발전소·자료 종류·기간의 활성 지표 조회 | 수동 |
 | solarops_report_monthly | 지정 발전소·자료 종류·월 확인 → 계보 포함 보고서 공개 | 매월 2일 03:00 UTC, 초기 paused |
 | solarops_backfill_manual | 명시 날짜 재생, 기본 dry_run=true | 수동 |
+| solarops_ons_daily | ONS 이전/현재 월 조건부 다운로드·변경 날짜 게시 | 매일05:00 UTC /14:00 KST |
+| solarops_public_benchmark_1 / _2 | 같은 공개4일, 동시1/2 비교; 별도 DB·버킷 필수 | 수동, KPO 전용 |
 
-기본 `source_kind=synthetic`, `plant=DEMO_01`, `from_date=2024-04-01`, `to_date=2024-04-08`, `source_version=synthetic-v1`입니다. 공개 BR-PVGen은 `source_kind=public`, `plant=PS_001`처럼 지정합니다. 이미 전처리된 역사 자료이며 라이브 센서 수집이 아닙니다. 일정이 실행되어도 날짜 Params가 자동으로 오늘 날짜로 이동하지 않습니다. 정해진 구간을 반복 검증하려는 경우에만 unpause합니다.
+기존 BR-PVGen4개 DAG의 기본 `source_kind=synthetic`, `plant=DEMO_01`, `from_date=2024-04-01`, `to_date=2024-04-08`, `source_version=synthetic-v1`입니다. 공개 BR-PVGen은 `source_kind=public`, `plant=PS_001`처럼 지정합니다. 이미 전처리된 역사 자료이며 라이브 센서 수집이 아닙니다. 일정이 실행되어도 날짜 Params가 자동으로 오늘 날짜로 이동하지 않습니다. 정해진 구간을 반복 검증하려는 경우에만 unpause합니다.
 
 보고 월 `period`도 기본 `2024-04`로 고정됩니다. DAG 사이에 자동 실행 의존성은 없고, 품질 DAG의 `analyze`는 게시된 지표를 조회하는 명령입니다. 이름의 `daily`가 정기 원본 수집이나 별도의 전체 품질 재검사를 뜻하지 않습니다. 한국 시각은 일별 11:00, 월간 매월 2일 12:00입니다.
 
@@ -82,3 +84,24 @@ UI Params의 날짜는 ISO date, 버전은 경로 안전 문자로 제한합니�
 `fault_marker`와 `test_delay`는 합성 자료의 장애 시연에만 적용됩니다. `fault_marker`가 새 이름이면 첫 실행에서 DB 커밋 도중 예외를 발생시키고, 다음 재시도에서 같은 결과를 정상 공개합니다. 동일 marker는 다시 실패시키지 않습니다. 기존 marker를 삭제하지 말고 새 이름을 사용합니다.
 
 현재 dashboard·worker·Airflow·KPO는0.4.2로 정렬했습니다. [릴리스 명세](../../src/solarops/release.json)를 변경하고 `uv run python scripts/release/release.py sync`, `uv lock`, `check`를 실행한 뒤 구현을 커밋합니다. `uv run python scripts/release/release.py build`는 두 이미지를 빌드하고 커밋/이미지 ID를 기록합니다. [현재 증거](../releases/0.4.2.json). kind의 `bash scripts/ops/k8s-refresh.sh`는 이미지 로드와 롤아웃을 수행하므로 상태 조회용으로 실행하지 않습니다. 완료 Pod/로그·과거 보고서는 보존하며 소급 변경하지 않습니다.
+
+## ONS 정기 수집 켜기/끄기
+
+kind가 켜져 있을 때 WSL에서 실행합니다. pause는 다음 스케줄을 중단하며 이미 실행 중인 Pod를 강제 종료하지 않습니다.
+
+```bash
+kubectl --kubeconfig artifacts/kubeconfig -n solarops exec airflow-scheduler-0 -c scheduler -- airflow dags unpause solarops_ons_daily
+kubectl --kubeconfig artifacts/kubeconfig -n solarops exec airflow-scheduler-0 -c scheduler -- airflow dags pause solarops_ons_daily
+```
+
+기준일 override는 Trigger JSON `{"as_of":"2026-10-23"}`입니다. 생략하면 스케줄의 `data_interval_end`를 사용합니다. 현재/이전 월 이외의 오래된 정정은 공통 CLI `solarops ons-sync --period YYYY-MM`으로 처리합니다. 오류는 월별 성공 cursor를 전진시키지 않습니다. [입력·라이선스·시간대 한계](../ons-source-contract.md).
+
+## 공개 DAG 병렬 측정
+
+```text
+uv run python scripts/validation/k8s_benchmark.py
+```
+
+Python3.12·실행 중인 kind/Airflow·일치하는 worker 이미지·PVC의 PS_001 원본이 필요합니다. Windows에서는 Ubuntu-22.04의 kubectl을 사용합니다. runner는 매번 별도 DB/버킷을 만들고 benchmark 전용 Secret을 설정한 뒤4일을 직렬/동시2로 실행합니다. 종료 후 두 DAG는 paused, probe는 종료되며 DB·객체·Pod·로그는 보존합니다. 기존 demo 게시를 쓰거나 원본을 다운로드하지 않습니다.
+
+출력은 `artifacts/dag-benchmark-<시각>/`이며 실제 DAG시간·workerCPU/RSS·DB통계 delta·S3새 객체수/바이트·DB/MinIO Pod CPU/샘플 메모리·논리hash를 기록합니다. S3수치는 요청 지연시간이 아니며, 캐시/시작 비용을 포함한 단일 호스트 시험입니다. 로컬 기준은 오류0·hash동일·workerRSS<2GiB·10분 이내, 병렬 권고는15% 이상 시간 감소입니다.

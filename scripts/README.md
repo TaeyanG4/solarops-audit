@@ -22,7 +22,8 @@
 | `validation/` | `compare_calculations.py` | 보존한 v1 기준과 v2 전체 일별 지표·원본 SHA·표본 시계열 비교 |
 | `validation/` | `backup_restore_drill.py` | 새 합성 SQLite/파일의 별도 경로 복원·해시·API·재처리 시험; 실제 서비스 백업 도구는 아님 |
 | `validation/` | `service_restore_drill.py` | 합성 전용 DB/버킷 복원. `--isolated-target`이면 별도 PostgreSQL·MinIO 컨테이너에 복원하고 시험 후 중지; 자원·증거 보존 |
-| `validation/` | `k8s_benchmark.py`, `k8s_fault.py` | 합성 작업 생성 / **이 도구가 시작한 작업 프로세스 종료** 후 재시도 확인 |
+| `validation/` | `k8s_benchmark.py` | 실제 Airflow 공개4일 직렬/동시2 비교; 별도 DB/버킷·자원/논리hash 측정, 증거 보존 |
+| `validation/` | `k8s_fault.py` | 합성 작업 생성 / **이 도구가 시작한 작업 프로세스 종료** 후 재시도 확인 |
 | `demo/` | `portfolio_demo.py` | 독립 새 폴더에 합성 정상·실패·복구 증거, 선택적 8503 UI |
 | `demo/` | `pilot_price.py` | 입력 가정에 따른 가격/원가 산술; 실제 매출 예측 아님 |
 | `data/` | `full_dataset.py` | 이미 받은 공개 51개 발전소를 처리; 부하·저장공간 사용 큼 |

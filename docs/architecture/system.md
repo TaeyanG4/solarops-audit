@@ -4,7 +4,7 @@
 
 SolarOps는 **역사 CSV를 검증·분석해 일별 결과와 불변 보고서로 게시하는 배치 시스템**입니다. Python CLI가 처리와 쓰기를 담당하고 FastAPI 대시보드는 저장된 결과를 읽습니다. 같은 CLI를 네이티브, Compose, Airflow, Kubernetes 작업 Pod에서 실행합니다.
 
-설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 앱 v0.4.2 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
+설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 앱 v0.5.0 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
 
 **v0.4.2:** 독립 검토에서 재현한 입력 ID·추출·metadata·역순 게시 경계를 수정했습니다. 배치 시작 때 기대한 active와 비교해 교체하고 metadata도 같은 트랜잭션에 게시합니다. 충돌은 이전 결과를 유지한 채 명시적으로 실패하며 의도적 과거 복원은 `--restore`가 필요합니다. [실제 SQLite/PostgreSQL 검증](../benchmarks/integrity-v0.4.2.md).
 
@@ -13,6 +13,10 @@ SolarOps는 **역사 CSV를 검증·분석해 일별 결과와 불변 보고서�
 ```mermaid
 flowchart TB
     Z["Zenodo BR-PVGen V.1"] -->|"명시적 source fetch · extract"| CSV["보존한 공개 CSV"]
+    ONS["ONS 월별 CSV · CKAN metadata"] -->|"매일 이전/현재 월 확인"| INC["ons-sync · 원천 시각/MWmed · 유형 보존"]
+    INC --> RAW["immutable raw · 변경 날짜 JSON"]
+    RAW --> CUR["조직별 collection_partition + 성공 cursor 원자 게시"]
+    CUR --> API
     S["합성 fixture DEMO_01"] --> CLI["공통 solarops CLI"]
     CSV --> CLI
     A["Airflow: 일정 · 재시도 · 수동 백필"] -.->|"Compose subprocess 또는 kind KPO"| CLI
@@ -29,7 +33,7 @@ flowchart TB
     API --> UI["HTML · CSS · JS 대시보드 / 보고서 다운로드"]
 ```
 
-다운로드는 `acquisition/brpvgen.py`, 일별 처리는 `pipeline.py`, 보고서는 `reports/`에 있습니다. Airflow DAG에 다운로드 호출은 없으며 기본 날짜도 고정된 역사 구간입니다. 2026-10-23 확인 시 Compose Airflow는 중지, kind DAG는 모두 paused였습니다. **주기적인 신규 원천 수집이나 실시간 스트리밍이 가동 중인 구조는 아닙니다.** [일정·실제 상태·확장 절차](../guides/data-ingestion.md).
+다운로드는 `acquisition/brpvgen.py`, 일별 처리는 `pipeline.py`, 보고서는 `reports/`에 있습니다. BR-PVGen DAG는 고정된 역사 구간을 재처리합니다. v0.5.0의 ONS DAG는 별도 수집기로 이전/현재 월을 조건부 GET하고, 날짜별 내용 hash와 월별 성공 cursor로 증분 게시합니다. 실시간 스트리밍은 아닙니다. [일정·실제 상태·확장 절차](../guides/data-ingestion.md).
 
 ## 배포 환경과 저장소 경계
 
@@ -38,7 +42,7 @@ flowchart TB
 | 네이티브 | `uv run solarops`, 기본 UI 8501 | 설정한 data 폴더의 SQLite | 같은 환경의 로컬 파일 | 서버 없는 개발·합성 시연. 기본 native의 기존 v1 결과는 보존본 |
 | 독립 포트폴리오 데모 | `portfolio_demo.py --serve`, 8503 | 실행마다 새 SQLite | 실행마다 별도 폴더 | 합성 실패·복구 시연, 서비스 DB와 분리 |
 | Compose | worker 또는 Airflow subprocess, UI 8502 | `app-db` PostgreSQL | MinIO + 작업용 app-data 볼륨 | 공개 전체 51개 발전소의 계산 v2 결과 |
-| kind Kubernetes | Airflow LocalExecutor → KPO CLI Pod | namespace 내부 별도 `app-db` | namespace 내부 별도 MinIO + PVC | 공개 v2 검증은 PS_001 하루. Compose 전체 데이터의 복제본 아님 |
+| kind Kubernetes | Airflow LocalExecutor → KPO CLI Pod | namespace 내부 별도 `app-db` | namespace 내부 별도 MinIO + PVC | 기존 공개 v2는 PS_001 하루. ONS 수집은 별도 collection 테이블, 성능시험은 별도 DB/버킷. Compose 복제본 아님 |
 
 **Compose와 kind는 독립 저장소이며 자동 동기화하지 않습니다.** 네이티브에서 처리한 결과도 설정을 명시하지 않으면 8502에 나타나지 않습니다. 같은 코드가 실행돼도 데이터와 활성 결과의 범위는 환경마다 다릅니다. [환경 분리 결정](../adr/0002-two-environments.md).
 
@@ -142,3 +146,9 @@ Compose dashboard/worker/Airflow와 kind Airflow/KPO의 새 실행을0.4.2로 �
 | 외부 운영 | 현재 로컬 개발/시연 범위. 고객 업로드·다중 사용자 인증/권한·HTTPS 외부 서비스·신규 원천 정기 수집은 미구현 |
 
 기술별 버전·대안·재검토 조건은 [기술 선택 문서](technology-stack.md), 실제 실행·종료는 [운영 안내](../runbooks/operator.md), 복구는 [백업·복원](../runbooks/backup-restore.md)을 따릅니다.
+
+## ONS 증분 경계 (v0.5.0)
+
+원천의 offset 없는 시각을 UTC라고 가정하지 않습니다. MWmed·verified/forecast/unspecified를 보존하고 기존 energy-v2 지표와 분리합니다. 원본과 metadata를 보존한 뒤 날짜별 내용 hash가 달라진 결과만 업로드하고, 기대 cursor가 일치할 때 월의 변경 manifest와 cursor를 함께 전환합니다. HTTP304는 날짜 재처리 없이 확인 이력만 남깁니다. [출처·실패/철회 계약과 조회 API](../ons-source-contract.md).
+
+실제 KPO 병렬 측정은 별도 PostgreSQL DB·MinIO 버킷·PVC 하위 경로를 사용합니다. 동일 PS_001 공개4일을 max_active_tasks=1/2로 실행하며 신규 기술스택을 추가하지 않습니다. 단일 kind 노드의 공유 RWO PVC이므로 다중 물리 노드 확장 검증이 아닙니다. [실행 기록](../worklog/2026-10-23-incremental.md).

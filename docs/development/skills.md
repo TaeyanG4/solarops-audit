@@ -101,3 +101,7 @@ UI-05에서는 사용자가 스크롤 닫힘을 거절해 열림 유지로 재�
 2026-10-23 TECH-02에서는 UI UX Pro Max의 `live status screen reader` 검색에서 contextual live badge 지침을 확인해, 색과16px 문구·비교 기준 시각을 함께 표시하고 하나의 atomic status 영역을 사용했습니다. 최초 `status feedback stale data` 검색은 부적합한 결과라 적용하지 않았습니다. 기존 DESIGN.md의 색·타이포그래피를 유지했습니다.
 
 Agent Browser로 실제 공개 자료의 동일 상태와 별도 합성 재처리의 변경 상태를 열었습니다.1440/768/390px의 넘침0, 최종 모바일 두 상태의 보고서 영역 axe 위반0·JS오류0을 확인했습니다. DPR2 원본 [화면과 출처](../portfolio/images/technical-20261023/README.md)를 보존했습니다. 백엔드·CI·복원 작업에는 UI 스킬을 적용하지 않았고, 이번 좁은 변경에서 Impeccable/Web Design Guidelines·별도 에이전트 검수를 수행한 것으로 기록하지 않습니다.
+
+## ONS 출처 계약 확인
+
+2026-10-23 DATA-03에서는 `pdf:pdf` 스킬로 ONS 공식 데이터 사전 PDF의 필드·단위·null/음수 규칙을 확인했습니다. 시간대나 구간 기준이 없다는 한계를 계약에 남겼습니다. UI 변경은 없으므로 디자인/브라우저 스킬을 재사용한 것으로 기록하지 않습니다. [출처 계약](../ons-source-contract.md) · [수행 기록](../worklog/2026-10-23-incremental.md).
