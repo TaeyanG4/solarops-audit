@@ -54,6 +54,39 @@ FIELDS = (
     "cod_modalidadeoperacao nom_tipousina nom_tipocombustivel nom_usina id_ons ceg val_geracao"
 ).split()
 VERIFIED = {"TIPO I", "TIPO II-A", "TIPO II-B", "TIPO II-C", "Conjunto de Usinas"}
+ERROR_CODES = frozenset(
+    {
+        "ONS_MONTH",
+        "ONS_INCOMPLETE_HTTP_RESPONSE",
+        "ONS_DOWNLOAD_LIMIT",
+        "ONS_SCHEMA_CHANGED",
+        "ONS_INCOMPLETE_ROW",
+        "ONS_TIMESTAMP",
+        "ONS_ENTITY_ID",
+        "ONS_DUPLICATE_CONFLICT",
+        "ONS_EMPTY_PHOTOVOLTAIC_SNAPSHOT",
+        "ONS_CURSOR_CONFLICT",
+        "ONS_TEST_PUBLICATION_FAILURE",
+        "ONS_SOURCE_CONTRACT_CHANGED",
+    }
+)
+
+
+def failure_code(exc):
+    """Persist only known domain codes; never exception text or connection details."""
+    if isinstance(exc, (ValueError, RuntimeError)):
+        code = str(exc).split(":", 1)[0]
+        if code in ERROR_CODES:
+            return code
+    if isinstance(exc, urllib.error.HTTPError):
+        return f"ONS_HTTP_{exc.code}" if 100 <= exc.code <= 599 else "ONS_HTTP_ERROR"
+    if isinstance(exc, TimeoutError):
+        return "ONS_TIMEOUT"
+    if isinstance(exc, urllib.error.URLError):
+        return "ONS_NETWORK_ERROR"
+    if isinstance(exc, OSError):
+        return "ONS_IO_ERROR"
+    return "ONS_UNEXPECTED_ERROR"
 
 
 def month(value):
@@ -373,7 +406,7 @@ def sync_month(settings, period):
                     **record,
                     "status": "failed",
                     "finished_at": now(),
-                    "error_code": type(exc).__name__,
+                    "error_code": failure_code(exc),
                 },
             )
         raise

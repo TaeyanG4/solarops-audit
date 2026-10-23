@@ -2,11 +2,14 @@ import csv
 import json
 from dataclasses import replace
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 
 from solarops.analytics.metrics import analyze
+from solarops.api.readmodels import fleet_overview
 from solarops.config import CALCULATION_VERSION
+from solarops.reports.render import build_report
 from solarops.storage.postgres import Catalog
 from tests.test_contracts import record
 from tests.test_pipeline import run
@@ -79,6 +82,26 @@ def test_entire_missing_dst_day_is_published(settings, sample, day, timestamps, 
     assert row["metric"]["expected_slots"] == row["metric"]["missing_slots"] == slots
     series = json.loads((local.root / row["payload"]["object_prefix"] / "series.json").read_text())
     assert len(series) == slots and all(r["power_kw"] is None for r in series)
+    assert row["metric"]["source_interpolation_ratio"] is None
+    assert fleet_overview(Catalog(local), day[:7])["summary"]["source_interpolation_ratio"] is None
+    report = build_report(local, day[:7], "DEMO_01", "synthetic")
+    directory = Path(report["local_directory"])
+    original = (directory / "manifest.json").read_bytes()
+    assert json.loads(original)["interpolation"] is None
+    assert "<dt>원본 보간 표시</dt><dd>알 수 없음" in (directory / "report.html").read_text(
+        encoding="utf-8"
+    )
+    # A real observed non-interpolated value remains 0%, and old reports stay immutable.
+    sparse_source(sample, [f"{day}T12:00:00Z"])
+    run(local, sample, version="filled", start=day, end=end)
+    newer = build_report(local, day[:7], "DEMO_01", "synthetic")
+    assert (
+        json.loads((Path(newer["local_directory"]) / "manifest.json").read_text(encoding="utf-8"))[
+            "interpolation"
+        ]
+        == 0
+    )
+    assert (directory / "manifest.json").read_bytes() == original
 
 
 def test_v2_hash_includes_series_and_retains_replay_determinism(settings, sample, monkeypatch):

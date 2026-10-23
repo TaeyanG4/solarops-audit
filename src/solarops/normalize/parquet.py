@@ -64,14 +64,25 @@ def rows(path, kind, plant, start, end):
         conn.close()
 
 
-def normalize(raw, kind):
-    value = raw.get("datetime") or ""
-    dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
+def timestamp_utc(value):
+    """The same timestamp contract for source bounds and normalized observations."""
+    try:
+        dt = datetime.fromisoformat((value or "").replace("Z", "+00:00"))
+    except ValueError:
+        raise ValueError("TIMESTAMP_INVALID") from None
     if dt.tzinfo is None:
         raise ValueError("TIMESTAMP_TIMEZONE_MISSING")
-    dt = dt.astimezone(UTC)
+    try:
+        dt = dt.astimezone(UTC)
+    except (ValueError, OverflowError):
+        raise ValueError("TIMESTAMP_INVALID") from None
     if dt.minute % 15 or dt.second or dt.microsecond:
         raise ValueError("TIMESTAMP_OFF_GRID")
+    return dt
+
+
+def normalize(raw, kind):
+    dt = timestamp_utc(raw.get("datetime"))
     field = "total_active_power_w" if kind == "inverter" else "poa_irradiance_wm2"
     numeric = raw.get(field)
     numeric = float(numeric) if numeric not in (None, "") else None

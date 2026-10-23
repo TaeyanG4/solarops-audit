@@ -17,9 +17,9 @@
     <p>같은 기간에 새 자료를 적재하거나 재처리·계산 버전 변경이 있었다면 보고서를 다시 발행해야 반영됩니다. 기존 보고서 ID의 내용은 유지됩니다.</p>
   </section>
   <dl class="report-metrics">
-    <div><dt>관측 슬롯 완전성</dt><dd>{{ '%.1f'|format(report.coverage*100) }}%<p>등록된 일별 파티션 기준</p></dd></div>
-    <div><dt>유효값 비율</dt><dd>{{ '%.1f'|format(report.valid_coverage*100) }}%<p>무효값은 추정 에너지 계산에서 제외</p></dd></div>
-    <div><dt>원본 보간 표시</dt><dd>{{ '%.2f'|format(report.interpolation*100) }}%<p>유효·무효와 겹칠 수 있는 별도 속성</p></dd></div>
+    <div><dt>관측 슬롯 완전성</dt><dd>{{ '%.1f'|format(report.coverage*100) ~ '%' if report.coverage is not none else '알 수 없음' }}<p>등록된 일별 파티션 기준</p></dd></div>
+    <div><dt>유효값 비율</dt><dd>{{ '%.1f'|format(report.valid_coverage*100) ~ '%' if report.valid_coverage is not none else '알 수 없음' }}<p>무효값은 추정 에너지 계산에서 제외</p></dd></div>
+    <div><dt>원본 보간 표시</dt><dd>{{ '%.2f'|format(report.interpolation*100) ~ '%' if report.interpolation is not none else '알 수 없음' }}<p>유효·무효와 겹칠 수 있는 별도 속성</p></dd></div>
     <div><dt>저출력 검토 구간</dt><dd>{{ report.candidates|length }}건<p>사람이 확인할 후보 · 고장 확정 아님</p></dd></div>
   </dl>
   <section class="panel report-section"><h2>일별 데이터 내역</h2><p>추정 발전량과 품질을 함께 확인하세요. 원본 보간 여부 불명은 0%로 표시하지 않습니다.</p><p><a href="metrics.csv">CSV 다운로드</a></p>

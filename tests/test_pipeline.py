@@ -200,7 +200,15 @@ def test_report_api_and_lineage(settings, sample):
 
 
 def test_unknown_plant_and_malformed_timestamp_block(settings, sample):
+    run(settings, sample, end="2024-04-02")
+    before = Catalog(settings).snapshot(settings.org)
     text = sample["inverter"].read_text(encoding="utf-8")
     sample["inverter"].write_text(text.replace("DEMO_01", "UNKNOWN"), encoding="utf-8")
     with pytest.raises(ValueError, match="UNKNOWN_PLANT"):
-        run(settings, sample)
+        run(settings, sample, version="unknown")
+    # Invalid rows outside the requested day still contribute to source bounds.
+    for i, stamp in enumerate(("2024-03-31T23:45:00", "2024-03-31T23:46:00Z", "bad-time")):
+        sample["inverter"].write_text(text + f"{stamp},DEMO_01,1,1000,false,3\n", encoding="utf-8")
+        with pytest.raises(ValueError, match="TIMESTAMP"):
+            run(settings, sample, version=f"bad-{i}", end="2024-04-02")
+        assert Catalog(settings).snapshot(settings.org) == before

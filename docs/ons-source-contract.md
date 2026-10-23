@@ -47,4 +47,6 @@ Airflow `solarops_ons_daily`는 매일05:00UTC(14:00KST), `data_interval_end` �
 
 ## 검증 범위
 
+v0.5.2의 실패 기록은 알려진 `ONS_SCHEMA_CHANGED`, `ONS_TIMESTAMP`, `ONS_CURSOR_CONFLICT` 등 원인 코드를 보존합니다. HTTP는 `ONS_HTTP_503` 같은 상태 코드, timeout·연결·파일 오류는 `ONS_TIMEOUT` / `ONS_NETWORK_ERROR` / `ONS_IO_ERROR`, 알 수 없는 예외는 `ONS_UNEXPECTED_ERROR`로 표시합니다. API에 임의 예외 메시지·접속 문자열을 노출하지 않습니다. 실패하더라도 마지막 성공 cursor는 유지하며 [원인별 복구](runbooks/recovery.md#ons-수집-실패)를 따릅니다.
+
 기존 계약/게시/서비스 테스트에 작은 offline fixture로 단위·원천 시각·유형·invalid·누락·중복충돌·동일응답·정정/지연/철회·실패 cursor·조직 격리를 추가했습니다. 전체 데이터를 테스트에서 다운로드하지 않습니다. 실제 원천과 성능 결과는 [실행 기록](worklog/2026-10-23-incremental.md)으로 분리합니다.

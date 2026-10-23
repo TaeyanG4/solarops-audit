@@ -19,6 +19,7 @@ from solarops.normalize.parquet import (
     normalize,
     rows,
     sql_quote,
+    timestamp_utc,
     write_parquet,
 )
 from solarops.runtime import execution_context, release_info
@@ -46,6 +47,7 @@ def canonical_hash(value):
 
 
 def source_bounds(path, plant, metadata_ids):
+    result, identities = {}, {}
     with duckdb.connect() as conn:
         configure_duckdb(conn)
         q = f"read_csv({sql_quote(path)}, all_varchar=true)"
@@ -54,15 +56,19 @@ def source_bounds(path, plant, metadata_ids):
         )
         if unknown:
             raise ValueError("UNKNOWN_PLANT_IN_SOURCE")
-        data = conn.execute(
-            f"SELECT inverter_id, min(try_cast(datetime AS TIMESTAMPTZ)), max(try_cast(datetime AS TIMESTAMPTZ)) FROM {q} WHERE ps_id=? GROUP BY inverter_id",
+        cursor = conn.execute(
+            f"SELECT inverter_id, datetime FROM {q} WHERE ps_id=?",
             [plant],
-        ).fetchall()
-    result = {}
-    for inv, left, right in data:
-        inv = inverter_id(inv)
-        if left and right:
-            result[inv] = (left.astimezone(UTC), right.astimezone(UTC))
+        )
+        # Validate every contributing row, including rows outside the request window.
+        # Bounded batches avoid materializing the file or accepting SQL's naive UTC cast.
+        while batch := cursor.fetchmany(2048):
+            for raw_id, raw_time in batch:
+                if raw_id not in identities:
+                    identities[raw_id] = inverter_id(raw_id)
+                inv, stamp = identities[raw_id], timestamp_utc(raw_time)
+                left, right = result.get(inv, (stamp, stamp))
+                result[inv] = (min(left, stamp), max(right, stamp))
     return result
 
 

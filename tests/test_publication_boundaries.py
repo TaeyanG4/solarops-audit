@@ -307,6 +307,31 @@ def test_ons_conditional_download_and_failure_preserve_success(settings, tmp_pat
     assert result["available_periods"] == ["2026-10"]
     assert result["storage"]["scheduler_status"] == "not_observed"
     assert "database_url" not in result["storage"]
+    # Domain causes remain distinct, while arbitrary exception details stay private.
+    from urllib.error import HTTPError, URLError
+
+    failures = (
+        (ValueError("ONS_SCHEMA_CHANGED"), "ONS_SCHEMA_CHANGED"),
+        (ValueError("ONS_SOURCE_CONTRACT_CHANGED"), "ONS_SOURCE_CONTRACT_CHANGED"),
+        (ValueError("ONS_CURSOR_CONFLICT: internal detail"), "ONS_CURSOR_CONFLICT"),
+        (TimeoutError("private endpoint"), "ONS_TIMEOUT"),
+        (HTTPError("https://private.invalid", 503, "private detail", {}, None), "ONS_HTTP_503"),
+        (URLError("private endpoint"), "ONS_NETWORK_ERROR"),
+        (OSError("private path"), "ONS_IO_ERROR"),
+        (ValueError("private connection string"), "ONS_UNEXPECTED_ERROR"),
+    )
+    for exception, expected_code in failures:
+
+        def fail(*args, _exc=exception, **kwargs):
+            raise _exc
+
+        monkeypatch.setattr(ons, "download", fail)
+        with pytest.raises(type(exception)):
+            ons.sync_month(settings, "2026-10")
+        result = client.get("/api/v1/sources/ons?period=2026-10").json()
+        assert result["recent_attempts"][0]["error_code"] == expected_code
+        assert result["last_success"] == second
+        assert "private" not in json.dumps(result["recent_attempts"])
     # Last success comes from the cursor even when >20 later failures hide it.
     from solarops.storage.postgres import collection_runs, put
 

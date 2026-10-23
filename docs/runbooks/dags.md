@@ -83,7 +83,7 @@ UI Params의 날짜는 ISO date, 버전은 경로 안전 문자로 제한합니�
 
 `fault_marker`와 `test_delay`는 합성 자료의 장애 시연에만 적용됩니다. `fault_marker`가 새 이름이면 첫 실행에서 DB 커밋 도중 예외를 발생시키고, 다음 재시도에서 같은 결과를 정상 공개합니다. 동일 marker는 다시 실패시키지 않습니다. 기존 marker를 삭제하지 말고 새 이름을 사용합니다.
 
-현재 dashboard·worker·Airflow·KPO는0.4.2로 정렬했습니다. [릴리스 명세](../../src/solarops/release.json)를 변경하고 `uv run python scripts/release/release.py sync`, `uv lock`, `check`를 실행한 뒤 구현을 커밋합니다. `uv run python scripts/release/release.py build`는 두 이미지를 빌드하고 커밋/이미지 ID를 기록합니다. [현재 증거](../releases/0.4.2.json). kind의 `bash scripts/ops/k8s-refresh.sh`는 이미지 로드와 롤아웃을 수행하므로 상태 조회용으로 실행하지 않습니다. 완료 Pod/로그·과거 보고서는 보존하며 소급 변경하지 않습니다.
+dashboard·worker·Airflow·KPO는 같은 릴리스 선언을 사용합니다. 실제 배포 상태와 이미지 식별자는 [현재 handoff](../../handoff.md)에서 확인합니다. [릴리스 명세](../../src/solarops/release.json)를 변경하고 `uv run python scripts/release/release.py sync`, `uv lock`, `check`를 실행한 뒤 구현을 커밋합니다. `uv run python scripts/release/release.py build`는 두 이미지를 빌드하고 커밋/이미지 ID를 기록합니다. [0.4.2 당시 증거](../releases/0.4.2.json). kind의 `bash scripts/ops/k8s-refresh.sh`는 이미지 로드와 롤아웃을 수행하므로 상태 조회용으로 실행하지 않습니다. 완료 Pod/로그·과거 보고서는 보존하며 소급 변경하지 않습니다.
 
 ## ONS 정기 수집 켜기/끄기
 

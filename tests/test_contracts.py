@@ -109,9 +109,13 @@ def test_flags(value, expected):
 
 
 @pytest.mark.parametrize("ts", ["garbage", "2024-04-01T00:00:00", "2024-04-01T00:01:00Z"])
-def test_bad_timestamps(ts):
+def test_bad_timestamps(ts, tmp_path):
     with pytest.raises(ValueError):
         record(ts)
+    path = tmp_path / "timestamps.csv"
+    path.write_text(f"datetime,ps_id,inverter_id\n{ts},DEMO_01,1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="TIMESTAMP"):
+        source_bounds(path, "DEMO_01", {"DEMO_01"})
 
 
 def test_offsets_are_utc():

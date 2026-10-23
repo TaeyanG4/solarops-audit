@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-- 앱 **v0.5.1** / 계산 `energy-interval-v2`. 구현 `ee791cb`와 [릴리스·이미지](docs/releases/0.5.1.json)를 연결했습니다. [GitHub](https://github.com/TaeyanG4/solarops-audit)는 비공개입니다.
+- 최신 코드 **v0.5.2** / 계산 `energy-interval-v2`: 시각 계약·보고서 unknown·ONS 오류 코드·README 보완. [검사·동등성·비용](docs/benchmarks/quality-v0.5.2.md). 실행 서비스는 아직 v0.5.1이며 이미지 배포 진행 전입니다. [GitHub](https://github.com/TaeyanG4/solarops-audit)는 비공개입니다.
 - DATA-03/PERF-03 완료: [ONS 증분 계약](docs/ons-source-contract.md), 성공 cursor와 변경 날짜 원자 게시, 별도 CLI/API, 실제 정기 수집과 공개4일 Airflow 병렬 비교. [실행 근거·한계](docs/benchmarks/incremental-v0.5.0.md).
 - ONS: Compose 10월 태양광 69,696행·21일, 같은 응답 재실행 변경 0개. kind 9~10월 167,424행·51일, 실제 scheduled KPO 성공. 두 환경의 10월 일별 hash 일치. 원문 시각/MWmed·검증/예측/미확정 보존, 기존 발전량에 합산하지 않습니다.
 - 공개 4일 실제 KPO: 직렬 36.675초→동시 2개 19.339초(47.3% 단축), hash 동일·오류 0, worker RSS 최대 427.78MiB. 총 CPU 24.3% 증가. 별도 DB/버킷이며 단일 호스트·각 1회·4개의 일별 task 비교입니다.
@@ -18,8 +18,9 @@
 
 ## 다음 재개 지점
 
-- PORT-01~04 제출 마무리는 완료. 이후 [Fable·Astra 독립 모의 면접 평가](docs/reviews/2026-10-23-interview.md)는 77/83점으로 모두 주니어 면접을 권고했습니다. 주관적 점수이며 개인 역량·합격 확률을 뜻하지 않습니다.
-- 다음은 [plan](plan.md)의 **INT-01 시각 계약(21) → INT-02 보고서 unknown(19) → INT-03 ONS 오류 코드(16)**. 세 경계는 격리 합성 입력으로 재현했고 수정 미착수입니다. 공개 원본 발생 여부는 미확인. 기존 제출 체크리스트 완료와 새 결함을 구분하며 BIZ-01은 후순위입니다.
+- 사용자는 면접·개인 역량 검증을 생략했습니다. [고정 산출물 루브릭](docs/reviews/portfolio-rubric.md)으로 두 독립 평가 각각 95점 이상을 목표로 개선합니다. 이전 면접 점수와 새 기준 점수는 직접 비교하지 않습니다.
+- INT-01/02/03·DOC-04 완료: 오프라인 136통과·14제외, 독립 실제 서비스 13통과, 정상 합성 7일 hash/공개 PS_001 범위 동일. 다음은 v0.5.2 배포·같은 커밋의 독립 평가입니다. [plan](plan.md)의 REVIEW-02 진행 중, BIZ-01 후순위.
+- 매일 10:00 KST 이 대화 자동 점검(`solarops`)을 설정했습니다. 의미 있는 개선 뒤에만 Fable(Claude Code)/Astra 새 세션에서 평가하며 목표 달성 시 중지합니다. 변화 없는 점수 재추첨은 하지 않습니다.
 - ONS는 이전/현재 월을 재확인하며 그보다 오래된 정정은 `ons-sync --period YYYY-MM`. 실패 시 월별 성공 cursor 유지, 충돌은 최신 상태에서 재시도. 원문 시간대를 추측해 UTC로 변환하지 않습니다.
 - kind 중지 시 정기 수집도 멈춥니다. ONS만 멈추려면 DAG pause. 현재 실행 중인 Pod까지 강제 종료하는 명령은 아닙니다. 두 환경 자료는 독립입니다.
 - 릴리스는 `scripts/release/release.py sync`→`uv lock`→`check`→구현커밋→`build`. 추가 테이블은 새 읽기 API 배포 전 `db-migrate`. 원본/과거 보고서 필드를 소급 변경하지 않습니다.
@@ -30,6 +31,7 @@
 
 | 일자 | 수행 영역과 결과 | 상세 |
 |---|---|---|
+| 10-23 | 면접 제외·고정 루브릭·반복 점검·세 경계/README 수정·관련 검사 | [개선·재평가 진행](docs/worklog/2026-10-23-quality.md) |
 | 10-23 | Fable·Astra 면접 평가·합성 경계 3개 재현·후속 21/19/16점 등록 | [평가·재현·전달](docs/worklog/2026-10-23-interview.md) |
 | 10-23 | PORT-01~04완료·ONS상태UI·0.5.1배포·격리재현·제출자료·최신CI | [최종 수행](docs/worklog/2026-10-23-portfolio-finish.md) |
 | 10-23 | ONS 실제 증분·정기 KPO·공개 DAG 동시 2개 비교, 0.5.0 배포·문서 갱신 | [수행·전달](docs/worklog/2026-10-23-incremental.md) |
@@ -37,6 +39,5 @@
 | 10-23 | 독립 검토·경계 4개 재현·6개 후속 계획 | [수용 판단](docs/worklog/2026-10-23-independent-review.md) |
 | 10-23 | 실제 수집/스케줄·환경별 아키텍처·README 정리 | [문서·상태](docs/worklog/2026-10-23-data-architecture.md) |
 | 10-23 | 서비스 CI·보고서 비교·격리 복원·합성 10만 건 조회 부하 | [전달기록](docs/worklog/2026-10-23-technical-delivery.md) |
-| 10-23 | 영업 후순위·MVP와 남은 기술 범위 구분 | [평가](docs/worklog/2026-10-23-technical-roadmap.md) |
 
 100줄 이내·최근 요약 최대 8개. 이전 handoff/discoveries는 [원문 보관](docs/worklog/archive/README.md)이며 현재 지침이 아닙니다.

@@ -1,112 +1,18 @@
 # SolarOps Audit
 
-[CI 검사 — Windows · Ubuntu](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml)
+**공개 태양광 데이터를 검증하고, 실패·정정·재처리 이후에도 보고서 숫자를 원본까지 추적하는 배치 데이터 파이프라인.**
 
-**태양광 운영 데이터를 검증하고, 보고서 숫자를 원본까지 추적하는 데이터 엔지니어링 프로젝트.**
+관측 슬롯이 모두 있어도 값이 모두 유효한 것은 아닙니다. SolarOps는 무효·누락·원본 보간을 구분하고, 검증한 결과만 게시하며, 실패하면 이전 결과를 유지합니다. Python 공통 CLI를 로컬, Docker, Airflow의 Kubernetes 작업 Pod에서 사용합니다.
 
-브라질 공개 발전소 CSV를 내려받거나 합성 데모를 생성해 일별 Parquet·품질 지표·월간 보고서·읽기 전용 대시보드로 제공합니다. 데이터가 빠지거나 잘못됐을 때의 표시, 같은 자료를 다시 처리했을 때의 일관성, 작업 실패 후 이전 결과 보존까지 구현했습니다.
+[한 쪽 요약](docs/portfolio/SUBMISSION.md) · [5분 재현](#빠른-실행) · [아키텍처](docs/architecture/system.md) · [설계 사례](docs/portfolio/CASE_STUDY.md) · [검사 CI](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml) · [전체 문서](docs/README.md)
 
-현재 버전은 **v0.5.1 · 계산 energy-interval-v2**입니다. 제출 자료부터 읽으려면 [한 쪽 요약](docs/portfolio/SUBMISSION.md), [3~5분 시연](docs/portfolio/DEMO_GUIDE.md), [핵심 설계 질문 5개](docs/portfolio/DESIGN_QUESTIONS.md)를 참고하세요.
+![전체 현황 — BR-PVGen 공개 자료의 추정 에너지와 데이터 품질](docs/portfolio/images/workspace-20261023/overview.png)
 
-[Fable·Astra 독립 모의 면접 평가](docs/reviews/2026-10-23-interview.md)에는 강점·면접 질문과 코드 재현으로 확인한 보완점이 있습니다. 실제 채용 평가와 구별하며, 새로 발견한 세 항목의 수정 순서는 [현재 계획](plan.md)에 기록했습니다.
-
-- **실제 데이터:** BR-PVGen 역사 자료 51개 발전소와 별도 ONS 갱신 수집. 합성 자료는 실패·복구 시연에만 구분해서 사용합니다.
-- **운영 경계:** 원본 보존 → 검증 → 원자 게시. 실패·중복 충돌·동시 게시·재처리·보고서 계보를 실행 검사로 확인합니다.
-- **ONS 화면:** 데이터 출처 안의 ONS 탭에서 현재 저장소·월·최근 시도·마지막 성공·변경 날짜를 확인합니다. Compose와 kind를 구분하고 MWmed를 추정 kWh에 합산하지 않습니다.
-- **측정된 성능:** 실제 공개4일 Airflow KPO 직렬36.675→동시2개19.339초(47.3% 단축), 결과hash 동일. 총CPU는24.3% 증가했습니다. [조건·한계](docs/benchmarks/incremental-v0.5.0.md).
-
-[최종 화면·재현 검증](docs/benchmarks/portfolio-finish-20261023.md) · [v0.4.2 무결성](docs/benchmarks/integrity-v0.4.2.md) · [조회·복원 측정](docs/benchmarks/technical-20261023.md)
-
-**대시보드 데이터 출처:** [BR-PVGen / Zenodo](https://zenodo.org/records/21511487) · 브라질 51개 발전소의 공개 역사 자료 · CC BY 4.0. 합성 데모는 별도로 표시하며 화면의 발전량은 추정치입니다.
-
-**실제로 작동하는가?** 2026-10-23 실행 서비스·DB·객체를 직접 점검했습니다. 원본 4개는 Zenodo 게시 체크섬과 일치하고, 대표 하루의 독립 계산값이 DB·API·보고서·Kubernetes 결과와 일치합니다. Airflow/KPO 실행 이력도 확인했으며, 합성 장애 시험과 공개 데이터 처리를 구분합니다. [기술스택·데이터 실사와 한계](docs/benchmarks/stack-authenticity-20261023.md).
-
-[빠른 실행](#빠른-실행) · [데이터 출처](#어떤-데이터를-사용하는가) · [수집과 데이터 추가](#수집-주기와-데이터-추가) · [아키텍처](docs/architecture/system.md) · [기술 선택](#구조와-기술-선택) · [사용 스킬](#개발에-사용한-ai-스킬) · [검증 근거](#검증한-범위) · [전체 문서](docs/README.md)
-
-![전체 현황: 공개 BR-PVGen 2024년 4월, 추정 발전량과 데이터 품질](docs/portfolio/images/workspace-20261023/overview.png)
-
-*실제 화면을 820 CSS px·DPR 2로 렌더링해 크롭했습니다. 이미지를 축소 편집하거나 글자를 샤프닝하지 않았습니다. [원본 크게 보기](docs/portfolio/images/workspace-20261023/overview.png?raw=1) · [사이드바를 포함한 1440px 화면](docs/portfolio/images/workspace-20261023/overview-1440.png?raw=1) · [반응형 비교](docs/benchmarks/workspace-20261023.md).*
-
-## 어떤 문제를 해결하는가
-
-“관측률 100%”인 데이터에도 NULL·무효 전력·원본 보간이 섞일 수 있습니다. 결과가 그럴듯하게 보여도 어떤 값을 제외했는지, 어느 원본에서 계산했는지, 실패한 작업이 기존 보고서에 영향을 줬는지를 설명할 수 있어야 합니다.
-
-| 운영 중 확인할 질문 | SolarOps의 처리 |
-|---|---|
-| 자료가 모두 정상인가? | 관측 슬롯·유효값·무효값·누락을 구분하고 원본 보간 여부를 별도로 표시 |
-| 이 숫자는 어디에서 왔는가? | 원본 SHA-256, 입력 버전, 계산 버전, 일별 파티션과 보고서 계보 연결 |
-| 같은 입력을 다시 처리해도 같은가? | 실행 시각·실행 ID를 제외한 논리 해시로 결과 비교, 같은 버전의 다른 입력은 거부 |
-| 처리 도중 실패하면? | 검증된 일별 결과만 활성화. 실패한 날짜의 이전 결과 유지, 원인과 하위 파티션 조회 |
-| 로컬과 서비스 환경이 다른가? | 공통 CLI와 저장소 인터페이스, SQLite/파일 및 PostgreSQL/MinIO 결과 비교 |
-
-**실제 예:** 공개 자료 PS_001의 2024년 4월 관측 슬롯 완전성은 100%지만 유효값 비율은 74.9%입니다. 무효 슬롯 28,146개를 분리하고, 추정 발전량 585.98 MWh와 원본 보간 표시 17%를 함께 보여줍니다. 보간은 유효·무효 분류와 겹칠 수 있는 속성입니다.
-
-## 어떤 데이터를 사용하는가
-
-**실측 기반 공개 원천은 [BR-PVGen — 브라질 태양광 발전 데이터셋](https://zenodo.org/records/21511487)입니다.** SolarOps가 직접 수집한 고객 자료가 아닙니다. 원본 제작자가 15분 집계와 일부 보간을 수행한 역사 자료입니다.
-
-| 구분 | 출처와 범위 | 프로젝트에서의 용도 |
-|---|---|---|
-| 공개 자료 (`public`) | 브라질 51개 발전소, 2024-03-26~2025-06-09, 15분 간격. 발전소별 수록 기간은 다름 | 실제 CSV 계약 검증, 전체 처리, 품질 분석과 공개 자료 시연 |
-| ONS 시간별 발전 | [ONS 공식 자료](https://dados.ons.org.br/dataset/geracao-usina-2) · 갱신 월별 CSV · MWmed · 예측 포함 · CC BY(버전 미명시) | 별도 증분 수집·출처 추적 CLI/API와 수집 상태 탭. 기존 발전량에 합산하지 않음 |
-| 합성 데모 (`synthetic`) | [프로젝트 생성기](src/solarops/fixtures.py)의 DEMO_01, 기본 1주 | Docker 없는 시연, 누락·무효·실패 주입·재처리 검사 |
-| 화면의 “전체” | 공개와 합성 자료를 함께 조회 | 편의 필터. 실제 발전소 수나 공개 데이터 실적으로 합산해 해석하지 않음 |
-
-- **제작자:** Caian Dutra de Jesus, Rhuan Nascimento Ferreira, Eduardo Pestana de Aguiar — 브라질 UFJF.
-- **배포:** Zenodo V.1 · DOI [10.5281/zenodo.21511487](https://doi.org/10.5281/zenodo.21511487) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
-- **원본 구성:** [발전소 메타데이터](https://zenodo.org/records/21511487/files/BR-PVGen_metadata.csv?download=1) / [인버터 ZIP 약 294 MB](https://zenodo.org/records/21511487/files/BR-PVGen_inverter.zip?download=1) / [기상 ZIP 약 57 MB](https://zenodo.org/records/21511487/files/BR-PVGen_meteorological.zip?download=1) / [원문 설명](https://zenodo.org/records/21511487/files/Readme.txt?download=1).
-
-전체 인버터 14,400,480행과 발전소 51개는 **전체 기간** 기준입니다. 위 2024년 4월 화면은 해당 월에 자료가 있는 **5개**만 표시합니다. 원본의 NULL·보간 표시·집계 표본 수를 보존하며, 유효한 전력에 `W ÷ 1000 × 0.25 h`를 적용한 값을 **추정 에너지**로 표시합니다. 계량기 실측 전력량·매출·확정 손실을 뜻하지 않습니다.
-
-[출처·파일별 역할·인용·다운로드](docs/data-sources.md) · [실제 스키마·품질·계산 계약](docs/data-contract.md)
-
-## 수집 주기와 데이터 추가
-
-**두 수집 경로를 구분합니다.** BR-PVGen V.1은 고정된 역사 자료를 명시적으로 다운로드·재처리합니다. v0.5.0의 ONS 수집기는 실제 갱신되는 월별 공개 CSV를 조건부 GET하고, 수정·추가된 날짜만 새로 게시합니다. 화면 새로고침은 저장된 결과 조회입니다.
-
-| 작업 | 주기와 범위 | 처리 방식 |
-|---|---|---|
-| BR-PVGen 다운로드 | 명시적 CLI | 고정 Zenodo 배포, 최신 버전 자동 탐색 없음 |
-| BR-PVGen 적재·월간 보고 | 기존 과거 구간/월을 재처리 | 기존4개 DAG는 paused 유지 |
-| ONS 증분 수집 | 매일05:00UTC /14:00KST, 이전·현재 월 | 같은 응답 재처리0, 정정/지연 날짜만 게시, 실패 시 성공 cursor 유지 |
-| 공개 DAG 성능시험 | 수동, 동일 PS_001 공개4일 | 격리 DB·버킷에서 동시1/2 비교, 종료 후 paused |
-
-현재 kind에서는 ONS DAG만 활성화했고 나머지6개는 paused입니다. Compose Airflow는 중지 상태입니다.
-
-ONS의 MWmed·원문 시각·verified/forecast/unspecified를 보존합니다. 공식 사전에 시간대가 없어 UTC로 가정하거나 기존 발전량에 합산하지 않습니다. 새 자료는 [별도 CLI/API](docs/ons-source-contract.md)와 [데이터 출처 → ONS 수집 상태](http://127.0.0.1:8502/?view=sources&source_tab=ons&ons_period=2026-10)로 조회합니다. `public` 필터는 BR-PVGen입니다. ONS 탭은 연결된 저장소의 기록만 표시하고 스케줄러 가동 여부는 조회하지 않습니다. [실행 상태·증거](docs/worklog/2026-10-23-incremental.md).
-
-
-**데이터 확장은 가능합니다.** 현재 자료의 다른 발전소·월은 기존 처리기로 분석할 수 있으며, 이 PC의 Compose에는 V.1 전체 51개 발전소가 이미 처리되어 있습니다. 2024년 4월 화면의 5개는 월 필터에 따른 수입니다. ONS는 별도 adapter·출처·성공 cursor로 추가했습니다. 또 다른 공개 API/CSV나 새 BR-PVGen 버전은 각 출처의 계약 확인이 필요합니다. 현재 `public`은 BR-PVGen DOI·라이선스로 기록되므로 다른 자료를 같은 옵션으로 넣으면 안 됩니다.
-
-[다운로드→처리→보고서 명령, 환경별 저장 위치, 새 출처·정기 수집 확장 순서](docs/guides/data-ingestion.md)를 정리했습니다. 고객 업로드와 실시간 SCADA 연동은 현재 구현 범위에 포함되지 않습니다.
-
-![ONS 수집 상태: 실제 Compose 저장소, 마지막 성공과 변경 날짜](docs/portfolio/images/portfolio-finish-20261023/ons-readme.png)
-
-*실제 ONS 자료의 저장 기록입니다.820 CSS px·DPR2로 촬영해 축소 편집하지 않았습니다. [원본 확대](docs/portfolio/images/portfolio-finish-20261023/ons-readme.png?raw=1) · [전후/1440/768/390px](docs/portfolio/images/portfolio-finish-20261023/README.md).*
-
-## 화면에서 확인할 수 있는 것
-
-| 화면 | 할 수 있는 일 |
-|---|---|
-| 전체 현황 | 추정 에너지·품질, 부분 기간/무효/누락 필터, 날짜 탐색과 수치표 |
-| 발전소 | 월별 비교와 개별 15분 전력·일사량 관측. 빈값·판단 불가·검토 후보 구분 |
-| 데이터 품질 | 유효·무효·누락 분류와 별도 원본 보간, 발전소별 비교 |
-| 월간 보고서 | 요약·품질·계보·발행 근거와 현재 자료의 비교, CSV/JSON·인쇄 HTML. 비교 범위를 알 수 없는 이전 보고서는 비교 불가로 표시 |
-| 실행 이력 | 발전소·상태별 조회, 주소로 조사 위치 복원, 작업↔일별 파티션·실패 원인·입력 버전 추적 |
-| 데이터 출처 | BR-PVGen 원문·라이선스·공개/합성 구분, ONS 탭의 저장소·최근 시도/성공·변경 날짜·원문 단위 |
-| 시스템 관리 | 사이드바에서 독립 관리 서버로 바로 이동. 서비스 제어 / 컨테이너 상태 / 운영 안내 탭 |
-
-![월간 보고서: 통합 본문, 추정 에너지와 품질 지표](docs/portfolio/images/workspace-20261023/report.png)
-
-*PS_001 공개 2024년 4월 보고서. 관측 슬롯 100%와 유효값 74.9%는 다른 지표입니다. 일별 내역은 필요할 때 펼쳐 보고 페이지 전체를 한 번에 스크롤합니다. 기존 보고서 UUID는 보존합니다. [보고서 원본 확대](docs/portfolio/images/workspace-20261023/report.png?raw=1).*
-
-[390px 스크롤 중 열린 목록](docs/portfolio/images/select-anchor-20261023/reports-scrolled-390.png) · [월 선택창](docs/portfolio/images/workspace-20261023/month-picker-mobile.png) · [시스템 관리 탭](docs/portfolio/images/interactions-20261023/admin-services-1440.png) · [관측 차트의 빈 구간](docs/portfolio/images/interactions-20261023/series-768.png) · [5분 시연 순서](docs/portfolio/DEMO_GUIDE.md)
-
-[일별 차트 확대](docs/portfolio/images/workspace-20261023/chart.png?raw=1) · [품질 분류 확대](docs/portfolio/images/workspace-20261023/quality.png?raw=1) · [합성 실패 근거](docs/portfolio/images/readme-hidpi-20261023/run-evidence.png). GitHub가 본문 너비에 맞춰 표시하므로 작은 수치는 원본 링크에서 확대할 수 있습니다.
+*PS_001의 2024년 4월은 관측 슬롯 100%, 유효값 74.9%입니다. 원본 보간 17%는 별도 속성입니다. 화면의 에너지는 계량기 실측 전력량이 아닌 추정값입니다. [원본 확대](docs/portfolio/images/workspace-20261023/overview.png?raw=1) · [1440px 전체 화면](docs/portfolio/images/workspace-20261023/overview-1440.png?raw=1). 이미지는 DPR 2로 촬영했으며 축소 편집하지 않았습니다.*
 
 ## 빠른 실행
 
-Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/), Git이 필요합니다. 저장소는 비공개이므로 접근 권한이 있는 계정으로 실행합니다.
+Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/), Git을 준비합니다. 비공개 저장소 접근 권한이 필요합니다.
 
 ```text
 git clone https://github.com/TaeyanG4/solarops-audit.git
@@ -115,130 +21,114 @@ uv sync --frozen
 uv run python scripts/demo/portfolio_demo.py --serve
 ```
 
-[합성 데모 열기 — localhost:8503](http://127.0.0.1:8503/?view=overview&period=2024-04&source=synthetic). Docker와 공개 데이터 다운로드 없이 **정상 처리 → 커밋 실패 → 이전 결과 보존 → 재처리 해시 일치 → 보고서**를 확인합니다. 실행할 때마다 새 결과 폴더와 `evidence.json`을 만들며, 서버는 해당 터미널에서 **Ctrl+C**로 종료합니다.
+출력되는 `http://127.0.0.1:8503/`을 **명령을 실행한 PC**에서 엽니다. Docker·공개 원본 다운로드 없이 합성 7일 자료의 다음 흐름을 재현합니다. 최초 의존성 설치에는 네트워크가 필요할 수 있습니다.
 
-이미 구성된 이 작업 PC의 공개 자료 화면은 [localhost:8502](http://127.0.0.1:8502/?view=overview&period=2024-04&source=public)입니다. 외부 공개 사이트가 아니며, 다른 PC에서는 아래 설치 절차로 자료·저장소를 준비해야 합니다.
+1. 정상 처리와 7개 일별 결과 게시.
+2. 커밋 도중 실패 주입, 이전 결과 보존 확인.
+3. 재처리 후 논리 해시 일치 확인.
+4. 월간 보고서와 `evidence.json` 생성.
 
-| 실행 방식 | 필요한 것 | 시작·종료 |
+서버는 같은 터미널에서 **Ctrl+C**로 종료합니다. 각 실행은 새 폴더를 만들고 기존 자료를 보존합니다. 서버 없이 검증하려면 `--serve`를 생략합니다. [시연·결과 확인](docs/portfolio/DEMO_GUIDE.md) · [전체 설치 안내](docs/guides/setup.md).
+
+실제 PostgreSQL·MinIO·Airflow/Kubernetes 시연은 선택 경로입니다. [설치](docs/guides/setup.md), [수집·처리 명령](docs/guides/data-ingestion.md), [서비스 시작·종료](docs/runbooks/operator.md), [DAG 운영](docs/runbooks/dags.md)에 절차를 분리했습니다. 이 작업 PC의 현재 포트와 프로세스는 [handoff](handoff.md)에 기록합니다. 외부 공개 데모 사이트는 운영하지 않습니다.
+
+## 데이터와 숫자의 의미
+
+| 자료 | 출처·실제 범위 | 사용 방식 |
 |---|---|---|
-| 독립 합성 데모 8503 | Python·uv | 위 명령 / Ctrl+C |
-| 기본 네이티브 8501 | Python·uv, `solarops demo`로 생성한 자료 | [설치 안내](docs/guides/setup.md#빠른-실행) / Ctrl+C |
-| Compose 대시보드 8502 | Docker, 준비된 PostgreSQL·MinIO·catalog | 아래 3개 서비스 / `stop` |
-| 로컬 관리 서버 8504 | Python·uv·Docker CLI, 이미 생성된 SolarOps 컨테이너 | 아래 PowerShell 실행기 또는 `solarops admin` |
-| Airflow / Kubernetes | 배치 스케줄·작업 Pod 시연 시 선택 | [DAG 운영](docs/runbooks/dags.md), 대시보드 조회에는 불필요 |
+| BR-PVGen V.1 | [Zenodo 원문·파일](https://zenodo.org/records/21511487), DOI [10.5281/zenodo.21511487](https://doi.org/10.5281/zenodo.21511487), CC BY 4.0. 브라질 51개 발전소의 2024-03-26~2025-06-09 자료; 발전소별 기간은 다름 | 고정 배포 CSV를 명시적으로 다운로드·재처리. 원본이 15분 집계·일부 보간된 자료 |
+| ONS 발전 자료 | [브라질 전력계통 운영기관 ONS](https://dados.ons.org.br/dataset/geracao-usina-2), 월별 갱신 CSV, CC BY(버전 미명시) | 이전·현재 월을 조건부 HTTP GET. 변경 날짜와 성공 cursor를 원자 게시 |
+| 합성 DEMO_01 | [저장소의 생성기](src/solarops/fixtures.py) | 작은 오프라인 데모·실패 주입·회귀 검사. 실제 발전 실적으로 해석하지 않음 |
 
-구성이 끝난 환경에서 대시보드와 저장소 켜기/끄기:
+BR-PVGen 제작자는 Caian Dutra de Jesus, Rhuan Nascimento Ferreira, Eduardo Pestana de Aguiar(UFJF)입니다. [출처·인용·파일별 다운로드](docs/data-sources.md)에서 메타데이터, 인버터, 기상 파일을 구별할 수 있습니다.
 
-```text
-docker compose --env-file .env -f infra/compose/compose.yaml up -d app-db minio dashboard
-docker compose --env-file .env -f infra/compose/compose.yaml stop dashboard app-db minio
-```
+- **추정 kWh:** 유효한 15분 전력에 `W ÷ 1000 × 0.25 h`를 적용합니다. 원본 보간·표본 수·추가 필드를 보존합니다. 추정 에너지는 계량기 실측 전력량·매출·확정 손실이 아닙니다.
+- **품질 분모:** 인버터별 원본 관측 범위와 요청 날짜의 교집합입니다. 관측·유효·누락·무효·보간을 각각 표시하며, 확인되지 않은 설비 가동기간을 추정해 채우지 않습니다.
+- **ONS:** 단위 MWmed와 원문 시각, 검증/예측/미확정 유형을 보존합니다. 공식 사전의 시간대·구간 기준이 불명확해 `ts_utc=null`로 두고 기존 kWh에 합산하지 않습니다.
+- **기간과 환경:** 전체 자료는 51개 발전소지만 2024년 4월 화면에는 해당 월 자료가 있는 5개가 나옵니다. Compose·kind·네이티브 저장소는 독립이며 자동 동기화하지 않습니다.
 
-`stop`은 데이터 볼륨을 삭제하지 않습니다. 별도로 실행한 네이티브 서버나 Airflow/kind는 각각 관리합니다. [최초 설치·환경 변수·공개 자료 처리](docs/guides/setup.md) · [화면 운영](docs/runbooks/operator.md)
+[계산·품질 계약](docs/data-contract.md) · [ONS 계약과 API](docs/ons-source-contract.md) · [주기·새 데이터 추가](docs/guides/data-ingestion.md). ONS 일정은 매일 05:00 UTC / 14:00 KST로 구성했습니다. 실제 활성 상태는 운영 기록을 확인하며, 화면 새로고침은 저장된 결과 조회입니다.
 
-Windows에서 [시스템 관리 화면](http://127.0.0.1:8504/) 켜기·상태 확인·끄기:
-
-```powershell
-.\scripts\ops\admin.ps1 start
-.\scripts\ops\admin.ps1 status
-.\scripts\ops\admin.ps1 stop
-```
-
-관리 화면의 **SolarOps 작업 환경 → 시작**은 기본 3개 서비스(DB·MinIO·대시보드)를 켭니다. **중지**는 SolarOps Compose 서비스와 kind를 모두 멈춥니다. 관리 서버(8504)는 다시 켜는 데 필요해 계속 실행되므로, 완전히 종료할 때 마지막 명령도 실행하세요. Docker Desktop 자체와 다른 프로젝트는 제어하지 않습니다. Kubernetes/Airflow는 필요할 때 개별 시작합니다. [정확한 제어 범위와 운영 순서](docs/runbooks/operator.md#시스템-관리-8504).
-
-Docker는 켜져 있지만 8502가 열리지 않으면 컨테이너가 중지됐는지 확인하세요. 기존 컨테이너는 다음 명령으로 다시 켭니다. [접속 오류 확인 순서](docs/runbooks/operator.md#8502가-열리지-않을-때).
-
-```text
-docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio dashboard
-```
-
-## 구조와 기술 선택
+## 설계와 기술 선택
 
 ```mermaid
 flowchart LR
-    ONS[ONS 월별 갱신 원천] --> INC[별도 증분 수집 · 원문 시각/MWmed]
-    INC --> CUR[변경 날짜 JSON + 성공 cursor]
-    CUR --> G
-    H -.->|매일 원천 확인| INC
-    Z[Zenodo 고정 배포] -->|명시적 다운로드| A[보존 CSV / 합성 fixture]
-    A --> B[공통 Python CLI]
-    H[Airflow · 선택적 KPO] -.->|과거 구간 재처리| B
-    B --> C[계약 검증 · UTC 정규화 · 일별 분석]
-    C --> D[Parquet / 원본 · MinIO 또는 파일]
-    C --> E[활성 결과 카탈로그 · PostgreSQL 또는 SQLite]
-    D --> F[월간 HTML · CSV · 계보 JSON]
-    E --> F
-    E --> G[FastAPI · HTML/CSS/JS 대시보드]
-    D --> G
+    BR[BR-PVGen 고정 CSV] --> CLI[공통 Python CLI]
+    CLI --> V[계약 검증 · 정규화 · 일별 분석]
+    V --> OBJ[불변 원본 · Parquet · 파일 또는 MinIO]
+    V --> CAT[활성 카탈로그 · SQLite 또는 PostgreSQL]
+    ONS[ONS 월별 CSV] --> INC[원문 보존 · 변경 날짜 검증]
+    INC --> OBJ
+    INC -->|월별 cursor와 manifest 원자 전환| CAT
+    AF[Airflow · 선택적 KPO] -.-> CLI
+    AF -.-> INC
+    OBJ --> REP[월간 HTML · CSV · 계보 JSON]
+    CAT --> REP
+    CAT --> API[FastAPI · 읽기 대시보드]
+    OBJ --> API
 ```
 
-| 기술 | 역할과 선택 이유 |
+| 기술 | 선택 이유와 역할 |
 |---|---|
-| Python 3.12 · uv | CLI·처리·검사를 통합하고 잠긴 의존성으로 재현 |
-| DuckDB · PyArrow/Parquet | CSV 외부 정렬과 일별 처리를 통해 메모리 경계를 제한, 명시 스키마·압축 저장 |
-| SQLAlchemy · SQLite/PostgreSQL | 서버 없는 데모와 서비스 환경을 지원, 일별 활성 결과를 트랜잭션으로 전환 |
-| MinIO · S3 API | 원본과 산출물을 작업 간 공유하고 파일 checksum·계보 보존 |
-| FastAPI · HTML/CSS/JS | 읽기 중심 UI와 API를 한 패키지로 전달, 별도 프런트엔드 빌드 체인 없이 실행 |
-| 별도 로컬 FastAPI 관리 서버 | 분석 앱을 꺼도 다시 시작할 수 있도록 호스트에서 실행. Docker 소켓을 대시보드 컨테이너에 넘기지 않고 고정된 기존 자원만 제어 |
-| Airflow · Docker · Kubernetes KPO | 재시도·백필·이력과 작업 자원 격리. 핵심 로직은 같은 CLI 사용 |
-| pytest · Ruff · GitHub Actions | 계약·실패·동시성 회귀, Windows/Ubuntu 검사와 패키징 |
+| Python 3.12 · uv | 처리·CLI·검사를 통합하고 앱 의존성을 잠금 |
+| DuckDB · Arrow/Parquet | 외부 정렬과 제한된 배치, 명시 스키마·열 형식 저장. 전체 CSV를 한 번에 Python 메모리에 적재하지 않음 |
+| PostgreSQL · SQLAlchemy | 활성 결과·계보의 트랜잭션과 동시 게시 제어. SQLite는 서버 없는 재현 경로 |
+| MinIO · S3 API | 원본·산출물의 바이트 저장. 파일 저장소와 같은 인터페이스, 실제 서비스 검사 별도 제공 |
+| Airflow · Docker · KubernetesPodOperator | 일정·재시도·백필·실행 이력과 작업별 자원 격리. 핵심 계산은 공통 CLI에 유지 |
+| FastAPI · HTML/CSS/JS · Jinja2 | 읽기 API·대시보드·독립 HTML 보고서를 같은 패키지로 전달 |
+| pytest · Ruff · GitHub Actions | 계약·실패·동시성·조직 격리 검사, Windows/Ubuntu 재현·패키징 |
 
-다운로드·처리·보고서 발행은 별도 명령입니다. Compose와 kind는 각각 독립 DB/MinIO를 사용하고, 네이티브 기본 SQLite 결과도 8502에 자동 반영되지 않습니다. Airflow 메타 DB는 분석 결과 DB와 별개이며 8504 관리 서버는 호스트에서 따로 실행됩니다.
+객체 업로드와 DB는 분산 트랜잭션으로 묶지 않습니다. 객체를 먼저 저장하고 검증한 뒤 활성 포인터를 바꿉니다. 실패한 객체는 게시되지 않은 증거로 남습니다. BR-PVGen은 일별 원자성, ONS는 월별 성공 cursor와 변경 날짜의 원자성을 보장합니다.
 
-[아키텍처: 데이터 흐름·배포 경계·일별 커밋·보고서 비교](docs/architecture/system.md) · [정확한 버전·대안·비용·재검토 조건](docs/architecture/technology-stack.md)
+Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. KubernetesExecutor와 구분합니다. 배치 요구와 현재 처리 규모에서 Kafka/Spark 도입 비용을 정당화하지 못해 사용하지 않았습니다. 로컬 관리 서버는 분석 앱과 분리하고 대시보드 컨테이너에 Docker 소켓을 주지 않습니다.
 
-## 검증한 범위
+[환경별 아키텍처·게시 경계](docs/architecture/system.md) · [버전·대안·비용·재검토 조건](docs/architecture/technology-stack.md) · [설계 결정 ADR](docs/README.md#설계-결정-기록).
 
-| 항목 | 확인한 결과 | 근거 |
+## 실행 근거와 한계
+
+최신 구현은 **v0.5.2 · energy-interval-v2**입니다. 시각 계약·보고서 unknown·ONS 오류 코드를 보완했고 [변경과 검증](docs/benchmarks/quality-v0.5.2.md)에 정상 입력 동등성과 성능 비용을 함께 기록했습니다. 실제 배포·독립 재평가 상태는 [handoff](handoff.md)를 확인하세요.
+
+| 확인한 항목 | 결과 | 범위와 근거 |
 |---|---|---|
-| v0.5.1 제출 마감 | 로컬136통과·14제외, CI양OS각137통과·13제외. ONS세너비·axe0, 격리7일 복구/조회/종료 | [최종 검증](docs/benchmarks/portfolio-finish-20261023.md) · [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39915517455) |
-| v0.5.0 수집·공개 병렬 실행 | Ubuntu/Windows 각각137통과·13제외, 실제 서비스13검사·7DAG양모드, 실제 ONS정기KPO | [구현 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39910321487) · [실행 증거](docs/benchmarks/incremental-v0.5.0.md) |
-| 이전 기술 후속 | 기능 `4d8b28c`의 실제 PostgreSQL/MinIO CI 5통과·로컬 관련 21통과, 보고서 근거 비교 3너비 확인 | [선택형 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39897515593) · [수행 기록](docs/worklog/2026-10-23-technical-delivery.md) |
-| 동시 조회·독립 인스턴스 복원 | 합성10만 건·동시4 깊은 페이지 p95 6409→679ms, 전후1080요청 오류0. 같은 호스트 별도 PostgreSQL/MinIO로 27객체·7파티션 복원 | [자원·측정 조건·한계](docs/benchmarks/technical-20261023.md) |
-| 기술스택·자료 실사 | 원본 4개·CSV 102개·공개 계보 103개 해시 대조, 대표 계산 경로 일치, 실제 Airflow/KPO 이력 확인 | [2026-10-23 실사](docs/benchmarks/stack-authenticity-20261023.md) |
-| 전체 공개 자료 | 51개 발전소·인버터 14,400,480행·일별 파티션 12,572개, v1/v2 일별 지표·원본 SHA 일치 | [v0.4 검증](docs/benchmarks/reliability-v0.4.0.md) |
-| 실패·동시성·복구 | 입력 변경·동시 버전·보고서 역순 완료·파일 누락/변조·격리 복원 | [v0.4.1 검증](docs/benchmarks/integrity-v0.4.1.md) |
-| 화면·보고서·관리 개편 | 1440/768/390px, overview 107명령·workspace 195명령, axe 3+23회 위반 0, API 동일 | [개편 당시 검증](docs/benchmarks/workspace-20261023.md) |
-| 실행 이력 탐색 | 기존 관련 테스트 5개 통과, 3너비·주소 복원·상하위 이동 확인, 모바일 axe 위반 0건; 영구 테스트 추가 없음 | [변경·검증·한계](docs/worklog/2026-10-23-run-navigation.md) |
-| 기간·보고서·진단 | 관련15개 검사, 3너비·모바일 axe3회 위반0, 기존 게시/보고서 보존·실제 PostgreSQL 인덱스 측정 | [검증·성능 조건](docs/worklog/2026-10-23-usability.md) |
-| 선택창·관리 탭·관측 차트 | 후속 303명령·axe 18회 위반 0, Python 31통과, 원본 빈값 대조·API 동일 | [상호작용 회귀](docs/benchmarks/interactions-20261023.md) |
-| 열린 목록 스크롤 유지 | 닫힘 동작을 교체, 269명령·3너비·열린 목록 axe6회 위반0, API 동일 | [목록 회귀](docs/benchmarks/select-anchor-20261023.md) |
-| 서비스 제어 | 실제 전체 중지→기본 3서비스 시작→kind 시작, 독립 관리 서버 유지·다른 프로젝트 보존 | [관리 검증과 한계](docs/benchmarks/workspace-20261023.md) |
-| 이전 전체 회귀·전달 | 기능 커밋 `d225e19`의 Windows/Ubuntu 각각 **127통과·5제외**, 합성 복원·wheel·소스 패키징 성공 | [당시 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39892650065) |
-| 월별 조회 | HTTP 53회 → 1회. 같은 로컬 조건 5회 중앙값 703.239ms → 12.576ms | [측정 조건](docs/benchmarks/workspace-v0.3.0.md) |
+| 공개 역사 자료 처리 | 51개 발전소, 인버터 14,400,480행, 일별 파티션 12,572개 | 과거 전체 처리 근거이며 매 커밋마다 전체를 재실행한 수치가 아님. [스택·자료 실사](docs/benchmarks/stack-authenticity-20261023.md) |
+| 실제 ONS 정기 수집 | kind 9~10월 태양광 167,424행·51일, 실제 scheduled KPO 성공. Compose 재확인 변경 0일 | 두 환경 저장소는 독립. [명령·원본 SHA·수집 결과](docs/benchmarks/incremental-v0.5.0.md) |
+| 공개 일별 KPO 병렬 비교 | 동일 4일, 직렬 36.675초 → 동시 2개 19.339초. 결과 hash 4개 동일, CPU 합 24.3% 증가 | 단일 kind 호스트, 직렬 후 병렬 각 1회, 기동·캐시 영향 포함. 하나의 4일 CLI 배치와 비교하지 않음. [조건·기계 판독 결과](docs/benchmarks/incremental-v0.5.0.json) |
+| 실패·재현·최종 화면 | v0.5.1 기준 양 OS 각각 137통과·13제외, 격리 합성 7일 복구·보고서·종료, 1440/768/390px 확인 | 해당 버전의 과거 근거. [검증 기록](docs/benchmarks/portfolio-finish-20261023.md) · [CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39915517455) |
 
-검증은 해당 코드·조건의 결과입니다. 최신 기능에 대해 이전 양OS 전체 회귀를 다시 실행했다고 주장하지 않습니다. 동시8 조회의 p95는 약2초이며 동시 쓰기·장시간 부하는 미검증입니다. 조회 측정은 응답 범위와 요청 방식이 달라 일반적인 성능 배수로 해석하지 않습니다. 자동 접근성 위반 0건은 WCAG 인증이 아니며 실제 모바일 기기·스크린리더·다른 브라우저는 미검증입니다. 과거 전체 처리를 매번 재실행한 것으로 표현하지 않습니다.
+[최신 검사 CI](https://github.com/TaeyanG4/solarops-audit/actions/workflows/ci.yaml), [현재 계획](plan.md), [독립 평가 기준](docs/reviews/portfolio-rubric.md)을 함께 확인하세요. 기존 [Fable·Astra 모의 면접 평가](docs/reviews/2026-10-23-interview.md)의 후속 검토는 면접·개인 역량을 제외한 산출물 기준으로 진행합니다. 평가 점수는 품질 보증이 아니며 확인된 결함과 미실행 검사를 따로 기록합니다.
 
-## 개발에 사용한 AI 스킬
+실제 PostgreSQL/MinIO, 복구·동시 조회, 모바일 접근성, 버전별 무결성 등 상세 증거는 [문서 목차](docs/README.md)에 모았습니다. 단일 호스트 kind는 고가용성 근거가 아니며 일회 비교는 일반적인 처리량·확장성을 입증하지 않습니다. 자동 접근성 검사 통과도 실제 보조공학 검사나 인증을 대체하지 않습니다.
 
-| 스킬 | 실제 사용 목적 | 결과물 |
-|---|---|---|
-| [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | 정보 위계·색·글자·차트·반응형 설계 가이드 검색 | [새 디자인 시스템](DESIGN.md) |
-| [Impeccable](https://github.com/pbakaus/impeccable) | 가독성·상태·접근성·정적 검출, 별도 최종 검수와 시스템 문서화 | [검수·수정 근거](docs/benchmarks/workspace-20261023.md) |
-| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 화면·선택창·키보드·오류 경로·세 너비·관리 수명주기 검증 | [워크스페이스 이미지](docs/portfolio/images/workspace-20261023/README.md) · [보고서 근거 비교](docs/portfolio/images/technical-20261023/README.md) |
-| [Web Design Guidelines](https://github.com/vercel-labs/agent-skills) | 실제 링크·폼·URL 상태·포커스·반응형 검사 | [설치와 적용 기록](docs/development/skills.md) |
-| [skill-installer](https://github.com/openai/skills/tree/main/skills/.system/skill-installer) | 요청한 스킬을 공식 저장소에서 설치 | 로컬 개발 도구 준비 |
+## 화면과 개발 도구
 
-스킬은 개발·검수를 돕는 도구이며 앱 실행 의존성이 아닙니다. 자동 추천을 그대로 채택하지 않은 이유와 도구 버전·적용 범위는 [스킬 사용 기록](docs/development/skills.md)에 정리했습니다. 앞으로 작업 기록에 research-orchestrator 스킬은 사용하지 않습니다.
+전체 현황·발전소·데이터 품질·월간 보고서·실행 이력·데이터 출처를 기능별 사이드바로 묶었습니다. 보고서는 생성 당시 자료의 스냅샷이며 현재 게시 결과와 비교할 수 있습니다. 이전 보고서를 새 값으로 덮어쓰지 않습니다.
 
-## 저장소와 작업 기록
+![월간 보고서 — 요약·품질·발행 근거를 같은 본문에서 확인](docs/portfolio/images/workspace-20261023/report.png)
+
+[보고서 확대](docs/portfolio/images/workspace-20261023/report.png?raw=1) · [ONS 수집 상태 화면](docs/portfolio/images/portfolio-finish-20261023/ons-readme.png?raw=1) · [1440/768/390px 검증](docs/benchmarks/workspace-20261023.md) · [화면 사용법](docs/runbooks/operator.md).
+
+| 사용한 스킬 | 실제 목적 |
+|---|---|
+| [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | 정보 위계·색·타이포그래피·차트·반응형 디자인 시스템 |
+| [Impeccable](https://github.com/pbakaus/impeccable) | 가독성·상태 표현·접근성 검수와 수정 |
+| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 화면·키보드·선택창·오류 경로·세 너비 검증 |
+| [Web Design Guidelines](https://github.com/vercel-labs/agent-skills) | 링크·폼·주소 상태·포커스·웹 사용성 검사 |
+
+AI 도구의 사용 범위·버전·채택하지 않은 제안은 [스킬 기록](docs/development/skills.md)에 공개했습니다. 스킬은 개발 도구이며 제품 실행 의존성이 아닙니다.
+
+## 범위와 기록
+
+검증 대상은 로컬 엔지니어링 포트폴리오입니다. 고객 계약·매출·현장 고장 정답·고객 인증·외부 SLO·다른 물리 호스트의 재해복구는 미검증입니다. 저출력은 검토 후보이며 확정 고장이나 손실이 아닙니다. [현재 구현 상태](docs/IMPLEMENTATION_STATUS.md).
 
 ```text
-src/solarops/       CLI · 수집 · 검증 · 분석 · 저장 · 보고서 · API
-tests/             계산/계약 · 재처리 · 실패 보존 · API · 패키징 회귀
-dags/ / infra/     Airflow DAG · Docker/Compose · kind/Helm
-scripts/           운영 · 검증 · 데모 · 데이터 · 배포 도구
-docs/              출처 · 설계 · 운영 · 검증 · 포트폴리오
-docs/worklog/      수행 일자별 상세 기록과 과거 기록 보관
-plan.md            미완료 작업과 점수·의존성
-handoff.md         현재 상태 · 최근 작업 요약 · 다음 재개 지점
-data/, artifacts/  로컬 데이터와 실행 증거 — Git 제외
+src/solarops/       CLI · 수집 · 분석 · 저장 · 보고서 · API
+tests/             데이터 계약 · 재처리 · 게시 · 보안 · 패키징
+dags/ / infra/     Airflow · Docker/Compose · kind/Helm
+scripts/           데모 · 운영 · 검증 · 데이터 · 릴리스
+docs/              출처 · 설계 · 운영 · 증거 · 날짜별 작업 기록
+plan.md            미완료 항목의 점수·의존성
+handoff.md         현재 상태와 다음 행동, 100줄 이하
+data/, artifacts/  로컬 데이터·검사 산출물, Git 제외
 ```
 
-[handoff](handoff.md)는 100줄 이내로 유지하고 상세 내용은 [날짜별 작업 기록](docs/worklog/README.md)에 연결합니다. 계획은 [plan.md](plan.md), 버전 변경은 [CHANGELOG](CHANGELOG.md)에 기록합니다.
-
-## 현재 한계
-
-엔지니어링 MVP와 로컬 시연은 검증했습니다. 실제 고객 계약·매출·현장 고장 라벨 평가, 고객 인증·다중 사용자 권한, 다른 호스트의 재해복구·SLO는 아직 검증하지 않았습니다. 저출력은 검토 후보이며 고장이나 금전적 손실로 확정하지 않습니다. [현재 구현 상태](docs/IMPLEMENTATION_STATUS.md) · [수익화 판단](docs/market/revenue-assessment.md)
-
-[포트폴리오 설계 사례](docs/portfolio/CASE_STUDY.md) · [개발·검사 방법](CONTRIBUTING.md) · [스크립트 안내](scripts/README.md)
+[개발 안내](CONTRIBUTING.md) · [스크립트 목록](scripts/README.md) · [변경 이력](CHANGELOG.md) · [날짜별 작업 기록](docs/worklog/README.md).

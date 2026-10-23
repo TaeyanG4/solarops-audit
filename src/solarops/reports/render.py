@@ -63,16 +63,18 @@ def build_report(settings, period, plant=None, source_kind=None):
         "days": len(metrics),
         "plant_count": len({r["plant_id"] for r in snapshot}),
         "estimated_energy_kwh": round(sum(m["estimated_energy_kwh"] for m in metrics), 3),
-        "coverage": sum(m["observed_slots"] for m in metrics) / denominator if denominator else 0,
+        "coverage": sum(m["observed_slots"] for m in metrics) / denominator
+        if denominator
+        else None,
         "valid_coverage": sum(m["valid_slots"] for m in metrics) / denominator
         if denominator
-        else 0,
+        else None,
         "interpolation": sum(
             (m["source_interpolation_ratio"] or 0) * m["observed_slots"] for m in metrics
         )
         / observed
         if observed
-        else 0,
+        else None,
         "metrics": metrics,
         "issues": quality,
         "candidates": candidates,

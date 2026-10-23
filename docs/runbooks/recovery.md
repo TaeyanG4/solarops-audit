@@ -19,3 +19,19 @@
 `needs_review=true`는 실패 판정이 아닙니다. Airflow 실행/시도, 작업 프로세스나 Pod 상태·종료시각을 대조하고, 살아 있는 작업은 기다립니다. 종료가 확인되면 누락 날짜를 선택해 재실행하고 논리 해시와 보고서 계보를 확인합니다. 이 CLI는 작업을 강제 실패 처리하거나 삭제·재시도하지 않습니다.
 
 kind는 재해복구 저장소가 아닙니다. 고객 도입 전 PostgreSQL dump + 객체 저장소 스냅샷을 별도 암호화 저장소에 보관하고 복원 시험을 해야 합니다. 이 프로젝트는 공개/합성 데이터만 가지고 있습니다.
+
+## ONS 수집 실패
+
+데이터 출처의 ONS 탭 또는 `solarops ons-status --period YYYY-MM`에서 최근 실패 코드와 마지막 성공을 따로 확인합니다. v0.5.2부터 새 실패에는 안전한 도메인 코드를 저장합니다. 과거 `ValueError` 기록은 소급 변경하지 않습니다.
+
+| 코드 | 다음 확인 |
+|---|---|
+| `ONS_SOURCE_CONTRACT_CHANGED`, `ONS_SCHEMA_CHANGED` | 공식 metadata·헤더·라이선스와 adapter 계약 대조. 자료를 임의 변환해 통과시키지 않음 |
+| `ONS_TIMESTAMP`, `ONS_ENTITY_ID`, `ONS_DUPLICATE_CONFLICT` | 보존 원본의 해당 계약과 충돌 확인. 정정 원문 확인 후 월 재시도 |
+| `ONS_CURSOR_CONFLICT` | 다른 실행이 성공했는지 확인한 뒤 최신 cursor 기준으로 재시도 |
+| `ONS_HTTP_404` | 월 파일의 실제 게시 여부 확인. 아직 없는 파일을 성공으로 표시하지 않음 |
+| `ONS_HTTP_429`, `ONS_HTTP_5xx`, `ONS_TIMEOUT`, `ONS_NETWORK_ERROR` | 원천/연결 상태와 Airflow 재시도 간격 확인. 짧은 반복 다운로드 피하기 |
+| `ONS_DOWNLOAD_LIMIT`, `ONS_INCOMPLETE_HTTP_RESPONSE`, `ONS_INCOMPLETE_ROW` | 원문 크기·응답 완전성 확인. 상한을 무조건 늘리지 않음 |
+| `ONS_IO_ERROR`, `ONS_UNEXPECTED_ERROR` | 호스트 여유 공간·권한 및 제한된 로컬 태스크 로그 확인. 비밀값을 외부 문서에 복사하지 않음 |
+
+성공 cursor가 남아 있다고 수집기가 현재 정상이라고 단정하지 않습니다. 프로세스 강제 종료로 남은 ONS `running` 기록도 Airflow/Pod와 대조해야 하며, 현재 자동 조정기는 없습니다. 삭제나 과거 성공 덮어쓰기 없이 새 실행으로 복구합니다.
