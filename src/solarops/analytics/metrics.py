@@ -1,6 +1,30 @@
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
+# Every stored metric written by this code base (v1 and v2) carries these fields.
+# A row without them is outside the contract: readers stop instead of guessing.
+REQUIRED_METRIC_FIELDS = frozenset(
+    {
+        "local_date",
+        "estimated_energy_kwh",
+        "expected_slots",
+        "observed_slots",
+        "valid_slots",
+        "missing_slots",
+        "invalid_slots",
+        "source_interpolation_ratio",
+        "interpolation_unknown_slots",
+        "review_candidate_count",
+    }
+)
+
+
+def require_metric_fields(metric):
+    if not REQUIRED_METRIC_FIELDS <= metric.keys():
+        raise ValueError("METRIC_CONTRACT_MISMATCH")
+    return metric
+
+
 SLOT = timedelta(minutes=15)
 
 

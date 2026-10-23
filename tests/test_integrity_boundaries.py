@@ -165,6 +165,11 @@ def test_series_and_report_integrity_and_legacy_compatibility(settings, sample):
         build_report(settings, "2024-04")
     assert failure_code(failure.value) == "METRIC_CONTRACT_MISMATCH"
     assert set((settings.root / "reports" / settings.org).iterdir()) == report_dirs
+    # The overview applies the same contract instead of summing absent fields as 0.
+    with TestClient(create_app(settings)) as client:
+        response = client.get("/api/v1/overview?period=2024-04")
+        assert response.status_code == 503
+        assert "outside contract" in response.json()["detail"]
 
 
 def test_concurrent_different_inputs_cannot_claim_same_version(settings, tmp_path, monkeypatch):

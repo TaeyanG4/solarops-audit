@@ -130,8 +130,8 @@ def test_failed_report_keeps_previous_publication(settings, sample, monkeypatch,
     else:
         original = render.Catalog
 
-        def failing_catalog(config):
-            catalog = original(config)
+        def failing_catalog(config, **options):
+            catalog = original(config, **options)
 
             def fail_active(conn, cursor, statement, params, context, many):
                 if statement.startswith("INSERT INTO active_report_manifest"):

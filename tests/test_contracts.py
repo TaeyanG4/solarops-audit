@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 
 from solarops.acquisition.brpvgen import safe_extract
-from solarops.analytics.metrics import analyze, day_window
+from solarops.analytics.metrics import REQUIRED_METRIC_FIELDS, analyze, day_window
 from solarops.config import identifier
 from solarops.contracts.brpvgen import flag, read_metadata
 from solarops.normalize.parquet import normalize
@@ -160,6 +160,8 @@ def test_golden_energy_duplicates_and_missing():
     assert metric["estimated_energy_kwh"] == 2.0
     assert metric["missing_slots"] == 2
     assert count == 1
+    # Readers reject rows without these fields, so the generator must always emit them.
+    assert REQUIRED_METRIC_FIELDS <= metric.keys()
     assert issues[0]["rule_id"] == "DQ-MISSING"
 
 

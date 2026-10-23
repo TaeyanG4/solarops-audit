@@ -1,0 +1,34 @@
+{
+  "target_commit": "fc64c4d785729b934e43ff62b76688f6f60d4431",
+  "archive_sha256": "2ca56b940f91456168c9e24eff07281bdf8b2c65d439e6bc3d726955468c4786",
+  "tracked_file_count": 303,
+  "fable": {
+    "cli": "claude -p --model fable",
+    "claude_code_version": "2.1.287",
+    "init_model": "claude-fable-5-1",
+    "model_usage": [
+      "claude-fable-5-1"
+    ],
+    "num_turns": 140,
+    "duration_ms": 626485,
+    "score": 91,
+    "review_sha256": "ef314007341052f46dfa13afe75593b593d7a7f5e2f7dd604d3c39d4c9af300f",
+    "stream_sha256": "4d9791b920dcfe380ee02a65a062fce80b6e9c5e835db2269ac669b8884ac605",
+    "reported_checks": {
+      "pytest": "141 passed / 14 skipped",
+      "services": "13 passed",
+      "demo": "replay_hashes_identical true",
+      "restore": "integrity ok",
+      "release_check": "aligned 0.5.6"
+    }
+  },
+  "astra": {
+    "status": "paused",
+    "reason": "codex-lb 502/503 no active account; direct provider out of credits",
+    "attempt_streams": [
+      "astra-stream-attempt2-502.jsonl",
+      "astra-stream-attempt3-lb503.jsonl",
+      "astra-stream-attempt4-credits.jsonl"
+    ]
+  }
+}

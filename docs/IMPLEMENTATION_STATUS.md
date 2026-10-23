@@ -8,7 +8,7 @@
 
 [문서 홈](README.md) · [변경 이력](../CHANGELOG.md) · [기술 선택 근거](architecture/technology-stack.md) · [점수 기반 계획](../plan.md) · [진행·인계](../handoff.md)
 
-현재 인계(2026-10-23): [R5 독립 평가](reviews/2026-10-23-artifact-r5.md) 완료 후 후속 확인이 남아 있습니다. org_id/hash 설명은 4개 문서에서 정정했지만 새 독립 확인은 아직입니다. 지표 필드 누락의 지원 계약·초기 SQL 문서 정합성을 [다음 계획](../plan.md)에 등록했습니다. 20:59 KST 확인에서 Compose 대시보드/DB/MinIO는 중지, kind 6개 서비스 Pod·관리 8504·랜딩 8507은 가동 중이며 자동 점검은 PAUSED입니다. 이전 배포 성공과 현재 실행 여부를 구분합니다. [재개 절차](../handoff.md).
+현재(2026-10-23): R5 후속인 지표 필수 필드 계약(`METRIC_CONTRACT_MISMATCH`)과 초기 SQL baseline 동기화를 완료했고, 이어서 overview의 보간 불명 처리·필드 계약 공유·`report`의 읽기 전용 snapshot을 보완했습니다. 모두 [CHANGELOG](../CHANGELOG.md)의 Unreleased이며 0.5.6 배포 이미지는 바뀌지 않았습니다. org_id/hash 설명은 4개 문서에서 정정했습니다. 실행 중인 서비스 상태와 재개 절차는 [handoff](../handoff.md)에 둡니다.
 
 ## 현재 확보한 결과
 

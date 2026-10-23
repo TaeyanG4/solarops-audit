@@ -5,6 +5,7 @@ from datetime import date, timedelta
 
 from sqlalchemy import func, select
 
+from solarops.analytics.metrics import require_metric_fields
 from solarops.config import CALCULATION_VERSION
 from solarops.contracts.dates import month_bounds
 from solarops.storage.postgres import active, metrics, runs
@@ -27,8 +28,9 @@ def empty_totals():
 
 
 def add_metric(total, metric):
+    require_metric_fields(metric)
     for key in COUNTS:
-        total[key] += metric.get(key, 0)
+        total[key] += metric[key]
     total["estimated_energy_kwh"] += metric["estimated_energy_kwh"]
     total["interpolated_slots"] += round(
         (metric["source_interpolation_ratio"] or 0) * metric["observed_slots"]
@@ -42,8 +44,11 @@ def finish(total):
     # Weight by slots, not by daily percentages. Unknown denominators stay unknown.
     total["coverage_ratio"] = (expected - total["missing_slots"]) / expected if expected else None
     total["valid_coverage_ratio"] = total["valid_slots"] / expected if expected else None
+    # Same rule as monthly reports: all-unknown interpolation is unknown, never 0%.
     total["source_interpolation_ratio"] = (
-        total["interpolated_slots"] / observed if observed else None
+        total["interpolated_slots"] / observed
+        if observed > total["interpolation_unknown_slots"]
+        else None
     )
     return total
 

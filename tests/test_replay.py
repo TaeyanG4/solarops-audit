@@ -172,3 +172,7 @@ def test_cli_plan_and_scoped_month_analysis(settings, public_layout, monkeypatch
     assert main(args) == 1
     capsys.readouterr()
     assert not absent.exists()
+    # report reads its snapshot read-only first, so it must not create one either.
+    assert main(["report", "--period", "2024-04"]) == 1
+    capsys.readouterr()
+    assert not absent.exists()

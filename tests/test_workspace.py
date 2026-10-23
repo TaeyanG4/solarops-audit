@@ -21,6 +21,7 @@ def seed_metric(
     kind="public",
     version=CALCULATION_VERSION,
     timezone="UTC",
+    unknown=0,
 ):
     run_id = str(uuid.uuid4())
     key = dict(
@@ -46,14 +47,15 @@ def seed_metric(
             metrics,
             {"run_id": run_id},
             dict(
+                local_date=day,
                 expected_slots=expected,
                 observed_slots=expected,
                 valid_slots=valid,
                 invalid_slots=expected - valid,
                 missing_slots=0,
                 estimated_energy_kwh=expected,
-                source_interpolation_ratio=0.2,
-                interpolation_unknown_slots=0,
+                source_interpolation_ratio=0.0 if unknown else 0.2,
+                interpolation_unknown_slots=unknown,
                 review_candidate_count=0,
             ),
         )
@@ -210,3 +212,12 @@ def test_failed_batch_keeps_linked_day_evidence(settings, sample):
     assert evidence["active_result_lookup_complete"]
     assert evidence["active_result"]["run_id"] == published["results"][0]["run_id"]
     assert catalog.snapshot("demo")[0]["run_id"] == evidence["active_result"]["run_id"]
+
+
+def test_all_unknown_interpolation_is_unknown_not_zero(settings):
+    # Same rule as monthly reports: no confirmed flags means unknown, never 0%.
+    catalog = Catalog(settings)
+    seed_metric(catalog, "2024-04-01", 10, 10, unknown=10)
+    summary = fleet_overview(catalog, "2024-04")["summary"]
+    assert summary["interpolation_unknown_slots"] == summary["observed_slots"] == 10
+    assert summary["source_interpolation_ratio"] is None

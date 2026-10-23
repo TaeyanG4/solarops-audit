@@ -3,6 +3,7 @@
 ## Unreleased — 2026-10-23 (배포 선언·이미지는 0.5.6 유지)
 
 - 보고서 생성은 일별 지표 행에 필수 필드(`interpolation_unknown_slots` 등)가 없으면 디렉터리 생성 전 `METRIC_CONTRACT_MISMATCH`로 중단합니다. 해당 필드는 최초 MVP부터 모든 생성기가 기록하며, 불명을 0으로 채우지 않습니다.
+- overview API는 보고서와 같은 필수 필드 계약을 적용해 범위 밖 행을 0으로 합산하지 않고 503으로 응답하며, 관측 슬롯이 모두 보간 불명이면 비중을 0이 아닌 null로 반환합니다. `report`는 snapshot을 읽기 전용으로 먼저 읽어 없는 카탈로그를 만들지 않습니다.
 - `migrations/0001_catalog.sql`을 현행 모델(ONS 3개 테이블·PostgreSQL 인덱스 2개 포함)에서 재생성하고 참조 baseline·`db-migrate` 지원 경로를 명시했습니다. 정적 대조 검사를 기존 계약 검사에 추가했습니다.
 
 ## 0.5.6 — 2026-10-23

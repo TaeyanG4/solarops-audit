@@ -12,8 +12,6 @@
 
 ## 빠른 실행
 
-제품 소개용 [독립 랜딩페이지](landing/README.md)도 제공합니다. 실제 화면과 검증 범위를 소개하는 정적 사이트이며 FastAPI 대시보드와 별도로 실행합니다. [디자인·화면 검수](landing/QA.md).
-
 Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/), Git을 준비합니다. 비공개 저장소 접근 권한이 필요합니다.
 
 ```text
@@ -104,6 +102,8 @@ Airflow는 LocalExecutor로 동작하고 KPO가 작업 Pod를 만듭니다. Kube
 ## 화면과 개발 도구
 
 전체 현황·발전소·데이터 품질·월간 보고서·실행 이력·데이터 출처를 기능별 사이드바로 묶었습니다. 보고서는 생성 당시 자료의 스냅샷이며 현재 게시 결과와 비교할 수 있습니다. 이전 보고서를 새 값으로 덮어쓰지 않습니다.
+
+제품 소개용 정적 [랜딩페이지](landing/README.md)는 저장된 공개 집계로 만든 데모 화면을 담으며 대시보드와 별도로 실행합니다. 백엔드에 연결하지 않습니다. [화면 검수](landing/QA.md).
 
 <details>
 <summary>월간 보고서 화면과 사용한 개발 스킬</summary>

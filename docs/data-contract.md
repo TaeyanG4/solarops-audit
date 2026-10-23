@@ -42,7 +42,7 @@ BR 입력 버전은 선택 기간의 upsert이며 전체 철회 snapshot이 아�
 
 보간 true 비중의 분모는 전체 관측 수입니다. v0.5.3 보고서/화면은 모두 불명일 때 “알 수 없음”, 일부 불명일 때 “확인된 비중 · 불명 N슬롯”, 명시 False일 때0%로 표시합니다. 새 manifest의 `observed_slots`·`interpolation_unknown_slots`와 일별 unknown 수를 함께 보존합니다. 기존 v2 지표/논리hash와 과거 보고서는 바꾸지 않습니다.
 
-일별 지표 행의 `interpolation_unknown_slots`와 보고서가 읽는 슬롯·추정 kWh·보간 비중·검토 후보 필드는 최초 MVP(`9652200`)부터 계산 v1/v2 모든 생성기가 기록한 필수 필드입니다. 이 필드가 없는 행은 지원하지 않습니다. 보고서 생성은 디렉터리·객체를 만들기 전에 `METRIC_CONTRACT_MISMATCH`로 중단하며, 불명을 0이나 확인된 값으로 채우지 않습니다. 기존 행·hash·발행 보고서는 바꾸지 않습니다.
+일별 지표 행의 `interpolation_unknown_slots`와 보고서가 읽는 슬롯·추정 kWh·보간 비중·검토 후보 필드는 최초 MVP(`9652200`)부터 계산 v1/v2 모든 생성기가 기록한 필수 필드입니다. 이 필드가 없는 행은 지원하지 않습니다. 보고서 생성은 디렉터리·객체를 만들기 전에 `METRIC_CONTRACT_MISMATCH`로 중단하며, 불명을 0이나 확인된 값으로 채우지 않습니다. overview API(`/api/v1/overview`)도 같은 필드 목록(`analytics/metrics.py`의 `REQUIRED_METRIC_FIELDS`)을 적용해 503으로 응답합니다. overview와 보고서의 보간 비중은 같은 규칙으로, 관측 슬롯이 모두 불명이면 0이 아닌 null입니다. 기존 행·hash·발행 보고서는 바꾸지 않습니다.
 
 CSV/API의 `source_interpolation_ratio`는 확인된 true/전체 관측 비중이며 보간이 아닌 비중을 뜻하지 않습니다. 전부 불명일 때도 이 v2 필드는0일 수 있으므로 반드시 `observed_slots`와 `interpolation_unknown_slots`를 함께 읽습니다. HTML의 ‘알 수 없음’과 같은 사실을 숫자+불명 수로 전달하는 계약입니다.
 

@@ -5,6 +5,7 @@
 ## 현재 상태
 
 - 최신 구현 **v0.5.6 / energy-interval-v2**, 구현 커밋 `4b9959e`, R5 평가 고정 커밋 `faa6f3b`. [릴리스·이미지](docs/releases/0.5.6.json) · [검증](docs/benchmarks/quality-v0.5.6.md) · [비공개 GitHub](https://github.com/TaeyanG4/solarops-audit).
+- **R6(`fc64c4d`) Fable 91**, Astra는 사용량/계정 문제로 일시중지. Fable 발견 5건(overview 불명 비중·필드 계약 공유·report 읽기 전용·이미지 목록·상태 문서) 수용·보완·검사 완료(Unreleased). [판단](docs/reviews/2026-10-23-artifact-r6.md) · [기록](docs/worklog/2026-10-23-review-r6.md).
 - **R5 Astra 96 / Fable 94, 각각 95이상 목표는 아직 미달. 두 평가 모두 종료.** [원문·수용·실행 근거](docs/reviews/2026-10-23-artifact-r5.md). 면접·개인 역량 평가는 제외합니다.
 - 각 평가자가 새 사본/venv에서 140통과·14제외, 격리 PostgreSQL/MinIO 13통과, 합성 7일 실패 보존/재처리·34개 파일 SQLite 복원을 실행했습니다. 호스트 symlink 1건 제외, 서비스 13건은 별도 실행. 원본 점수와 후속 정정은 구분합니다.
 - 2026-10-23 **20:59 KST 읽기 확인**: Compose app-db/minio/dashboard는 Exited(255), 8502 health/ready 연결 거부. kind 6개 서비스 Pod Ready, 관리 8504·별도 랜딩 8507 listening. Compose Airflow 3개는 Created/중지. 이번 인계에서 시작·종료하지 않았습니다.

@@ -58,7 +58,11 @@ def create_app(settings=None):
     ):
         try:
             return fleet_overview(catalog, period, source_kind)
-        except ValueError:
+        except ValueError as exc:
+            if str(exc) == "METRIC_CONTRACT_MISMATCH":
+                raise HTTPException(
+                    503, "Stored metrics outside contract; reprocess affected partitions"
+                ) from None
             raise HTTPException(422, "Expected a valid YYYY-MM period") from None
 
     @app.get("/api/v1/periods")
