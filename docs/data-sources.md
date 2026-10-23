@@ -51,6 +51,8 @@ uv run solarops source extract data/source/BR-PVGen_meteorological.zip data/sour
 
 다운로드는 분석 결과를 자동 생성하지 않습니다. 환경 설정과 replay·보고서 생성은 [설치 안내](guides/setup.md)를 따릅니다. 다운로드 후 배포 checksum을 확인하고, SHA-256 및 manifest로 수집 근거를 보존합니다.
 
+현재 수집기는 이 고정 record의 4개 파일 전용이며 최신 배포 탐색·정기 다운로드는 없습니다. Airflow 일정은 이미 준비된 과거 CSV를 처리합니다. 새 버전이나 다른 데이터셋은 DOI·라이선스까지 맞는 별도 수집·계보 경로가 필요합니다. [실제 스케줄 상태·데이터 추가 절차](guides/data-ingestion.md).
+
 ## 원천에서 화면까지
 
 ```mermaid

@@ -9,9 +9,10 @@
 | 5분 안에 실행 | [시연 순서](portfolio/DEMO_GUIDE.md), [설치·환경 변수](guides/setup.md) |
 | 현재 진행도와 다음 과제 | [구현 상태](IMPLEMENTATION_STATUS.md), [점수 기반 계획](../plan.md), [인계·진행 기록](../handoff.md), [날짜별 상세 기록](worklog/README.md), [버전별 변경](../CHANGELOG.md) |
 | 포트폴리오 설명 | [문제·설계·증거 사례](portfolio/CASE_STUDY.md) |
-| 기술 선택 이해 | [버전·선택 이유·대안](architecture/technology-stack.md), [폴더·데이터 흐름·트랜잭션](architecture/system.md) |
+| 기술 선택 이해 | [버전·선택 이유·대안](architecture/technology-stack.md), [아키텍처·배포 경계·데이터 흐름·트랜잭션](architecture/system.md) |
 | 실제 사용·자료 진위 | [실행 기술·원본 해시·독립 계산·합성 시험 구분](benchmarks/stack-authenticity-20261023.md) |
 | 데이터 출처 | [제작자·범위·라이선스·파일 다운로드](data-sources.md) |
+| 수집 주기·데이터 추가 | [실제 자동화 상태·처리 명령·새 출처 연동 범위](guides/data-ingestion.md) |
 | 데이터 해석 | [실제 CSV 스키마·품질·에너지 계약](data-contract.md) |
 | 로컬 운영 | [화면·보고서](runbooks/operator.md), [DAG·백필](runbooks/dags.md), [실패·진단](runbooks/recovery.md), [백업·복원 시험](runbooks/backup-restore.md) |
 | 디자인·사용 스킬 | [새 디자인 시스템](../DESIGN.md), [워크스페이스·보고서·관리 검증](benchmarks/workspace-20261023.md), [스킬별 목적·결과물](development/skills.md), [최신 이미지](portfolio/images/workspace-20261023/README.md) |
@@ -30,7 +31,7 @@
 - [0007: 계산 v2와 기존 결과 보존](adr/0007-calculation-v2.md)
 - [0008: 보존 원본·읽기 전용 조회·보고서 동시성](adr/0008-storage-integrity.md)
 
-최신 유지보수 검증은 [v0.4.1 경계·무결성 기록](benchmarks/integrity-v0.4.1.md)을 확인합니다.
+최신 기술 후속 검증은 [선택형 서비스 CI·보고서 비교·독립 인스턴스 복원·동시 부하](benchmarks/technical-20261023.md), 저장·조회 경계는 [v0.4.1 무결성 기록](benchmarks/integrity-v0.4.1.md)을 확인합니다.
 
 현재 UI: [방향과 추가 요건](design/workspace-navigation.md) · [전후 화면·검증 결과](benchmarks/workspace-20261023.md). 초기 전체 현황 개선은 [과거 검증](benchmarks/overview-redesign-20261023.md)으로 보존합니다.
 

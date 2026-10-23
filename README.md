@@ -4,7 +4,7 @@
 
 **태양광 운영 데이터를 검증하고, 보고서 숫자를 원본까지 추적하는 데이터 엔지니어링 프로젝트.**
 
-브라질 공개 발전소 자료와 합성 데모를 수집해 일별 Parquet·품질 지표·월간 보고서·읽기 전용 대시보드로 제공합니다. 데이터가 빠지거나 잘못됐을 때의 표시, 같은 자료를 다시 처리했을 때의 일관성, 작업 실패 후 이전 결과 보존까지 구현했습니다.
+브라질 공개 발전소 CSV를 내려받거나 합성 데모를 생성해 일별 Parquet·품질 지표·월간 보고서·읽기 전용 대시보드로 제공합니다. 데이터가 빠지거나 잘못됐을 때의 표시, 같은 자료를 다시 처리했을 때의 일관성, 작업 실패 후 이전 결과 보존까지 구현했습니다.
 
 **현재 화면:** 분석·감사 자료·관리로 묶은 사이드바, 본문 16px·보조 14px, 공통 월/목록 선택창을 적용했습니다. 월간 보고서는 화면 안의 iframe 없이 본문에서 바로 읽습니다. [화면·전후 비교](docs/benchmarks/workspace-20261023.md).
 
@@ -14,7 +14,7 @@
 
 **실제로 작동하는가?** 2026-10-23 실행 서비스·DB·객체를 직접 점검했습니다. 원본 4개는 Zenodo 게시 체크섬과 일치하고, 대표 하루의 독립 계산값이 DB·API·보고서·Kubernetes 결과와 일치합니다. Airflow/KPO 실행 이력도 확인했으며, 합성 장애 시험과 공개 데이터 처리를 구분합니다. [기술스택·데이터 실사와 한계](docs/benchmarks/stack-authenticity-20261023.md).
 
-[빠른 실행](#빠른-실행) · [데이터 출처](#어떤-데이터를-사용하는가) · [기술 선택](#구조와-기술-선택) · [사용 스킬](#개발에-사용한-ai-스킬) · [검증 근거](#검증한-범위) · [전체 문서](docs/README.md)
+[빠른 실행](#빠른-실행) · [데이터 출처](#어떤-데이터를-사용하는가) · [수집과 데이터 추가](#수집-주기와-데이터-추가) · [아키텍처](docs/architecture/system.md) · [기술 선택](#구조와-기술-선택) · [사용 스킬](#개발에-사용한-ai-스킬) · [검증 근거](#검증한-범위) · [전체 문서](docs/README.md)
 
 ![전체 현황: 공개 BR-PVGen 2024년 4월, 추정 발전량과 데이터 품질](docs/portfolio/images/workspace-20261023/overview.png)
 
@@ -51,6 +51,23 @@
 전체 인버터 14,400,480행과 발전소 51개는 **전체 기간** 기준입니다. 위 2024년 4월 화면은 해당 월에 자료가 있는 **5개**만 표시합니다. 원본의 NULL·보간 표시·집계 표본 수를 보존하며, 유효한 전력에 `W ÷ 1000 × 0.25 h`를 적용한 값을 **추정 에너지**로 표시합니다. 계량기 실측 전력량·매출·확정 손실을 뜻하지 않습니다.
 
 [출처·파일별 역할·인용·다운로드](docs/data-sources.md) · [실제 스키마·품질·계산 계약](docs/data-contract.md)
+
+## 수집 주기와 데이터 추가
+
+**현재 신규 데이터를 정기적으로 가져오지는 않습니다.** `source fetch`로 고정된 BR-PVGen V.1을 다운로드하고 `ingest` / `replay`로 저장된 CSV를 처리합니다. 화면 새로고침은 저장된 결과 조회이며 다운로드나 분석을 시작하지 않습니다.
+
+| 작업 | 구현된 주기와 범위 | 2026-10-23 확인 상태 |
+|---|---|---|
+| 원본 다운로드 | 명시적 CLI 실행. 새 배포 버전 자동 탐색 없음 | 정기 수집 DAG 없음 |
+| 일별 적재 DAG | 매일 02:00 UTC / 11:00 KST에 **지정된 과거 구간** 재처리 | Compose Airflow 중지, kind DAG paused |
+| 월간 보고서 DAG | 매월 2일 03:00 UTC / 12:00 KST에 **지정된 월** 보고서 생성 | 같은 상태; 기간 자동 이동 없음 |
+| 품질 조회·백필 DAG | 수동 실행 | kind의 전체 DAG 4개 paused, 진행/대기 배치 0건 |
+
+기본 DAG는 합성 DEMO_01의 2024년 4월 자료를 사용합니다. unpause만 하면 과거 고정 구간을 반복하므로 실시간 수집으로 바뀌지 않습니다. [실제 점검 근거](docs/worklog/2026-10-23-data-architecture.md).
+
+**데이터 확장은 가능합니다.** 현재 자료의 다른 발전소·월은 기존 처리기로 분석할 수 있으며, 이 PC의 Compose에는 V.1 전체 51개 발전소가 이미 처리되어 있습니다. 2024년 4월 화면의 5개는 월 필터에 따른 수입니다. 새로운 BR-PVGen 버전이나 다른 공개 API/CSV는 수집기·스키마 adapter·출처 등록을 추가해야 합니다. 현재 `public`은 BR-PVGen DOI·라이선스로 기록되므로 다른 자료를 같은 옵션으로 넣으면 안 됩니다.
+
+[다운로드→처리→보고서 명령, 환경별 저장 위치, 새 출처·정기 수집 확장 순서](docs/guides/data-ingestion.md)를 정리했습니다. 고객 업로드와 실시간 SCADA 연동은 현재 구현 범위에 포함되지 않습니다.
 
 ## 화면에서 확인할 수 있는 것
 
@@ -124,14 +141,16 @@ docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio 
 
 ```mermaid
 flowchart LR
-    A[BR-PVGen / 합성 CSV] --> B[공통 Python CLI]
-    H[Airflow · Kubernetes 작업 Pod] --> B
+    Z[Zenodo 고정 배포] -->|명시적 다운로드| A[보존 CSV / 합성 fixture]
+    A --> B[공통 Python CLI]
+    H[Airflow · 선택적 KPO] -.->|과거 구간 재처리| B
     B --> C[계약 검증 · UTC 정규화 · 일별 분석]
     C --> D[Parquet / 원본 · MinIO 또는 파일]
     C --> E[활성 결과 카탈로그 · PostgreSQL 또는 SQLite]
     D --> F[월간 HTML · CSV · 계보 JSON]
     E --> F
     E --> G[FastAPI · HTML/CSS/JS 대시보드]
+    D --> G
 ```
 
 | 기술 | 역할과 선택 이유 |
@@ -145,26 +164,29 @@ flowchart LR
 | Airflow · Docker · Kubernetes KPO | 재시도·백필·이력과 작업 자원 격리. 핵심 로직은 같은 CLI 사용 |
 | pytest · Ruff · GitHub Actions | 계약·실패·동시성 회귀, Windows/Ubuntu 검사와 패키징 |
 
-[정확한 버전·대안·비용·재검토 조건](docs/architecture/technology-stack.md) · [일별 커밋 경계와 데이터 흐름](docs/architecture/system.md)
+다운로드·처리·보고서 발행은 별도 명령입니다. Compose와 kind는 각각 독립 DB/MinIO를 사용하고, 네이티브 기본 SQLite 결과도 8502에 자동 반영되지 않습니다. Airflow 메타 DB는 분석 결과 DB와 별개이며 8504 관리 서버는 호스트에서 따로 실행됩니다.
+
+[아키텍처: 데이터 흐름·배포 경계·일별 커밋·보고서 비교](docs/architecture/system.md) · [정확한 버전·대안·비용·재검토 조건](docs/architecture/technology-stack.md)
 
 ## 검증한 범위
 
 | 항목 | 확인한 결과 | 근거 |
 |---|---|---|
+| 최신 기술 후속 | 기능 `4d8b28c`의 실제 PostgreSQL/MinIO CI 5통과·로컬 관련 21통과, 보고서 근거 비교 3너비 확인 | [선택형 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39897515593) · [수행 기록](docs/worklog/2026-10-23-technical-delivery.md) |
+| 동시 조회·독립 인스턴스 복원 | 합성10만 건·동시4 깊은 페이지 p95 6409→679ms, 전후1080요청 오류0. 같은 호스트 별도 PostgreSQL/MinIO로 27객체·7파티션 복원 | [자원·측정 조건·한계](docs/benchmarks/technical-20261023.md) |
 | 기술스택·자료 실사 | 원본 4개·CSV 102개·공개 계보 103개 해시 대조, 대표 계산 경로 일치, 실제 Airflow/KPO 이력 확인 | [2026-10-23 실사](docs/benchmarks/stack-authenticity-20261023.md) |
 | 전체 공개 자료 | 51개 발전소·인버터 14,400,480행·일별 파티션 12,572개, v1/v2 일별 지표·원본 SHA 일치 | [v0.4 검증](docs/benchmarks/reliability-v0.4.0.md) |
 | 실패·동시성·복구 | 입력 변경·동시 버전·보고서 역순 완료·파일 누락/변조·격리 복원 | [v0.4.1 검증](docs/benchmarks/integrity-v0.4.1.md) |
-| 화면·보고서·관리 | 1440/768/390px, overview 107명령·workspace 195명령, axe 3+23회 위반 0, API 동일 | [최신 UI 검증](docs/benchmarks/workspace-20261023.md) |
+| 화면·보고서·관리 개편 | 1440/768/390px, overview 107명령·workspace 195명령, axe 3+23회 위반 0, API 동일 | [개편 당시 검증](docs/benchmarks/workspace-20261023.md) |
 | 실행 이력 탐색 | 기존 관련 테스트 5개 통과, 3너비·주소 복원·상하위 이동 확인, 모바일 axe 위반 0건; 영구 테스트 추가 없음 | [변경·검증·한계](docs/worklog/2026-10-23-run-navigation.md) |
 | 기간·보고서·진단 | 관련15개 검사, 3너비·모바일 axe3회 위반0, 기존 게시/보고서 보존·실제 PostgreSQL 인덱스 측정 | [검증·성능 조건](docs/worklog/2026-10-23-usability.md) |
 | 선택창·관리 탭·관측 차트 | 후속 303명령·axe 18회 위반 0, Python 31통과, 원본 빈값 대조·API 동일 | [상호작용 회귀](docs/benchmarks/interactions-20261023.md) |
 | 열린 목록 스크롤 유지 | 닫힘 동작을 교체, 269명령·3너비·열린 목록 axe6회 위반0, API 동일 | [목록 회귀](docs/benchmarks/select-anchor-20261023.md) |
 | 서비스 제어 | 실제 전체 중지→기본 3서비스 시작→kind 시작, 독립 관리 서버 유지·다른 프로젝트 보존 | [관리 검증과 한계](docs/benchmarks/workspace-20261023.md) |
-| 최신 로컬 회귀 | Python 126통과·6제외, Ruff·4개 JS 문법·wheel 정적 자산 확인 | [최신 수행 기록](docs/worklog/2026-10-23-workspace.md) |
-| 회귀·전달 | 기능 커밋 `d225e19`의 Windows/Ubuntu 각각 **127통과·5제외**, 합성 복원·wheel·소스 패키징 성공 | [검증 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39892650065) |
+| 이전 전체 회귀·전달 | 기능 커밋 `d225e19`의 Windows/Ubuntu 각각 **127통과·5제외**, 합성 복원·wheel·소스 패키징 성공 | [당시 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39892650065) |
 | 월별 조회 | HTTP 53회 → 1회. 같은 로컬 조건 5회 중앙값 703.239ms → 12.576ms | [측정 조건](docs/benchmarks/workspace-v0.3.0.md) |
 
-조회 측정은 응답 범위와 요청 방식이 달라 일반적인 성능 배수로 해석하지 않습니다. 자동 접근성 위반 0건은 WCAG 인증이 아니며 실제 모바일 기기·스크린리더·다른 브라우저는 미검증입니다. 과거 전체 처리를 매번 재실행한 것으로 표현하지 않습니다.
+검증은 해당 코드·조건의 결과입니다. 최신 기능에 대해 이전 양OS 전체 회귀를 다시 실행했다고 주장하지 않습니다. 동시8 조회의 p95는 약2초이며 동시 쓰기·장시간 부하는 미검증입니다. 조회 측정은 응답 범위와 요청 방식이 달라 일반적인 성능 배수로 해석하지 않습니다. 자동 접근성 위반 0건은 WCAG 인증이 아니며 실제 모바일 기기·스크린리더·다른 브라우저는 미검증입니다. 과거 전체 처리를 매번 재실행한 것으로 표현하지 않습니다.
 
 ## 개발에 사용한 AI 스킬
 
@@ -172,7 +194,7 @@ flowchart LR
 |---|---|---|
 | [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | 정보 위계·색·글자·차트·반응형 설계 가이드 검색 | [새 디자인 시스템](DESIGN.md) |
 | [Impeccable](https://github.com/pbakaus/impeccable) | 가독성·상태·접근성·정적 검출, 별도 최종 검수와 시스템 문서화 | [검수·수정 근거](docs/benchmarks/workspace-20261023.md) |
-| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 화면·선택창·키보드·오류 경로·세 너비·관리 수명주기 검증 | [최신 이미지](docs/portfolio/images/workspace-20261023/README.md)와 UI 검증 |
+| [Agent Browser](https://github.com/vercel-labs/agent-browser) | 실제 화면·선택창·키보드·오류 경로·세 너비·관리 수명주기 검증 | [워크스페이스 이미지](docs/portfolio/images/workspace-20261023/README.md) · [보고서 근거 비교](docs/portfolio/images/technical-20261023/README.md) |
 | [Web Design Guidelines](https://github.com/vercel-labs/agent-skills) | 실제 링크·폼·URL 상태·포커스·반응형 검사 | [설치와 적용 기록](docs/development/skills.md) |
 | [skill-installer](https://github.com/openai/skills/tree/main/skills/.system/skill-installer) | 요청한 스킬을 공식 저장소에서 설치 | 로컬 개발 도구 준비 |
 

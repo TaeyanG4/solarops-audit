@@ -1,5 +1,9 @@
 # DAG와 명시적 재처리
 
+[수집 주기·데이터 추가](../guides/data-ingestion.md) · [아키텍처](../architecture/system.md)
+
+**이 DAG들은 다운로드하지 않습니다.** 2026-10-23 13:11 KST 점검에서 Compose Airflow는 중지, kind DAG 4개는 모두 paused, 진행/대기 배치는 0건이었습니다. [확인 근거](../worklog/2026-10-23-data-architecture.md). 아래 일정은 코드에 설정된 주기이며 현재 신규 원천 수집이 실행 중이라는 뜻이 아닙니다.
+
 | DAG | 역할 | 일정 |
 |---|---|---|
 | solarops_ingest_daily | 환경 확인 → 지정 발전소의 역사 구간 재처리/검증/공개 | 02:00 UTC, 초기 paused |
@@ -8,6 +12,8 @@
 | solarops_backfill_manual | 명시 날짜 재생, 기본 dry_run=true | 수동 |
 
 기본 `source_kind=synthetic`, `plant=DEMO_01`, `from_date=2024-04-01`, `to_date=2024-04-08`, `source_version=synthetic-v1`입니다. 공개 BR-PVGen은 `source_kind=public`, `plant=PS_001`처럼 지정합니다. 이미 전처리된 역사 자료이며 라이브 센서 수집이 아닙니다. 일정이 실행되어도 날짜 Params가 자동으로 오늘 날짜로 이동하지 않습니다. 정해진 구간을 반복 검증하려는 경우에만 unpause합니다.
+
+보고 월 `period`도 기본 `2024-04`로 고정됩니다. DAG 사이에 자동 실행 의존성은 없고, 품질 DAG의 `analyze`는 게시된 지표를 조회하는 명령입니다. 이름의 `daily`가 정기 원본 수집이나 별도의 전체 품질 재검사를 뜻하지 않습니다. 한국 시각은 일별 11:00, 월간 매월 2일 12:00입니다.
 
 ## 공개 자료 준비
 
@@ -75,4 +81,4 @@ UI Params의 날짜는 ISO date, 버전은 경로 안전 문자로 제한합니�
 
 `fault_marker`와 `test_delay`는 합성 자료의 장애 시연에만 적용됩니다. `fault_marker`가 새 이름이면 첫 실행에서 DB 커밋 도중 예외를 발생시키고, 다음 재시도에서 같은 결과를 정상 공개합니다. 동일 marker는 다시 실패시키지 않습니다. 기존 marker를 삭제하지 말고 새 이름을 사용합니다.
 
-배포 이미지 버전은 0.4.0입니다. 이후 코드 변경은 새 버전/digest로 배포하세요. Compose는 `docker compose --env-file .env -f infra/compose/compose.yaml --profile airflow build dashboard airflow-api` 후 해당 서비스를 `up -d`합니다. kind는 `bash scripts/ops/k8s-refresh.sh`로 이미지 로드와 롤아웃을 수행합니다. 완료 Pod/로그는 검증 증거로 남습니다.
+현재 Airflow·KPO worker 설정은 `0.4.1`, Compose dashboard는 `0.4.1-technical-final-20261023`입니다. 이번 기술 후속 배포는 dashboard만 갱신했으므로 기존 Airflow/kind 경로의 보고서는 최신 선택 범위 필드가 없어 게시 근거 비교가 불가능할 수 있습니다. [이미지 식별자](../image-versions.json). 이후 변경은 새 태그/digest로 관련 참조를 맞춘 뒤 필요한 이미지를 build하고 서비스를 `up -d`합니다. kind의 `bash scripts/ops/k8s-refresh.sh`는 이미지 로드와 롤아웃을 수행하므로 상태 조회용으로 실행하지 않습니다. 완료 Pod/로그는 검증 증거로 남습니다.

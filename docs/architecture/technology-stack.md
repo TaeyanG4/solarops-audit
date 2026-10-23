@@ -4,6 +4,8 @@
 
 설정된 기술과 실제 사용 증거는 [2026-10-23 실행 스택·데이터 실사](../benchmarks/stack-authenticity-20261023.md)를 함께 확인합니다. 라이브러리 설치뿐 아니라 DB 조회·S3 객체·원본 계산·실제 KPO 이력을 대조했습니다. kind DAG는 paused이며 전체 공개 데이터 처리는 Compose, kind v2 검증은 공개 하루 범위입니다.
 
+수집기는 BR-PVGen 고정 배포용 Python HTTP 다운로드이며 Airflow는 저장된 역사 구간을 재처리합니다. 신규 데이터 정기 수집과 다른 출처 연동은 현재 구현 범위 밖입니다. [수집·일정·확장 절차](../guides/data-ingestion.md)에서 실제 실행 상태와 코드 일정을 구분합니다.
+
 선택 기준은 로컬에서 재현 가능하고, 메모리 사용을 제한하며, 결과의 출처와 재시도 경계를 설명할 수 있는가입니다. 아래 버전은 직접 의존성 및 현재 인프라 설정 기준입니다. 전이 의존성은 [uv.lock](../../uv.lock), 배포된 이미지 식별자는 [image-versions.json](../image-versions.json)을 확인합니다.
 
 ## 처리와 저장
@@ -37,7 +39,7 @@ MinIO는 공식 소스 `RELEASE.2025-10-15T17-29-55Z`를 [Dockerfile](../../infr
 | Airflow 3.3.2 / LocalExecutor | 의존성·실행 이력·재시도·수동 백필. DAG는 공통 CLI만 호출 | cron은 더 단순하지만 태스크 재시도·관찰 기능을 직접 구현해야 함. 이력 규모 대비 Airflow 운영 비용도 있음 |
 | KPO provider 10.24.0 | KubernetesPodOperator가 작업별 CLI Pod를 생성, CPU/RAM·권한 격리 | LocalExecutor와 대체 관계가 아님. 스케줄러는 LocalExecutor, 실제 작업은 KPO Pod. 작은 작업의 Pod 기동 비용이 큼 |
 | kind 0.33.0 / Kubernetes 1.35.0 / Helm 3.19.0 / Airflow chart 1.22.0 | 로컬에서 실제 Pod·서비스 DNS·PVC·롤아웃·중단 재시도를 검증 | 단일 노드 kind는 고가용성/재해복구 증거가 아님. 관리형 클라우드 운영·대규모 확장성 미검증 |
-| pytest 9.1.1 / Ruff 0.17.1 / GitHub Actions | 실패 보존·중복 충돌·조직 격리·API·패키징 회귀, 두 OS에서 동일 검사 | 오프라인 CI에는 외부 서비스·전체 공개 자료가 없음. 실제 서비스 검사는 별도 수행 |
+| pytest 9.1.1 / Ruff 0.17.1 / GitHub Actions | 실패 보존·중복 충돌·조직 격리·API·패키징 회귀, 두 OS에서 동일 검사 | 오프라인 CI에는 외부 서비스·전체 공개 자료가 없음. 실제 PostgreSQL/MinIO는 별도 선택형 self-hosted CI로 검증하며 실행기·서비스가 필요 |
 | hatchling 1.29.0 | CLI와 템플릿·정적 파일을 wheel로 배포 | wheel 성공만으로 서비스 배포 완료를 뜻하지 않으므로 컨테이너/API 확인을 별도 기록 |
 
 개발 의존성의 httpx2 2.16.0은 FastAPI TestClient, psutil 7.2.2는 실제 메모리/실행 측정에 씁니다. Airflow 환경은 자체 의존성 제약이 있으므로 [별도 venv를 복사하는 이미지](../../infra/docker/Dockerfile)로 앱 환경과 분리합니다. 앱은 uv.lock에 잠겨 있지만 Airflow 이미지의 전이 의존성 전체가 같은 lockfile로 잠긴 것은 아닙니다. 이미지 digest를 검증 기록에 남깁니다.
