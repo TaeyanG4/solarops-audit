@@ -62,6 +62,10 @@ docker compose --env-file .env -f infra/compose/compose.yaml start app-db minio 
 
 새 파일: 별도 폴더에서 `solarops source checksum`으로 확인 후 `solarops ingest`의 metadata/inverter/station 경로를 지정합니다. 공개 자료는 `--source-kind public`, 테스트는 synthetic. 데이터가 수정됐다면 새 버전을 주어야 합니다. 원본 파일을 직접 덮어써서 수정하지 않습니다.
 
+v0.4.2의 `PUBLICATION_CONFLICT`는 배치 시작 후 같은 날짜의 active가 바뀌었다는 뜻입니다. 현재 결과와 입력 버전을 확인한 뒤 필요한 날짜만 재시도하세요. 이미 게시했다가 교체된 과거 버전으로 되돌리려면 `ingest` 또는 실행하는 `backfill`에 `--restore`를 명시합니다. 이 옵션도 동시성 검사는 유지하며 이전 run ID를 기록합니다. 실패한 날짜는 metadata와 함께 롤백되지만 배치 앞부분의 성공한 날짜는 유지됩니다.
+
+상세 추적은 `uv run solarops inspect-runs --run-id <UUID>` 또는 기존 진단 API를 사용합니다. 새 실행에는 릴리스·Git 커밋·Airflow dag/run/task/attempt·Pod UID·처리 단계·행 수·오류·관련 시도를 기록합니다. [실제 실패/재시도 예](../benchmarks/integrity-v0.4.2.md). 환경이 주지 않은 필드는 비워 두며 경과시간만으로 프로세스 사망을 판단하지 않습니다.
+
 실행 조사: [실행 이력](http://127.0.0.1:8502/?view=runs&run_plant=PS_001)에서 실행 단위·상태·정확한 발전소 ID로 좁힙니다. 전체 기간의 공개·합성 처리 이력을 조회하며 보고 월 필터와 별개입니다. 주소를 저장하면 페이지·선택한 상세까지 복원합니다. 상세의 날짜에서 하위 파티션으로 이동하고 **상위 작업 보기**로 돌아옵니다. 요약 건수는 상태 필터 적용 전이며, 과거 완료 기록이 현재 활성 결과임을 보장하지 않습니다.
 
 상세의 **진단 조회하기**는 현재 게시 개수와 미완료 기록의 경과 시간을 읽습니다. 같은 날짜·계산 버전·시간대의 결과가 다른 실행에 연결되면 **현재 결과의 실행 보기**로 이동합니다. 시간 경과는 프로세스 중단의 확정 근거가 아닙니다. API는 `GET /api/v1/runs/{UUID}/diagnostics`이며 실행 상태를 변경하지 않습니다.

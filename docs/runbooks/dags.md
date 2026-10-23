@@ -81,4 +81,4 @@ UI Params의 날짜는 ISO date, 버전은 경로 안전 문자로 제한합니�
 
 `fault_marker`와 `test_delay`는 합성 자료의 장애 시연에만 적용됩니다. `fault_marker`가 새 이름이면 첫 실행에서 DB 커밋 도중 예외를 발생시키고, 다음 재시도에서 같은 결과를 정상 공개합니다. 동일 marker는 다시 실패시키지 않습니다. 기존 marker를 삭제하지 말고 새 이름을 사용합니다.
 
-현재 Airflow·KPO worker 설정은 `0.4.1`, Compose dashboard는 `0.4.1-technical-final-20261023`입니다. 이번 기술 후속 배포는 dashboard만 갱신했으므로 기존 Airflow/kind 경로의 보고서는 최신 선택 범위 필드가 없어 게시 근거 비교가 불가능할 수 있습니다. [이미지 식별자](../image-versions.json). 이후 변경은 새 태그/digest로 관련 참조를 맞춘 뒤 필요한 이미지를 build하고 서비스를 `up -d`합니다. kind의 `bash scripts/ops/k8s-refresh.sh`는 이미지 로드와 롤아웃을 수행하므로 상태 조회용으로 실행하지 않습니다. 완료 Pod/로그는 검증 증거로 남습니다.
+현재 dashboard·worker·Airflow·KPO는0.4.2로 정렬했습니다. [릴리스 명세](../../src/solarops/release.json)를 변경하고 `uv run python scripts/release/release.py sync`, `uv lock`, `check`를 실행한 뒤 구현을 커밋합니다. `uv run python scripts/release/release.py build`는 두 이미지를 빌드하고 커밋/이미지 ID를 기록합니다. [현재 증거](../releases/0.4.2.json). kind의 `bash scripts/ops/k8s-refresh.sh`는 이미지 로드와 롤아웃을 수행하므로 상태 조회용으로 실행하지 않습니다. 완료 Pod/로그·과거 보고서는 보존하며 소급 변경하지 않습니다.

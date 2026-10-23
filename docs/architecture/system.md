@@ -4,9 +4,9 @@
 
 SolarOps는 **역사 CSV를 검증·분석해 일별 결과와 불변 보고서로 게시하는 배치 시스템**입니다. Python CLI가 처리와 쓰기를 담당하고 FastAPI 대시보드는 저장된 결과를 읽습니다. 같은 CLI를 네이티브, Compose, Airflow, Kubernetes 작업 Pod에서 실행합니다.
 
-설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 앱 v0.4.1 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
+설계 기준은 입력 보존, 계산·출처 추적, 실패 시 이전 게시 결과 유지, 실행 환경별 재현성입니다. 현재 앱 v0.4.2 / 계산 `energy-interval-v2` 기준이며 실제 배포 이미지와 확인 범위는 아래에 구분합니다.
 
-**알려진 보완 범위:** 2026-10-23 [독립 검토](../reviews/2026-10-23-independent.md)에서 입력 ID 일관성·중단 추출·발전소 metadata의 조기 갱신·일별 active 역순 교체 경계를 확인했습니다. 아래 일별 트랜잭션은 구현되어 있지만 metadata까지 실패 원자성이 보장되거나 오래된 실행의 교체가 차단되는 것은 아닙니다. [합성 재현과 다음 계획](../worklog/2026-10-23-independent-review.md).
+**v0.4.2:** 독립 검토에서 재현한 입력 ID·추출·metadata·역순 게시 경계를 수정했습니다. 배치 시작 때 기대한 active와 비교해 교체하고 metadata도 같은 트랜잭션에 게시합니다. 충돌은 이전 결과를 유지한 채 명시적으로 실패하며 의도적 과거 복원은 `--restore`가 필요합니다. [실제 SQLite/PostgreSQL 검증](../benchmarks/integrity-v0.4.2.md).
 
 ## 전체 데이터 흐름
 
@@ -90,10 +90,10 @@ sequenceDiagram
     participant DB as SQLite / PostgreSQL
     participant UI as API / 보고서
     CLI->>Obj: 원본 checksum·버전 보존
-    CLI->>DB: batch 및 일별 run 기록
+    CLI->>DB: 기대 active 캡처 + batch 및 일별 run 기록
     CLI->>Obj: 일별 정규화·지표·계보 저장
     CLI->>CLI: 품질·중복·계보 검증
-    CLI->>DB: 트랜잭션: 지표 + active 포인터 전환
+    CLI->>DB: 트랜잭션: 지표 + 조건부 active 교체 + metadata
     DB-->>CLI: commit 또는 rollback
     UI->>DB: 조직·시각대·계산 버전의 active snapshot
     UI->>Obj: active가 가리키는 산출물 읽기
@@ -131,12 +131,12 @@ DB와 객체 저장소 전체를 하나의 분산 트랜잭션으로 묶지는 �
 
 ## 구현·배포·검증의 범위
 
-현재 Compose dashboard는 `solarops-worker:0.4.1-technical-final-20261023`입니다. 기존 Airflow·KPO worker는 `0.4.1` 이미지를 유지하므로 저장소의 최신 코드와 모든 실행 이미지가 동일하다고 해석하면 안 됩니다. 특히 구버전 경로에서 생성한 보고서는 최신 선택 범위 필드가 없을 수 있습니다. 태그별 식별자는 [이미지 기록](../image-versions.json), 실제 상태는 [이번 점검](../worklog/2026-10-23-data-architecture.md)에 있습니다.
+Compose dashboard/worker/Airflow와 kind Airflow/KPO의 새 실행을0.4.2로 통일했습니다. [단일 명세](../../src/solarops/release.json)와 [커밋·이미지 ID](../releases/0.4.2.json)를 연결하고 CI에서 선언 드리프트를 검사합니다. Compose Airflow는 중지 상태이며 과거 완료 Pod·보고서는 보존합니다. Native/Compose/KPO의 작은 동일 표본과 실제 재시도·추적은 [v0.4.2 검증](../benchmarks/integrity-v0.4.2.md)에 있습니다.
 
 | 주장 | 실행한 근거 / 한계 |
 |---|---|
 | 실제 스택과 원본 사용 | [원본 해시·독립 계산·DB/API/보고서/KPO 대조](../benchmarks/stack-authenticity-20261023.md). 현장 계측 정확도 인증은 아님 |
-| 실패 보존·재처리 | [계약·공개 전체·무결성 검증](../benchmarks/integrity-v0.4.1.md), [최신 실제 서비스 CI](https://github.com/TaeyanG4/solarops-audit/actions/runs/39897515593) 5개 통과 |
+| 실패 보존·재처리 | [v0.4.2](../benchmarks/integrity-v0.4.2.md): 실제 서비스12검사, 동시 게시·복원·실제KPO 재시도. 과거 공개 전체 검증은 별도 역사 기록 |
 | 보고서 비교·동시 읽기 | [최신 기술 측정](../benchmarks/technical-20261023.md). 합성10만 건·동시4의 깊은 페이지 p95 679ms, 동시8은 약2초; 동시 쓰기·장시간 부하 미검증 |
 | 복원 | 별도 PostgreSQL/MinIO 인스턴스에 합성27객체·7파티션 복원. 같은 물리 호스트이며 다른 호스트 재해복구·운영 RTO/RPO 증거는 아님 |
 | 외부 운영 | 현재 로컬 개발/시연 범위. 고객 업로드·다중 사용자 인증/권한·HTTPS 외부 서비스·신규 원천 정기 수집은 미구현 |

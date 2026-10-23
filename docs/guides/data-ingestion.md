@@ -30,7 +30,7 @@ Airflow가 켜져 있다는 사실만으로 자동 적재 중이라고 판단하
 
 구현: [다운로더](../../src/solarops/acquisition/brpvgen.py) · [공통 CLI](../../src/solarops/cli.py) · [재처리](../../src/solarops/replay.py) · [파이프라인](../../src/solarops/pipeline.py).
 
-**현재 미해결 경계:** 다운로드의 임시 파일 검증과 달리 압축 해제는 최종 CSV에 직접 씁니다. 중단 시 불완전 파일이 남아 재시도를 막는 경로를 합성으로 재현했습니다. 입력 ID 혼용·실패 metadata·게시 역순 완료 보완과 함께 [다음 계획](../../plan.md)에 등록했으며 자동 수집·병렬화를 확대하기 전에 처리할 항목입니다. [근거](../worklog/2026-10-23-independent-review.md).
+**v0.4.2 완료 경계:** ZIP의 개별 CSV를 임시 경로에 복사하고 EOF/CRC·크기·fsync 검증 후 최종 경로에 원자적으로 연결합니다. 중단 partial은 보존하며 재시도할 수 있습니다. ID 표현은 범위 계산과 정규화에서 동일하게 검사하고, metadata와 조건부 active 교체를 함께 커밋합니다. ZIP 전체/날짜 범위 전체의 원자성을 의미하지는 않습니다. [검증과 충돌·복원 계약](../benchmarks/integrity-v0.4.2.md).
 
 ## 코드에 정의된 일정
 

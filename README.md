@@ -10,7 +10,7 @@
 
 **최근 기술 개선:** 보고서의 발행 당시 근거와 현재 자료를 비교하고, 실제 PostgreSQL·MinIO 검사를 선택형 CI에 연결했습니다. 별도 인스턴스 복원과 합성10만 건 동시 조회를 검증했고, 정렬 인덱스로 동시4개의 깊은 페이지 p95가6409→679ms로 줄었습니다. [조건·검사·한계](docs/benchmarks/technical-20261023.md) · [보고서 상태 화면](docs/portfolio/images/technical-20261023/README.md). 이전 등록 월·진단·발전소 조회 개선은 [기록](docs/worklog/2026-10-23-usability.md)에 있습니다.
 
-**독립 검토 후 남은 보완:** 합성 입력에서 ID 표현 혼용에 따른 품질 분모 오류, 추출 중단 후 재시도 차단, 적재 실패 시 발전소 metadata 변경, 일별 게시 역순 완료 위험을 확인했습니다. 수정은 아직 진행하지 않았으며 입력·게시 무결성→배포 버전 정렬을 다음 우선순위로 정했습니다. [독립 평가](docs/reviews/2026-10-23-independent.md) · [재현 근거와 적용 판단](docs/worklog/2026-10-23-independent-review.md) · [작업 순서](plan.md). 기존 공개 자료에서 해당 문제가 발생했다고 확인한 것은 아닙니다.
+**v0.4.2 무결성·실행 정렬:** 독립 검토에서 재현한 ID 혼용, 중단 추출, 실패 metadata 반영, 역순 게시를 수정했습니다. 실제 PostgreSQL·MinIO12검사 통과, Native·Compose·Airflow KPO의 7일 논리 해시와 보고서 지표가 일치합니다. 실행에는 Git 릴리스·Airflow 재시도·Pod UID를 기록하고 dashboard와 kind도 같은 이미지로 교체했습니다. [수정·실행 증거와 한계](docs/benchmarks/integrity-v0.4.2.md) · [다음 계획](plan.md). 기존 공개 자료에서 해당 결함이 발생했다고 확인한 것은 아닙니다.
 
 **데이터 출처:** [BR-PVGen / Zenodo](https://zenodo.org/records/21511487) · 브라질 51개 발전소의 공개 역사 자료 · CC BY 4.0. 합성 데모는 별도로 표시하며 화면의 발전량은 추정치입니다.
 
