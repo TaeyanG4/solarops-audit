@@ -1,0 +1,2259 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="SolarOps Audit는 태양광 발전량의 추정치와 데이터 품질을 함께 보여주고, 월간 보고서의 숫자를 원본까지 연결합니다. 실제 제품 화면과 공개 자료 검증 근거를 살펴보세요."
+    />
+    <meta name="theme-color" content="#172131" />
+    <title>SolarOps Audit — 태양광 데이터, 숫자부터 근거까지</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="preload"
+      href="assets/fonts/PretendardLanding.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="styles.css?v=6" />
+    <script>
+      document.documentElement.classList.add("js");
+    </script>
+    <script src="site.js?v=6" defer></script>
+  </head>
+  <body class="landing-page">
+    <a class="skip" href="#main">본문으로 건너뛰기</a>
+    <header class="site-header wrap">
+      <a class="wordmark" href="./" aria-label="SolarOps Audit 처음으로"
+        ><img src="assets/favicon.svg" width="32" height="32" alt="" /><span
+          >SolarOps <span class="wordmark-suffix">Audit</span></span
+        ></a
+      >
+      <nav aria-label="주 메뉴">
+        <a href="#demo">제품 화면</a><a href="#workflow">데이터 품질</a
+        ><a href="#evidence">검증 근거</a><a href="#faq">자주 묻는 질문</a>
+      </nav>
+      <a class="header-action" href="evidence.html#demo"
+        >로컬 데모 실행
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M5 12h14m-6-6 6 6-6 6" /></svg
+      ></a>
+    </header>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <img
+          class="landscape"
+          src="assets/images/solar-landscape.webp"
+          width="1920"
+          height="1280"
+          alt=""
+          fetchpriority="high"
+        />
+        <div class="hero-head wrap">
+          <p class="hero-badge"><i aria-hidden="true"></i>BR-PVGen 공개 자료 · 2024년 4월 실제 집계</p>
+          <h1 id="hero-title">태양광 데이터,<br />숫자부터 근거까지</h1>
+          <p class="lead">
+            SolarOps Audit는 발전량의 추정치와 데이터 품질을 함께 보여주고,
+            월간 보고서의 숫자를 원본까지 연결합니다.
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="#demo"
+              >제품 화면 살펴보기 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" /></svg></a
+            ><a class="button button-ghost" href="evidence.html">검증 근거 보기</a>
+          </div>
+        </div>
+        <div class="demo-stage wrap" id="demo">
+          <div class="app-window" role="region" aria-label="SolarOps Audit 제품 화면 데모" data-ui>
+            <div class="app-chrome">
+              <span class="app-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="app-address"
+                >SolarOps Audit <span aria-hidden="true">/</span>
+                <b id="app-crumb">전체 현황</b></span
+              >
+              <span class="app-source">저장된 공개 집계 · 실시간 아님</span>
+            </div>
+            <div class="app-body">
+              <div class="app-sidebar">
+                <p class="app-brand">
+                  <img src="assets/favicon.svg" width="22" height="22" alt="" />SolarOps
+                </p>
+                <div class="app-nav" role="tablist" aria-label="데모 화면" aria-orientation="vertical">
+                  <button type="button" role="tab" id="tab-overview" aria-controls="view-overview" aria-selected="true" tabindex="0" data-view-tab="overview" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z" /></svg><span>전체 현황</span></button><button type="button" role="tab" id="tab-report" aria-controls="view-report" aria-selected="false" tabindex="-1" data-view-tab="report" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6" /></svg><span>월간 보고서</span></button><button type="button" role="tab" id="tab-lineage" aria-controls="view-lineage" aria-selected="false" tabindex="-1" data-view-tab="lineage" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3v12M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6M18 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6M18 9c0 5-6 4-12 6" /></svg><span>원본 계보</span></button>
+                </div>
+                <dl class="app-scope">
+                  <div><dt>기간</dt><dd>2024-04</dd></div>
+                  <div><dt>자료</dt><dd>BR-PVGen 공개</dd></div>
+                  <div><dt>시간대</dt><dd>UTC</dd></div>
+                </dl>
+              </div>
+              <div class="app-main">
+                <div class="app-view" id="view-overview" role="tabpanel" aria-labelledby="tab-overview" data-active>
+                  <header class="app-view-head">
+                    <div>
+                      <h2>전체 현황</h2>
+                      <p class="preview-meta">2024-04 · 공개 5개 발전소 · 140개 일별 파티션 · UTC</p>
+                    </div>
+                  </header>
+                  <dl class="kpi-row">
+                    <div>
+                      <dt>추정 발전량</dt>
+                      <dd class="kpi-energy">1,477.83<small>MWh</small></dd>
+                      <dd class="kpi-note">유효 전력 × 0.25h 추정</dd>
+                    </div>
+                    <div>
+                      <dt>유효값 비율</dt>
+                      <dd>82.5<small>%</small></dd>
+                      <dd class="kpi-note">161,084 / 195,264 슬롯</dd>
+                    </div>
+                    <div>
+                      <dt>관측 슬롯</dt>
+                      <dd>100<small>%</small></dd>
+                      <dd class="kpi-note">누락 0 · 채우지 않음</dd>
+                    </div>
+                    <div>
+                      <dt>검토 후보</dt>
+                      <dd>0<small>건</small></dd>
+                      <dd class="kpi-note">고장 확정이 아닌 검토 대상</dd>
+                    </div>
+                  </dl>
+                  <div class="app-grid">
+                    <section class="app-panel trend-preview" aria-labelledby="trend-heading">
+                      <div class="panel-head">
+                        <h3 id="trend-heading">일별 추정 발전량</h3>
+                        <p class="preview-meta">원본 보간 포함 가능 · 날짜별 발전소 수가 다릅니다.</p>
+                      </div>
+              <div class="chart-wrap">
+                <span class="chart-unit">MWh · 추정</span
+                ><svg
+                  class="energy-chart"
+                  viewBox="0 0 720 306"
+                  role="group"
+                  aria-label="2024년 4월 일별 추정 발전량. 막대를 선택하거나 아래 날짜를 선택하세요."
+                >
+                  <line class="chart-grid" x1="48" y1="32" x2="712" y2="32" />
+                  <text class="chart-axis" x="38" y="36" text-anchor="end">
+                    65
+                  </text>
+                  <line class="chart-grid" x1="48" y1="148" x2="712" y2="148" />
+                  <text class="chart-axis" x="38" y="152" text-anchor="end">
+                    32.5
+                  </text>
+                  <line class="chart-grid" x1="48" y1="264" x2="712" y2="264" />
+                  <text class="chart-axis" x="38" y="268" text-anchor="end">
+                    0
+                  </text>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="0"
+                    aria-label="2024-04-01 · 52.66 MWh · 4개 발전소"
+                    aria-pressed="true"
+                    data-day-index="0"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="50"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="52"
+                      y="76.027"
+                      width="16"
+                      height="187.973"
+                      rx="3"
+                    />
+                  </g>
+                  <text class="chart-axis" x="60" y="294" text-anchor="middle">
+                    01일
+                  </text>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-02 · 40.37 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="1"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="72"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="74"
+                      y="119.927"
+                      width="16"
+                      height="144.073"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-03 · 51.10 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="2"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="94"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="96"
+                      y="81.626"
+                      width="16"
+                      height="182.374"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-04 · 49.59 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="3"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="116"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="118"
+                      y="87.001"
+                      width="16"
+                      height="176.999"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-05 · 52.02 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="4"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="138"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="140"
+                      y="78.338"
+                      width="16"
+                      height="185.662"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-06 · 44.65 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="5"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="160"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="162"
+                      y="104.619"
+                      width="16"
+                      height="159.381"
+                      rx="3"
+                    />
+                  </g>
+                  <text class="chart-axis" x="170" y="294" text-anchor="middle">
+                    06일
+                  </text>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-07 · 49.46 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="6"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="182"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="184"
+                      y="87.465"
+                      width="16"
+                      height="176.535"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-08 · 27.11 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="7"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="204"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="206"
+                      y="167.222"
+                      width="16"
+                      height="96.778"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-09 · 32.09 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="8"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="226"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="228"
+                      y="149.446"
+                      width="16"
+                      height="114.554"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-10 · 22.95 MWh · 4개 발전소"
+                    aria-pressed="false"
+                    data-day-index="9"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="248"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="250"
+                      y="182.095"
+                      width="16"
+                      height="81.905"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-11 · 42.39 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="10"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="270"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="272"
+                      y="112.696"
+                      width="16"
+                      height="151.304"
+                      rx="3"
+                    />
+                  </g>
+                  <text class="chart-axis" x="280" y="294" text-anchor="middle">
+                    11일
+                  </text>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-12 · 50.23 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="11"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="292"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="294"
+                      y="84.709"
+                      width="16"
+                      height="179.291"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-13 · 48.05 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="12"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="314"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="316"
+                      y="92.513"
+                      width="16"
+                      height="171.487"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-14 · 36.14 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="13"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="336"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="338"
+                      y="134.992"
+                      width="16"
+                      height="129.008"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-15 · 41.51 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="14"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="358"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="360"
+                      y="115.826"
+                      width="16"
+                      height="148.174"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-16 · 50.38 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="15"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="380"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="382"
+                      y="84.196"
+                      width="16"
+                      height="179.804"
+                      rx="3"
+                    />
+                  </g>
+                  <text class="chart-axis" x="390" y="294" text-anchor="middle">
+                    16일
+                  </text>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-17 · 40.92 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="16"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="402"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="404"
+                      y="117.956"
+                      width="16"
+                      height="146.044"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-18 · 42.29 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="17"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="424"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="426"
+                      y="113.067"
+                      width="16"
+                      height="150.933"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-19 · 57.80 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="18"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="446"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="448"
+                      y="57.695"
+                      width="16"
+                      height="206.305"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-20 · 60.49 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="19"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="468"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="470"
+                      y="48.081"
+                      width="16"
+                      height="215.919"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-21 · 58.91 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="20"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="490"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="492"
+                      y="53.752"
+                      width="16"
+                      height="210.248"
+                      rx="3"
+                    />
+                  </g>
+                  <text class="chart-axis" x="500" y="294" text-anchor="middle">
+                    21일
+                  </text>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-22 · 52.47 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="21"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="512"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="514"
+                      y="76.706"
+                      width="16"
+                      height="187.294"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-23 · 54.71 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="22"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="534"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="536"
+                      y="68.726"
+                      width="16"
+                      height="195.274"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-24 · 48.87 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="23"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="556"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="558"
+                      y="89.573"
+                      width="16"
+                      height="174.427"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-25 · 59.17 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="24"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="578"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="580"
+                      y="52.802"
+                      width="16"
+                      height="211.198"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-26 · 61.15 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="25"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="600"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="602"
+                      y="45.725"
+                      width="16"
+                      height="218.275"
+                      rx="3"
+                    />
+                  </g>
+                  <text class="chart-axis" x="610" y="294" text-anchor="middle">
+                    26일
+                  </text>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-27 · 64.51 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="26"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="622"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="624"
+                      y="33.760"
+                      width="16"
+                      height="230.240"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-28 · 64.77 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="27"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="644"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="646"
+                      y="32.830"
+                      width="16"
+                      height="231.170"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-29 · 60.92 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="28"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="666"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="668"
+                      y="46.552"
+                      width="16"
+                      height="217.448"
+                      rx="3"
+                    />
+                  </g>
+                  <g
+                    class="chart-day"
+                    role="button"
+                    tabindex="-1"
+                    aria-label="2024-04-30 · 60.13 MWh · 5개 발전소"
+                    aria-pressed="false"
+                    data-day-index="29"
+                  >
+                    <rect
+                      class="chart-hit"
+                      x="688"
+                      y="20"
+                      width="22"
+                      height="246"
+                    />
+                    <rect
+                      class="chart-bar"
+                      x="690"
+                      y="49.365"
+                      width="16"
+                      height="214.635"
+                      rx="3"
+                    />
+                  </g>
+                  <text class="chart-axis" x="698" y="294" text-anchor="middle">
+                    30일
+                  </text>
+                </svg>
+                <div class="chart-tooltip" id="chart-tooltip" hidden></div>
+              </div>
+              <p class="chart-instruction">
+                막대에 마우스를 올리거나 날짜를 선택해 보세요.
+              </p>
+              <div class="day-controls">
+                <span class="day-control-label">상세 날짜</span>
+                <div>
+                  <div class="day-picker">
+                    <button
+                      type="button"
+                      id="day-trigger"
+                      aria-label="상세 날짜 선택"
+                      aria-haspopup="listbox"
+                      aria-expanded="false"
+                      aria-controls="day-options"
+                      data-index="0"
+                      disabled
+                    >
+                      <span>2024-04-01</span
+                      ><svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="m7 10 5 5 5-5" />
+                      </svg>
+                    </button>
+                    <div
+                      id="day-options"
+                      role="listbox"
+                      aria-label="상세 날짜"
+                      hidden
+                    >
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected="true"
+                        tabindex="0"
+                        data-date-option="0"
+                      >
+                        2024-04-01</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="1"
+                      >
+                        2024-04-02</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="2"
+                      >
+                        2024-04-03</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="3"
+                      >
+                        2024-04-04</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="4"
+                      >
+                        2024-04-05</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="5"
+                      >
+                        2024-04-06</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="6"
+                      >
+                        2024-04-07</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="7"
+                      >
+                        2024-04-08</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="8"
+                      >
+                        2024-04-09</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="9"
+                      >
+                        2024-04-10</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="10"
+                      >
+                        2024-04-11</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="11"
+                      >
+                        2024-04-12</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="12"
+                      >
+                        2024-04-13</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="13"
+                      >
+                        2024-04-14</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="14"
+                      >
+                        2024-04-15</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="15"
+                      >
+                        2024-04-16</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="16"
+                      >
+                        2024-04-17</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="17"
+                      >
+                        2024-04-18</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="18"
+                      >
+                        2024-04-19</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="19"
+                      >
+                        2024-04-20</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="20"
+                      >
+                        2024-04-21</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="21"
+                      >
+                        2024-04-22</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="22"
+                      >
+                        2024-04-23</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="23"
+                      >
+                        2024-04-24</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="24"
+                      >
+                        2024-04-25</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="25"
+                      >
+                        2024-04-26</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="26"
+                      >
+                        2024-04-27</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="27"
+                      >
+                        2024-04-28</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="28"
+                      >
+                        2024-04-29</button
+                      ><button
+                        type="button"
+                        role="option"
+                        aria-selected="false"
+                        tabindex="-1"
+                        data-date-option="29"
+                      >
+                        2024-04-30
+                      </button>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    id="day-prev"
+                    aria-label="이전 날짜"
+                    disabled
+                  >
+                    이전</button
+                  ><button
+                    type="button"
+                    id="day-next"
+                    aria-label="다음 날짜"
+                    disabled
+                  >
+                    다음
+                  </button>
+                </div>
+              </div>
+              <div class="day-result" aria-live="polite" aria-atomic="true">
+                <strong id="day-energy">52.66 MWh</strong
+                ><span id="day-description"
+                  >2024-04-01 · 추정 · 4개 발전소 합계</span
+                >
+              </div>
+              <details class="data-details">
+                <summary>
+                  일별 수치 표 보기<svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h14m-7-7v14" />
+                  </svg>
+                </summary>
+                <div
+                  class="preview-table-scroll"
+                  tabindex="0"
+                  role="region"
+                  aria-label="일별 발전량 표"
+                >
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>날짜 (UTC)</th>
+                        <th>추정 kWh</th>
+                        <th>발전소</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <th scope="row">2024-04-01</th>
+                        <td>52,664.910</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-02</th>
+                        <td>40,365.149</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-03</th>
+                        <td>51,096.119</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-04</th>
+                        <td>49,590.298</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-05</th>
+                        <td>52,017.453</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-06</th>
+                        <td>44,654.185</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-07</th>
+                        <td>49,460.263</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-08</th>
+                        <td>27,114.619</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-09</th>
+                        <td>32,094.750</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-10</th>
+                        <td>22,947.560</td>
+                        <td>4</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-11</th>
+                        <td>42,391.286</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-12</th>
+                        <td>50,232.515</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-13</th>
+                        <td>48,045.987</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-14</th>
+                        <td>36,144.501</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-15</th>
+                        <td>41,514.128</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-16</th>
+                        <td>50,376.172</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-17</th>
+                        <td>40,917.479</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-18</th>
+                        <td>42,287.187</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-19</th>
+                        <td>57,800.980</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-20</th>
+                        <td>60,494.605</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-21</th>
+                        <td>58,905.662</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-22</th>
+                        <td>52,474.541</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-23</th>
+                        <td>54,710.464</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-24</th>
+                        <td>48,869.734</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-25</th>
+                        <td>59,171.736</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-26</th>
+                        <td>61,154.576</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-27</th>
+                        <td>64,506.958</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-28</th>
+                        <td>64,767.348</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-29</th>
+                        <td>60,922.841</td>
+                        <td>5</td>
+                      </tr>
+                      <tr>
+                        <th scope="row">2024-04-30</th>
+                        <td>60,134.838</td>
+                        <td>5</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+                    </section>
+                    <section class="app-panel quality-preview" aria-labelledby="overview-quality-title">
+                      <h3 id="overview-quality-title">데이터 품질 구성</h3>
+                      <p class="preview-meta">등록된 일별 파티션의 예상 슬롯 기준</p>
+              <div
+                class="quality-track"
+                role="img"
+                aria-label="유효 82.5%, 무효 17.5%, 누락 0%"
+              >
+                <span></span>
+              </div>
+              <dl class="quality-rows">
+                <div>
+                  <dt><i class="valid-dot"></i>유효값</dt>
+                  <dd>161,084</dd>
+                </div>
+                <div>
+                  <dt><i class="invalid-dot"></i>무효값 · 계산 제외</dt>
+                  <dd>34,180</dd>
+                </div>
+                <div>
+                  <dt><i class="missing-dot"></i>누락 · 채우지 않음</dt>
+                  <dd>0</dd>
+                </div>
+              </dl>
+              <p class="preview-meta">
+                관측 슬롯은 100%입니다. 미등록 일자는 비율에 포함되지 않으므로
+                발전소별 등록 일수를 함께 확인하세요.
+              </p>
+              <div class="quality-footnote">
+                <strong>원본 보간 표시 9.89%</strong>
+                <p>
+                  유효·무효와 겹칠 수 있는 별도 속성입니다.<br />보간 여부가
+                  불명인 슬롯: 175,946개
+                </p>
+                <a href="#workflow">세 지표의 차이 살펴보기 →</a>
+              </div>
+                    </section>
+                  </div>
+                </div>
+                <div class="app-view" id="view-report" role="tabpanel" aria-labelledby="tab-report">
+                  <header class="app-view-head">
+                    <div>
+                      <h2>2024-04 · PS_001</h2>
+                      <p class="preview-meta">월간 보고서 · 1개 발전소 · 30개 일별 파티션 · UTC</p>
+                    </div>
+                    <p class="app-chip"><svg class="status-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4 10-10" /></svg>월 전체 파티션 확보</p>
+                  </header>
+                  <div class="report-view-grid">
+                    <section class="app-panel report-energy" aria-labelledby="report-energy-title">
+                      <div class="preview-energy-label">
+                        <h3 id="report-energy-title">추정 발전량</h3>
+                        <div class="unit-switch" role="group" aria-label="발전량 단위">
+                          <button type="button" data-unit="kwh" aria-pressed="true" disabled>kWh</button
+                          ><button type="button" data-unit="mwh" aria-pressed="false" disabled>MWh</button>
+                        </div>
+                      </div>
+                      <p class="preview-energy" aria-live="polite" aria-atomic="true">
+                        <strong id="hero-energy">585,980.28</strong>
+                        <span id="hero-unit">kWh</span>
+                      </p>
+                      <p class="preview-meta">유효 전력 × 0.25h · 계량기 실측 전력량과 다른 추정값입니다.</p>
+                      <dl class="report-stats">
+                        <div><dt>관측 슬롯</dt><dd>100%</dd></div>
+                        <div><dt>유효값</dt><dd>74.9%</dd></div>
+                        <div><dt>원본 보간</dt><dd>17.0%</dd></div>
+                        <div><dt>검토 후보</dt><dd>0건</dd></div>
+                      </dl>
+                    </section>
+                    <section class="app-panel report-daily" aria-labelledby="report-daily-title">
+                      <div class="panel-head">
+                        <h3 id="report-daily-title">일별 추정 발전량</h3>
+                        <p class="preview-meta">최대 30 MWh 기준</p>
+                      </div>
+                      <svg class="mini-chart" viewBox="0 0 600 182" role="img" aria-label="PS_001 2024년 4월 일별 추정 발전량. 최대 4월 23일 28.30 MWh, 4월 10일은 0 kWh이며 유효값 20.0%입니다. 유효값 50% 미만인 날은 4월 6일, 10일, 16일입니다."><line class="chart-grid" x1="8" y1="16" x2="592" y2="16" /><line class="chart-grid" x1="8" y1="140" x2="592" y2="140" /><rect class="mini-bar" x="12.2" y="37.6" width="11" height="102.4" rx="2" /><rect class="mini-bar" x="31.7" y="57.7" width="11" height="82.3" rx="2" /><rect class="mini-bar" x="51.2" y="58.4" width="11" height="81.6" rx="2" /><rect class="mini-bar" x="70.6" y="44.5" width="11" height="95.5" rx="2" /><rect class="mini-bar" x="90.1" y="51.9" width="11" height="88.1" rx="2" /><rect class="mini-bar is-low" x="109.6" y="64.4" width="11" height="75.6" rx="2" /><rect class="mini-bar" x="129.0" y="47.5" width="11" height="92.5" rx="2" /><rect class="mini-bar" x="148.5" y="99.0" width="11" height="41.0" rx="2" /><rect class="mini-bar" x="168.0" y="110.0" width="11" height="30.0" rx="2" /><rect class="mini-bar is-low" x="187.4" y="138.5" width="11" height="1.5" rx="2" /><rect class="mini-bar" x="206.9" y="68.4" width="11" height="71.6" rx="2" /><rect class="mini-bar" x="226.4" y="55.1" width="11" height="84.9" rx="2" /><rect class="mini-bar" x="245.8" y="87.7" width="11" height="52.3" rx="2" /><rect class="mini-bar" x="265.3" y="101.8" width="11" height="38.2" rx="2" /><rect class="mini-bar" x="284.8" y="89.9" width="11" height="50.1" rx="2" /><rect class="mini-bar is-low" x="304.2" y="81.4" width="11" height="58.6" rx="2" /><rect class="mini-bar" x="323.7" y="95.3" width="11" height="44.7" rx="2" /><rect class="mini-bar" x="343.2" y="45.3" width="11" height="94.7" rx="2" /><rect class="mini-bar" x="362.6" y="28.1" width="11" height="111.9" rx="2" /><rect class="mini-bar" x="382.1" y="35.3" width="11" height="104.7" rx="2" /><rect class="mini-bar" x="401.6" y="35.8" width="11" height="104.2" rx="2" /><rect class="mini-bar" x="421.0" y="64.8" width="11" height="75.2" rx="2" /><rect class="mini-bar" x="440.5" y="23.0" width="11" height="117.0" rx="2" /><rect class="mini-bar" x="460.0" y="35.0" width="11" height="105.0" rx="2" /><rect class="mini-bar" x="479.4" y="37.2" width="11" height="102.8" rx="2" /><rect class="mini-bar" x="498.9" y="32.2" width="11" height="107.8" rx="2" /><rect class="mini-bar" x="518.4" y="25.4" width="11" height="114.6" rx="2" /><rect class="mini-bar" x="537.8" y="32.3" width="11" height="107.7" rx="2" /><rect class="mini-bar" x="557.3" y="46.1" width="11" height="93.9" rx="2" /><rect class="mini-bar" x="576.8" y="46.9" width="11" height="93.1" rx="2" /><circle class="mini-low" cx="115.1" cy="154" r="3.5" /><circle class="mini-low" cx="192.9" cy="154" r="3.5" /><circle class="mini-low" cx="309.7" cy="154" r="3.5" /><text class="chart-axis" x="17.7" y="176" text-anchor="middle">01일</text><text class="chart-axis" x="192.9" y="176" text-anchor="middle">10일</text><text class="chart-axis" x="387.6" y="176" text-anchor="middle">20일</text><text class="chart-axis" x="582.3" y="176" text-anchor="middle">30일</text></svg>
+                      <p class="mini-legend"><i aria-hidden="true"></i>유효값 50% 미만 · 4월 6일, 10일, 16일</p>
+                      <p class="preview-meta">
+                        유효 슬롯만 계산하므로 유효값이 낮은 날의 발전량은 품질과 함께 해석합니다.
+                      </p>
+                      <a class="preview-download" href="assets/data/report-metrics.csv" download
+                        >일별 CSV 다운로드</a
+                      >
+                    </section>
+                  </div>
+                    <section class="app-panel report-table" aria-labelledby="report-table-title">
+                      <div class="panel-head">
+                        <h3 id="report-table-title">일별 지표</h3>
+                        <p class="preview-meta">보고서 CSV와 같은 값 · UTC</p>
+                      </div>
+                      <div class="preview-table-scroll" tabindex="0" role="region" aria-label="PS_001 일별 지표 표">
+                        <table>
+                          <thead>
+                            <tr><th scope="col">날짜</th><th scope="col">추정 kWh</th><th scope="col">유효값</th><th scope="col">원본 보간</th></tr>
+                          </thead>
+                          <tbody>
+                            <tr><th scope="row">2024-04-01</th><td>24,768.3</td><td>77.4%</td><td>33.8%</td></tr>
+                            <tr><th scope="row">2024-04-02</th><td>19,922.6</td><td>79.5%</td><td>31.5%</td></tr>
+                            <tr><th scope="row">2024-04-03</th><td>19,752.7</td><td>73.5%</td><td>28.4%</td></tr>
+                            <tr><th scope="row">2024-04-04</th><td>23,104.6</td><td>78.2%</td><td>35.0%</td></tr>
+                            <tr><th scope="row">2024-04-05</th><td>21,316.8</td><td>65.4%</td><td>28.4%</td></tr>
+                            <tr><th scope="row">2024-04-06</th><td>18,280.8</td><td>41.3%</td><td>13.8%</td></tr>
+                            <tr><th scope="row">2024-04-07</th><td>22,380.6</td><td>76.8%</td><td>35.2%</td></tr>
+                            <tr><th scope="row">2024-04-08</th><td>9,923.1</td><td>76.8%</td><td>34.4%</td></tr>
+                            <tr><th scope="row">2024-04-09</th><td>7,251.6</td><td>72.8%</td><td>32.3%</td></tr>
+                            <tr><th scope="row">2024-04-10</th><td>0.0</td><td>20.0%</td><td>8.8%</td></tr>
+                            <tr><th scope="row">2024-04-11</th><td>17,317.8</td><td>67.0%</td><td>30.5%</td></tr>
+                            <tr><th scope="row">2024-04-12</th><td>20,542.3</td><td>72.0%</td><td>29.6%</td></tr>
+                            <tr><th scope="row">2024-04-13</th><td>12,646.7</td><td>62.5%</td><td>28.0%</td></tr>
+                            <tr><th scope="row">2024-04-14</th><td>9,237.5</td><td>70.5%</td><td>33.7%</td></tr>
+                            <tr><th scope="row">2024-04-15</th><td>12,124.2</td><td>60.5%</td><td>27.5%</td></tr>
+                            <tr><th scope="row">2024-04-16</th><td>14,175.0</td><td>37.2%</td><td>0.3%</td></tr>
+                            <tr><th scope="row">2024-04-17</th><td>10,816.3</td><td>78.2%</td><td>1.7%</td></tr>
+                            <tr><th scope="row">2024-04-18</th><td>22,923.2</td><td>78.2%</td><td>3.3%</td></tr>
+                            <tr><th scope="row">2024-04-19</th><td>27,064.6</td><td>78.2%</td><td>9.8%</td></tr>
+                            <tr><th scope="row">2024-04-20</th><td>25,339.9</td><td>76.5%</td><td>8.2%</td></tr>
+                            <tr><th scope="row">2024-04-21</th><td>25,211.0</td><td>78.2%</td><td>5.7%</td></tr>
+                            <tr><th scope="row">2024-04-22</th><td>18,188.2</td><td>71.3%</td><td>2.5%</td></tr>
+                            <tr><th scope="row">2024-04-23</th><td>28,300.8</td><td>96.2%</td><td>0.0%</td></tr>
+                            <tr><th scope="row">2024-04-24</th><td>25,401.2</td><td>96.2%</td><td>0.0%</td></tr>
+                            <tr><th scope="row">2024-04-25</th><td>24,873.5</td><td>96.2%</td><td>0.0%</td></tr>
+                            <tr><th scope="row">2024-04-26</th><td>26,071.2</td><td>96.1%</td><td>6.0%</td></tr>
+                            <tr><th scope="row">2024-04-27</th><td>27,736.7</td><td>96.1%</td><td>15.0%</td></tr>
+                            <tr><th scope="row">2024-04-28</th><td>26,056.2</td><td>96.2%</td><td>15.0%</td></tr>
+                            <tr><th scope="row">2024-04-29</th><td>22,720.5</td><td>95.1%</td><td>10.3%</td></tr>
+                            <tr><th scope="row">2024-04-30</th><td>22,532.2</td><td>84.2%</td><td>1.5%</td></tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                </div>
+                <div class="app-view" id="view-lineage" role="tabpanel" aria-labelledby="tab-lineage">
+                  <header class="app-view-head">
+                    <div>
+                      <h2>원본 계보</h2>
+                      <p class="preview-meta">보고서 생성 시점의 계산과 원본 정보를 보존합니다.</p>
+                    </div>
+                    <p class="app-chip">발행본 스냅샷</p>
+                  </header>
+                  <div class="lineage-view-grid">
+                  <div class="app-panel lineage-preview">
+            <dl class="lineage-rows">
+              <div>
+                <dt>생성 기준 시각</dt>
+                <dd>2026-10-23 03:38:45 UTC</dd>
+              </div>
+              <div>
+                <dt>입력 버전</dt>
+                <dd>brpvgen-v1</dd>
+              </div>
+              <div>
+                <dt>계산 버전</dt>
+                <dd>energy-interval-v2</dd>
+              </div>
+              <div>
+                <dt>집계 범위</dt>
+                <dd>PS_001 · 공개 자료 · 30일</dd>
+              </div>
+            </dl>
+                    <div class="lineage-ids">
+                      <p>보고서 ID</p>
+                      <code>a4fbf16f-a877-4ed0-b35a-e4f7f49ebda9</code>
+                      <p>원본 manifest SHA-256</p>
+                      <code id="lineage-hash"
+                        >2c41dce2e0bad97e9d6cd366faf3e34f3492db27a7e58883e76a6acdac6e1f99</code
+                      >
+                      <div class="copy-row">
+                        <button type="button" class="copy-control" id="copy-hash" disabled>해시 복사</button
+                        ><span id="copy-status" role="status"></span>
+                      </div>
+                    </div>
+                  </div>
+                    <section class="app-panel partition-panel" aria-labelledby="partition-title">
+                      <div class="panel-head">
+                        <h3 id="partition-title">포함된 일별 파티션</h3>
+                        <p class="preview-meta">30 / 30 게시</p>
+                      </div>
+                      <ol class="partition-grid" aria-label="2024년 4월 PS_001 일별 파티션과 유효값 비율"><li class="is-mid"><span>01</span><b>77%</b></li><li class="is-mid"><span>02</span><b>79%</b></li><li class="is-mid"><span>03</span><b>73%</b></li><li class="is-mid"><span>04</span><b>78%</b></li><li class="is-low"><span>05</span><b>65%</b></li><li class="is-warn"><span>06</span><b>41%</b></li><li class="is-mid"><span>07</span><b>77%</b></li><li class="is-mid"><span>08</span><b>77%</b></li><li class="is-mid"><span>09</span><b>73%</b></li><li class="is-warn"><span>10</span><b>20%</b></li><li class="is-low"><span>11</span><b>67%</b></li><li class="is-mid"><span>12</span><b>72%</b></li><li class="is-low"><span>13</span><b>62%</b></li><li class="is-mid"><span>14</span><b>71%</b></li><li class="is-low"><span>15</span><b>61%</b></li><li class="is-warn"><span>16</span><b>37%</b></li><li class="is-mid"><span>17</span><b>78%</b></li><li class="is-mid"><span>18</span><b>78%</b></li><li class="is-mid"><span>19</span><b>78%</b></li><li class="is-mid"><span>20</span><b>77%</b></li><li class="is-mid"><span>21</span><b>78%</b></li><li class="is-mid"><span>22</span><b>71%</b></li><li class="is-high"><span>23</span><b>96%</b></li><li class="is-high"><span>24</span><b>96%</b></li><li class="is-high"><span>25</span><b>96%</b></li><li class="is-high"><span>26</span><b>96%</b></li><li class="is-high"><span>27</span><b>96%</b></li><li class="is-high"><span>28</span><b>96%</b></li><li class="is-high"><span>29</span><b>95%</b></li><li class="is-mid"><span>30</span><b>84%</b></li></ol>
+                      <p class="partition-legend">
+                        <span><i class="is-high"></i>90% 이상</span><span><i class="is-mid"></i>70–89%</span><span><i class="is-low"></i>50–69%</span><span><i class="is-warn"></i>50% 미만</span>
+                      </p>
+                      <p class="preview-meta">숫자는 날짜별 유효값 비율입니다. 모든 날짜가 게시됐어도 품질은 다를 수 있습니다.</p>
+                    </section>
+                  </div>
+                  <p class="preview-meta app-footnote">
+                    2026-10-23에 확인한 발행본입니다. 새로운 수집 결과가 이 화면에 자동 반영되지 않습니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="demo-caption">
+            <p>
+              2026-10-23 공개 API와 발행 보고서에서 읽은 값을 그대로 담았습니다.
+              <a href="assets/images/overview-full-2x.webp" target="_blank" rel="noopener"
+                >실제 대시보드 캡처<span class="sr-only"> (새 탭)</span></a
+              >
+            </p>
+            <a href="evidence.html#visual-sources">풍경 사진 · GlacierNPS</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="public-proof wrap" aria-labelledby="proof-title">
+        <h2 id="proof-title">공개 자료로 확인한 규모</h2>
+        <div class="proof-metrics">
+          <p>
+            <strong>51<span>개</span></strong
+            ><span>BR-PVGen 발전소</span>
+          </p>
+          <p>
+            <strong>1,440<span>만 행</span></strong
+            ><span>인버터 관측 자료</span>
+          </p>
+          <p>
+            <strong>12,572<span>개</span></strong
+            ><span>검증·게시한 일별 파티션</span>
+          </p>
+        </div>
+        <div class="proof-footnote">
+          <p>
+            BR-PVGen 전체 역사 자료 기준 · 월간 화면의 조회 범위와 다릅니다.
+          </p>
+          <a href="evidence.html#public-data">데이터와 검증 범위 보기</a>
+        </div>
+      </section>
+
+      <section
+        class="quality-section"
+        id="workflow"
+        aria-labelledby="quality-title"
+      >
+        <div class="wrap quality-layout">
+          <div class="quality-copy">
+            <h2 id="quality-title">값이 있다는 것과<br />쓸 수 있다는 것</h2>
+            <p>
+              같은 2024년 4월 자료도 관측 슬롯은 100%, 유효값은 82.5%입니다.
+              누락·무효·원본 보간을 구분해야 숫자의 의미가 보입니다.
+            </p>
+            <div class="quality-demo" data-ui>
+              <p class="demo-instruction" id="quality-instruction">
+                세 지표를 눌러 차이를 확인하세요.
+              </p>
+              <div
+                class="metric-choices"
+                role="group"
+                aria-labelledby="quality-instruction"
+              >
+                <button
+                  type="button"
+                  data-metric="observed"
+                  disabled
+                  aria-pressed="false"
+                >
+                  관측 슬롯
+                </button>
+                <button
+                  type="button"
+                  data-metric="valid"
+                  disabled
+                  aria-pressed="true"
+                >
+                  유효값
+                </button>
+                <button
+                  type="button"
+                  data-metric="interpolated"
+                  disabled
+                  aria-pressed="false"
+                >
+                  원본 보간
+                </button>
+              </div>
+              <div
+                id="metric-result"
+                class="metric-result"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                <p class="metric-value">82.5<span>%</span></p>
+                <p class="metric-explanation">
+                  계산 조건을 통과한 전력 슬롯의 비율입니다. 관측된 값 중에도
+                  계산에서 제외되는 무효값이 있습니다.
+                </p>
+              </div>
+              <noscript
+                ><p>
+                  관측 슬롯 100%는 예상 슬롯에 값이 있다는 뜻입니다. 유효값은
+                  82.5%, 원본 보간은 9.9%이며 보간은 유효·무효와 중첩될 수 있는
+                  별도 속성입니다.
+                </p></noscript
+              >
+              <p class="note">
+                공개 5개 발전소의 등록된 일별 파티션 기준.<br />원본 보간은
+                유효·무효와 중첩될 수 있는 별도 속성입니다.
+              </p>
+            </div>
+          </div>
+          <figure class="quality-figure" data-ui>
+            <div class="quality-comparison">
+              <h3>같은 자료, 세 가지 기준</h3>
+              <p class="preview-meta">예상 슬롯 195,264개 · 공개 2024년 4월</p>
+              <div
+                class="comparison-rows"
+                role="group"
+                aria-label="품질 지표 선택"
+              >
+                <button
+                  type="button"
+                  class="comparison-row"
+                  data-metric="observed"
+                  aria-pressed="false"
+                  disabled
+                >
+                  <span
+                    >관측 슬롯<strong>100<span>%</span></strong></span
+                  ><span class="comparison-track"
+                    ><i style="--ratio: 1"></i
+                  ></span>
+                </button>
+                <button
+                  type="button"
+                  class="comparison-row"
+                  data-metric="valid"
+                  aria-pressed="true"
+                  disabled
+                >
+                  <span
+                    >유효값<strong>82.5<span>%</span></strong></span
+                  ><span class="comparison-track"
+                    ><i style="--ratio: 0.8249549328"></i
+                  ></span>
+                </button>
+                <button
+                  type="button"
+                  class="comparison-row"
+                  data-metric="interpolated"
+                  aria-pressed="false"
+                  disabled
+                >
+                  <span
+                    >원본 보간<strong>9.9<span>%</span></strong></span
+                  ><span class="comparison-track"
+                    ><i style="--ratio: 0.098932727"></i
+                  ></span>
+                </button>
+              </div>
+              <p class="preview-meta">
+                각 비율은 다른 기준을 보여줍니다.<br />세 값을 더해 100%로
+                해석하지 않습니다.
+              </p>
+            </div>
+          </figure>
+        </div>
+      </section>
+
+      <section class="report-section" aria-labelledby="report-title">
+        <div class="wrap">
+          <div class="section-intro">
+            <h2 id="report-title">보고할 숫자에<br />근거를 함께</h2>
+            <div>
+              <p>
+                추정 발전량, 데이터 품질, 계산 버전을 월간 보고서에 담습니다.
+                HTML로 읽고, CSV와 원본 계보 JSON으로 이어서 검토하세요.
+              </p>
+              <a class="text-link" href="evidence.html#reports"
+                >보고서에 담기는 정보</a
+              >
+            </div>
+          </div>
+          <figure class="report-figure" data-ui>
+            <div
+              class="report-format-tabs"
+              role="tablist"
+              aria-label="월간 보고서 형식"
+            >
+              <button
+                role="tab"
+                id="format-html"
+                aria-controls="report-html"
+                aria-selected="true"
+                data-format="html"
+                disabled
+              >
+                HTML 요약</button
+              ><button
+                role="tab"
+                id="format-csv"
+                aria-controls="report-csv"
+                aria-selected="false"
+                tabindex="-1"
+                data-format="csv"
+                disabled
+              >
+                CSV 일부</button
+              ><button
+                role="tab"
+                id="format-json"
+                aria-controls="report-json"
+                aria-selected="false"
+                tabindex="-1"
+                data-format="json"
+                disabled
+              >
+                JSON 일부
+              </button>
+            </div>
+            <div class="report-content">
+              <div
+                id="report-html"
+                role="tabpanel"
+                aria-labelledby="format-html"
+                class="report-doc"
+                tabindex="0"
+              >
+                <div class="doc-head">
+                  <div>
+                    <p class="doc-kicker">월간 발전 보고서</p>
+                    <h3>2024-04 · PS_001</h3>
+                  </div>
+                  <span class="doc-badge">월 전체 확보</span>
+                </div>
+                <table class="doc-table">
+                  <tbody>
+                    <tr><th scope="row">추정 발전량</th><td>585,980.28 kWh</td></tr>
+                    <tr><th scope="row">관측 슬롯 · 유효값</th><td>100% · 74.9%</td></tr>
+                    <tr><th scope="row">원본 보간</th><td>17.0%</td></tr>
+                    <tr><th scope="row">계산 버전</th><td>energy-interval-v2</td></tr>
+                  </tbody>
+                </table>
+                <p class="doc-foot">유효 전력 × 0.25h 추정값 · 계량기 실측 전력량과 다릅니다.</p>
+              </div>
+              <div
+                id="report-csv"
+                role="tabpanel"
+                aria-labelledby="format-csv"
+                tabindex="0"
+                hidden
+              >
+                <pre><code id="csv-preview">local_date,estimated_energy_kwh,plant_id
+2024-04-01,24768.34375,PS_001
+2024-04-02,19922.63075,PS_001
+2024-04-03,19752.692125,PS_001
+2024-04-04,23104.6475,PS_001
+…</code></pre>
+                <a
+                  class="preview-download"
+                  href="assets/data/report-metrics.csv"
+                  download
+                  >실제 월간 CSV 다운로드</a
+                >
+              </div>
+              <div
+                id="report-json"
+                role="tabpanel"
+                aria-labelledby="format-json"
+                tabindex="0"
+                hidden
+              >
+                <pre><code>{
+  &quot;period&quot;: &quot;2024-04&quot;,
+  &quot;scope&quot;: &quot;PS_001&quot;,
+  &quot;estimated_energy_kwh&quot;: 585980.279,
+  &quot;calculation_version&quot;: &quot;energy-interval-v2&quot;,
+  &quot;days&quot;: 30
+}</code></pre>
+                <a
+                  class="preview-download"
+                  href="assets/data/preview.json"
+                  download
+                  >공개 집계 미리보기 JSON 다운로드</a
+                >
+              </div>
+            </div>
+          </figure>
+          <div class="report-formats">
+            <p><strong>HTML</strong> 바로 읽는 보고서</p>
+            <p><strong>CSV</strong> 일별 수치와 품질</p>
+            <p><strong>JSON</strong> 계산 버전과 원본 계보</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="lineage-section wrap" aria-labelledby="lineage-title">
+        <div class="lineage-copy">
+          <h2 id="lineage-title">값이 바뀌어도<br />근거는 남도록</h2>
+          <p>
+            보고서는 발행 당시의 스냅샷을 보존합니다. 현재 게시 결과와 비교해,
+            재처리 이후 근거가 달라졌는지 확인할 수 있습니다.
+          </p>
+          <p class="lineage-callout">
+            검증을 통과한 결과만 게시하고,<br />게시 실패 시 이전 결과를
+            유지합니다.
+          </p>
+          <a class="text-link" href="evidence.html#publication"
+            >실패·재처리 검증 보기</a
+          >
+        </div>
+        <figure class="lineage-figure">
+          <ol class="pipeline">
+            <li>
+              <span class="step-index">1</span>
+              <div>
+                <h3>원본 확인</h3>
+                <p>SHA-256을 확인한 원본 스냅샷만 처리합니다.</p>
+              </div>
+            </li>
+            <li>
+              <span class="step-index">2</span>
+              <div>
+                <h3>품질 검사</h3>
+                <p>UTC 슬롯, 중복 충돌, 누락을 확인하고 무효값과 원본 보간을 구분합니다.</p>
+              </div>
+            </li>
+            <li class="pipeline-gate">
+              <span class="step-index">3</span>
+              <div>
+                <h3>검증된 파티션만 게시</h3>
+                <p>완전한 일별 파티션만 게시합니다.</p>
+                <p class="pipeline-branch">
+                  <strong>게시 실패 시</strong> 새 결과를 노출하지 않고 이전 게시 결과를 유지합니다.
+                </p>
+              </div>
+            </li>
+            <li>
+              <span class="step-index">4</span>
+              <div>
+                <h3>보고서 스냅샷</h3>
+                <p>입력 버전, 계산 버전, 원본 manifest 해시를 발행본에 고정합니다.</p>
+              </div>
+            </li>
+          </ol>
+        </figure>
+      </section>
+
+      <section
+        class="evidence-section"
+        id="evidence"
+        aria-labelledby="evidence-title"
+      >
+        <div class="wrap evidence-layout">
+          <div>
+            <h2 id="evidence-title">확인한 만큼만<br />이야기합니다</h2>
+            <p>
+              공개 자료 처리와 합성 실패 시험의 범위·조건을 함께 공개합니다.
+            </p>
+            <a class="text-link" href="evidence.html">기술 검증 자료 읽기</a>
+          </div>
+          <div class="evidence-list">
+            <article>
+              <h3>공개 원본에서 보고서까지</h3>
+              <p>
+                51개 발전소, 인버터 14,400,480행을 처리했습니다. 대표 날짜의
+                원본 독립 계산과 Parquet·DB·API·보고서 값을 대조했습니다.
+              </p>
+              <span class="note">역사 자료 처리 실적 · 2026-10-23 점검</span>
+            </article>
+            <article>
+              <h3>실패 이후의 결과 보존</h3>
+              <p>
+                합성 7일 자료에 게시 실패를 주입했습니다. 이전 결과가 유지되고,
+                재처리한 7개 날짜의 논리 해시가 같은지 확인했습니다.
+              </p>
+              <span class="note"
+                >v0.5.2 검증 · 합성 자료의 명시된 시험 범위</span
+              >
+            </article>
+            <article>
+              <h3>실행 환경에서도 같은 처리 흐름</h3>
+              <p>
+                로컬·Docker·Airflow의 Kubernetes 작업에서 공통 Python CLI를
+                사용합니다. 실제 PostgreSQL·MinIO 서비스 검사도 수행했습니다.
+              </p>
+              <span class="note">로컬 단일 호스트 검증 · 외부 SLO 미검증</span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="faq-section wrap" id="faq" aria-labelledby="faq-title">
+        <div>
+          <h2 id="faq-title">도입 검토 전,<br />알아둘 것</h2>
+          <p>지원 범위와 숫자의 의미를<br />명확히 설명합니다.</p>
+        </div>
+        <div class="faq-list">
+          <details name="faq">
+            <summary>
+              화면의 발전량은 실측값인가요?<svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14m-7-7v14" />
+              </svg>
+            </summary>
+            <p>
+              유효한 15분 전력에 시간 간격을 적용한 추정 에너지입니다. 원본
+              보간값이 포함될 수 있습니다. 계량기 실측 전력량, 매출, 확정 손실로
+              해석하지 않습니다.
+            </p>
+          </details>
+          <details name="faq">
+            <summary>
+              설비 고장을 자동 확정하나요?<svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14m-7-7v14" />
+              </svg>
+            </summary>
+            <p>
+              저출력 조건에 해당하는 구간을 사람이 확인할 검토 후보로
+              표시합니다. 현장 고장 정답과 탐지 정확도는 검증하지 않았으며,
+              후보가 없다는 결과도 설비 정상의 보증은 아닙니다.
+            </p>
+          </details>
+          <details name="faq">
+            <summary>
+              어떤 데이터를 사용하나요?<svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14m-7-7v14" />
+              </svg>
+            </summary>
+            <p>
+              이 페이지의 분석 화면은 BR-PVGen 공개 역사 자료입니다. 별도 ONS
+              수집 기능은 원문 시각과 MWmed 단위를 보존하며, 기존 추정 kWh에
+              합산하지 않습니다. 실패·재처리 시험에는 명시된 합성 자료를
+              사용합니다.
+            </p>
+          </details>
+          <details name="faq">
+            <summary>
+              지금 직접 실행해 볼 수 있나요?<svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14m-7-7v14" />
+              </svg>
+            </summary>
+            <p>
+              저장소 접근 권한과 Python 3.12가 있으면 로컬에서 합성 7일 데모를
+              실행할 수 있습니다. 공개 원본 전체 다운로드나 Docker 없이
+              실패·재처리·보고서 생성 흐름을 확인합니다.
+              <a href="evidence.html#demo">로컬 데모 실행 안내</a>
+            </p>
+          </details>
+          <details name="faq">
+            <summary>
+              현재 서비스 제공 범위는 어디까지인가요?<svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14m-7-7v14" />
+              </svg>
+            </summary>
+            <p>
+              현재는 로컬에서 실행·검증한 엔지니어링 포트폴리오입니다. 고객
+              인증, 실제 설비의 실시간 연결, 공개 서비스 운영은 제공 범위에
+              포함되지 않습니다. 실제 고객·매출·고장 탐지 정확도에 대한 성과는
+              제시하지 않습니다.
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <section class="closing" aria-labelledby="closing-title">
+        <div class="wrap closing-inner">
+          <h2 id="closing-title">다음 보고서는,<br />근거부터 확인하세요</h2>
+          <div>
+            <p>
+              실제 화면을 살펴보고, 로컬 데모에서<br />실패와 재처리 흐름을
+              재현할 수 있습니다.
+            </p>
+            <a class="button" href="#demo"
+              >제품 화면 다시 보기
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 12h14m-6-6 6 6-6 6" /></svg></a
+            ><a class="closing-secondary" href="evidence.html#demo"
+              >로컬 데모 실행 안내</a
+            >
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="wrap site-footer">
+      <a class="wordmark" href="./"
+        ><span>SolarOps <span class="wordmark-suffix">Audit</span></span></a
+      >
+      <p>태양광 데이터의 숫자와 근거를 잇습니다.</p>
+      <div>
+        <a href="evidence.html#sources">데이터 출처</a
+        ><a href="evidence.html">검증과 실행 안내</a>
+      </div>
+      <p class="footer-note">
+        2026 SolarOps Audit · 로컬 검증 프로젝트<br />BR-PVGen V.1 · Jesus,
+        Ferreira &amp; de Aguiar · CC BY 4.0
+      </p>
+    </footer>
+    <script type="application/json" id="preview-data">
+      {
+        "provenance": {
+          "captured_at": "2026-10-23T09:59:49.490087+00:00",
+          "period": "2024-04",
+          "source_kind": "public",
+          "dataset": "BR-PVGen V.1",
+          "doi": "10.5281/zenodo.21511487",
+          "license": "CC BY 4.0",
+          "overview_endpoint": "/api/v1/overview?period=2024-04&source_kind=public",
+          "report_endpoint": "/reports/a4fbf16f-a877-4ed0-b35a-e4f7f49ebda9/manifest.json",
+          "note": "Captured public aggregates. Static landing preview, not live monitoring."
+        },
+        "summary": {
+          "expected_slots": 195264,
+          "observed_slots": 195264,
+          "valid_slots": 161084,
+          "missing_slots": 0,
+          "invalid_slots": 34180,
+          "interpolation_unknown_slots": 175946,
+          "review_candidate_count": 0,
+          "estimated_energy_kwh": 1477828.846,
+          "interpolated_slots": 19318,
+          "partition_count": 140,
+          "coverage_ratio": 1.0,
+          "valid_coverage_ratio": 0.8249549328089151,
+          "source_interpolation_ratio": 0.09893272697476237,
+          "plant_count": 5,
+          "complete_plants": 4
+        },
+        "timeline": [
+          {
+            "day": "2024-04-01",
+            "estimated_energy_kwh": 52664.91,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-02",
+            "estimated_energy_kwh": 40365.149,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-03",
+            "estimated_energy_kwh": 51096.119,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-04",
+            "estimated_energy_kwh": 49590.298,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-05",
+            "estimated_energy_kwh": 52017.453,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-06",
+            "estimated_energy_kwh": 44654.185,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-07",
+            "estimated_energy_kwh": 49460.263,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-08",
+            "estimated_energy_kwh": 27114.619,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-09",
+            "estimated_energy_kwh": 32094.75,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-10",
+            "estimated_energy_kwh": 22947.56,
+            "plant_count": 4
+          },
+          {
+            "day": "2024-04-11",
+            "estimated_energy_kwh": 42391.286,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-12",
+            "estimated_energy_kwh": 50232.515,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-13",
+            "estimated_energy_kwh": 48045.987,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-14",
+            "estimated_energy_kwh": 36144.501,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-15",
+            "estimated_energy_kwh": 41514.128,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-16",
+            "estimated_energy_kwh": 50376.172,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-17",
+            "estimated_energy_kwh": 40917.479,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-18",
+            "estimated_energy_kwh": 42287.187,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-19",
+            "estimated_energy_kwh": 57800.98,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-20",
+            "estimated_energy_kwh": 60494.605,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-21",
+            "estimated_energy_kwh": 58905.662,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-22",
+            "estimated_energy_kwh": 52474.541,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-23",
+            "estimated_energy_kwh": 54710.464,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-24",
+            "estimated_energy_kwh": 48869.734,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-25",
+            "estimated_energy_kwh": 59171.736,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-26",
+            "estimated_energy_kwh": 61154.576,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-27",
+            "estimated_energy_kwh": 64506.958,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-28",
+            "estimated_energy_kwh": 64767.348,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-29",
+            "estimated_energy_kwh": 60922.841,
+            "plant_count": 5
+          },
+          {
+            "day": "2024-04-30",
+            "estimated_energy_kwh": 60134.838,
+            "plant_count": 5
+          }
+        ],
+        "report": {
+          "report_id": "a4fbf16f-a877-4ed0-b35a-e4f7f49ebda9",
+          "period": "2024-04",
+          "scope": "PS_001",
+          "generated_at": "2026-10-23T12:38:45.075353+09:00",
+          "calculation_version": "energy-interval-v2",
+          "source_manifest_hash": "2c41dce2e0bad97e9d6cd366faf3e34f3492db27a7e58883e76a6acdac6e1f99",
+          "status": "complete",
+          "days": 30,
+          "plant_count": 1,
+          "estimated_energy_kwh": 585980.279,
+          "coverage": 1.0,
+          "valid_coverage": 0.7494123931623932,
+          "interpolation": 0.1700676638176638,
+          "source_version": "brpvgen-v1"
+        }
+      }
+    </script>
+  </body>
+</html>

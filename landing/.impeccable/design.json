@@ -1,0 +1,472 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-23T10:22:51.566Z",
+  "title": "Design System: SolarOps Audit landing",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "primary",
+        "displayName": "Night Navy",
+        "tonalRamp": [
+          "oklch(15% 0.0339 259.58)",
+          "oklch(25% 0.0339 259.58)",
+          "oklch(35% 0.0339 259.58)",
+          "oklch(45% 0.0339 259.58)",
+          "oklch(55% 0.0339 259.58)",
+          "oklch(65% 0.0339 259.58)",
+          "oklch(80% 0.0339 259.58)",
+          "oklch(95% 0.0339 259.58)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Body Slate",
+        "tonalRamp": [
+          "oklch(15% 0.0357 258.92)",
+          "oklch(25% 0.0357 258.92)",
+          "oklch(35% 0.0357 258.92)",
+          "oklch(45% 0.0357 258.92)",
+          "oklch(55% 0.0357 258.92)",
+          "oklch(65% 0.0357 258.92)",
+          "oklch(80% 0.0357 258.92)",
+          "oklch(95% 0.0357 258.92)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Quiet Paper",
+        "tonalRamp": [
+          "oklch(15% 0.0058 264.53)",
+          "oklch(25% 0.0058 264.53)",
+          "oklch(35% 0.0058 264.53)",
+          "oklch(45% 0.0058 264.53)",
+          "oklch(55% 0.0058 264.53)",
+          "oklch(65% 0.0058 264.53)",
+          "oklch(80% 0.0058 264.53)",
+          "oklch(95% 0.0058 264.53)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0000 0.00)",
+          "oklch(25% 0.0000 0.00)",
+          "oklch(35% 0.0000 0.00)",
+          "oklch(45% 0.0000 0.00)",
+          "oklch(55% 0.0000 0.00)",
+          "oklch(65% 0.0000 0.00)",
+          "oklch(80% 0.0000 0.00)",
+          "oklch(95% 0.0000 0.00)"
+        ]
+      },
+      "gold": {
+        "role": "primary",
+        "displayName": "Solar Gold",
+        "tonalRamp": [
+          "oklch(15% 0.1340 79.22)",
+          "oklch(25% 0.1340 79.22)",
+          "oklch(35% 0.1340 79.22)",
+          "oklch(45% 0.1340 79.22)",
+          "oklch(55% 0.1340 79.22)",
+          "oklch(65% 0.1340 79.22)",
+          "oklch(80% 0.1340 79.22)",
+          "oklch(95% 0.1340 79.22)"
+        ]
+      },
+      "inverse-muted": {
+        "role": "neutral",
+        "displayName": "Inverse Slate",
+        "tonalRamp": [
+          "oklch(15% 0.0266 259.05)",
+          "oklch(25% 0.0266 259.05)",
+          "oklch(35% 0.0266 259.05)",
+          "oklch(45% 0.0266 259.05)",
+          "oklch(55% 0.0266 259.05)",
+          "oklch(65% 0.0266 259.05)",
+          "oklch(80% 0.0266 259.05)",
+          "oklch(95% 0.0266 259.05)"
+        ]
+      },
+      "green": {
+        "role": "secondary",
+        "displayName": "Measured Green",
+        "tonalRamp": [
+          "oklch(15% 0.0903 172.39)",
+          "oklch(25% 0.0903 172.39)",
+          "oklch(35% 0.0903 172.39)",
+          "oklch(45% 0.0903 172.39)",
+          "oklch(55% 0.0903 172.39)",
+          "oklch(65% 0.0903 172.39)",
+          "oklch(80% 0.0903 172.39)",
+          "oklch(95% 0.0903 172.39)"
+        ]
+      },
+      "focus": {
+        "role": "secondary",
+        "displayName": "Focus Blue",
+        "tonalRamp": [
+          "oklch(15% 0.2062 264.12)",
+          "oklch(25% 0.2062 264.12)",
+          "oklch(35% 0.2062 264.12)",
+          "oklch(45% 0.2062 264.12)",
+          "oklch(55% 0.2062 264.12)",
+          "oklch(65% 0.2062 264.12)",
+          "oklch(80% 0.2062 264.12)",
+          "oklch(95% 0.2062 264.12)"
+        ]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Cool Canvas",
+        "tonalRamp": [
+          "oklch(15% 0.0025 228.78)",
+          "oklch(25% 0.0025 228.78)",
+          "oklch(35% 0.0025 228.78)",
+          "oklch(45% 0.0025 228.78)",
+          "oklch(55% 0.0025 228.78)",
+          "oklch(65% 0.0025 228.78)",
+          "oklch(80% 0.0025 228.78)",
+          "oklch(95% 0.0025 228.78)"
+        ]
+      },
+      "hero-foundation": {
+        "role": "neutral",
+        "displayName": "Landscape Foundation",
+        "tonalRamp": [
+          "oklch(15% 0.0340 254.52)",
+          "oklch(25% 0.0340 254.52)",
+          "oklch(35% 0.0340 254.52)",
+          "oklch(45% 0.0340 254.52)",
+          "oklch(55% 0.0340 254.52)",
+          "oklch(65% 0.0340 254.52)",
+          "oklch(80% 0.0340 254.52)",
+          "oklch(95% 0.0340 254.52)"
+        ]
+      },
+      "quality-field": {
+        "role": "neutral",
+        "displayName": "Sage Field",
+        "tonalRamp": [
+          "oklch(15% 0.0074 132.42)",
+          "oklch(25% 0.0074 132.42)",
+          "oklch(35% 0.0074 132.42)",
+          "oklch(45% 0.0074 132.42)",
+          "oklch(55% 0.0074 132.42)",
+          "oklch(65% 0.0074 132.42)",
+          "oklch(80% 0.0074 132.42)",
+          "oklch(95% 0.0074 132.42)"
+        ]
+      },
+      "closing": {
+        "role": "neutral",
+        "displayName": "Warm Closing",
+        "tonalRamp": [
+          "oklch(15% 0.0955 82.07)",
+          "oklch(25% 0.0955 82.07)",
+          "oklch(35% 0.0955 82.07)",
+          "oklch(45% 0.0955 82.07)",
+          "oklch(55% 0.0955 82.07)",
+          "oklch(65% 0.0955 82.07)",
+          "oklch(80% 0.0955 82.07)",
+          "oklch(95% 0.0955 82.07)"
+        ]
+      },
+      "control-slate": {
+        "role": "neutral",
+        "displayName": "Control Slate",
+        "tonalRamp": [
+          "oklch(15% 0.0426 256.87)",
+          "oklch(25% 0.0426 256.87)",
+          "oklch(35% 0.0426 256.87)",
+          "oklch(45% 0.0426 256.87)",
+          "oklch(55% 0.0426 256.87)",
+          "oklch(65% 0.0426 256.87)",
+          "oklch(80% 0.0426 256.87)",
+          "oklch(95% 0.0426 256.87)"
+        ]
+      },
+      "menu-slate": {
+        "role": "neutral",
+        "displayName": "Menu Slate",
+        "tonalRamp": [
+          "oklch(15% 0.0464 258.72)",
+          "oklch(25% 0.0464 258.72)",
+          "oklch(35% 0.0464 258.72)",
+          "oklch(45% 0.0464 258.72)",
+          "oklch(55% 0.0464 258.72)",
+          "oklch(65% 0.0464 258.72)",
+          "oklch(80% 0.0464 258.72)",
+          "oklch(95% 0.0464 258.72)"
+        ]
+      },
+      "menu-hover": {
+        "role": "neutral",
+        "displayName": "Hover Slate",
+        "tonalRamp": [
+          "oklch(15% 0.0491 255.53)",
+          "oklch(25% 0.0491 255.53)",
+          "oklch(35% 0.0491 255.53)",
+          "oklch(45% 0.0491 255.53)",
+          "oklch(55% 0.0491 255.53)",
+          "oklch(65% 0.0491 255.53)",
+          "oklch(80% 0.0491 255.53)",
+          "oklch(95% 0.0491 255.53)"
+        ]
+      },
+      "control-border": {
+        "role": "neutral",
+        "displayName": "Control Edge",
+        "tonalRamp": [
+          "oklch(15% 0.0395 254.97)",
+          "oklch(25% 0.0395 254.97)",
+          "oklch(35% 0.0395 254.97)",
+          "oklch(45% 0.0395 254.97)",
+          "oklch(55% 0.0395 254.97)",
+          "oklch(65% 0.0395 254.97)",
+          "oklch(80% 0.0395 254.97)",
+          "oklch(95% 0.0395 254.97)"
+        ]
+      },
+      "dark-divider": {
+        "role": "neutral",
+        "displayName": "Dark Divider",
+        "tonalRamp": [
+          "oklch(15% 0.0360 254.91)",
+          "oklch(25% 0.0360 254.91)",
+          "oklch(35% 0.0360 254.91)",
+          "oklch(45% 0.0360 254.91)",
+          "oklch(55% 0.0360 254.91)",
+          "oklch(65% 0.0360 254.91)",
+          "oklch(80% 0.0360 254.91)",
+          "oklch(95% 0.0360 254.91)"
+        ]
+      },
+      "invalid-ochre": {
+        "role": "secondary",
+        "displayName": "Invalid Ochre",
+        "tonalRamp": [
+          "oklch(15% 0.1108 66.56)",
+          "oklch(25% 0.1108 66.56)",
+          "oklch(35% 0.1108 66.56)",
+          "oklch(45% 0.1108 66.56)",
+          "oklch(55% 0.1108 66.56)",
+          "oklch(65% 0.1108 66.56)",
+          "oklch(80% 0.1108 66.56)",
+          "oklch(95% 0.1108 66.56)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Two-phrase hero heading; responsive sizes are documented in DESIGN.md."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section titles, with a phone size of 32px."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "General third-level titles; compact product panels use 22px."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Explanatory Korean copy; 16px on phones."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Metadata, source context and compact navigation."
+      },
+      "metric": {
+        "displayName": "Historical processing figures",
+        "purpose": "Three large figures with tabular numerals and distinct units."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "CSV/JSON excerpts and source hashes where specified."
+      }
+    },
+    "motion": [
+      {
+        "name": "direct-action",
+        "value": "180ms",
+        "purpose": "Local opacity and control color feedback after a deliberate user action."
+      },
+      {
+        "name": "result-opacity",
+        "value": "0.82 → 1; ease-out",
+        "purpose": "Web Animations feedback for values, explanations and report tabs; no position change."
+      },
+      {
+        "name": "chart-fill",
+        "value": "160ms",
+        "purpose": "Current SVG bar fill transition; reflects the implemented CSS."
+      },
+      {
+        "name": "action-arrow",
+        "value": "translateX(3px); 180ms",
+        "purpose": "Hover feedback confined to the action arrow."
+      },
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "CTA-arrow easing from the source CSS custom property."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "none",
+        "purpose": "Disable transitions, arrow shift and scripted feedback; use automatic rather than smooth anchor scrolling."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "narrow-phone",
+        "value": "380px"
+      },
+      {
+        "name": "phone",
+        "value": "600px"
+      },
+      {
+        "name": "tablet",
+        "value": "800px"
+      },
+      {
+        "name": "compact-desktop",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Navy action on a light field; only its arrow moves on hover.",
+      "html": "<a class=\"ds-button-primary\" href=\"#product\">제품 화면 살펴보기 <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></a>",
+      "css": ".ds-button-primary{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:54px;padding:16px 24px;border:0;border-radius:var(--radius,12px);background:var(--ink,#172131);color:var(--white,#fff);font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif;font-size:var(--body,18px);font-weight:650;line-height:1.4;text-decoration:none;cursor:pointer;transition:background-color 180ms,color 180ms}.ds-button-primary svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.ds-button-primary:hover{background:#2c3c53}.ds-button-primary:focus-visible{outline:3px solid var(--focus,#285bdd);outline-offset:5px;}.ds-button-primary:active{filter:brightness(.92)}@media(prefers-reduced-motion:no-preference){.ds-button-primary svg{transition:transform 180ms var(--ease,cubic-bezier(.16,1,.3,1))}.ds-button-primary:hover svg{transform:translateX(3px)}}@media(prefers-reduced-motion:reduce){.ds-button-primary{transition:none}}"
+    },
+    {
+      "name": "Inverse Button",
+      "kind": "button",
+      "refersTo": "button-inverse",
+      "description": "White action used over the full-width hero photograph.",
+      "html": "<a class=\"ds-button-inverse\" href=\"#product\">제품 화면 살펴보기 <svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14m-6-6 6 6-6 6\"/></svg></a>",
+      "css": ".ds-button-inverse{display:inline-flex;align-items:center;justify-content:center;gap:24px;min-height:54px;padding:16px 24px;border:0;border-radius:var(--radius,12px);background:var(--white,#fff);color:var(--ink,#172131);font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif;font-size:var(--body,18px);font-weight:650;line-height:1.4;text-decoration:none;cursor:pointer;transition:background-color 180ms,color 180ms}.ds-button-inverse svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.ds-button-inverse:hover{background:#e2e6ec}.ds-button-inverse:focus-visible{outline:3px solid var(--focus,#285bdd);outline-offset:5px;}.ds-button-inverse:active{filter:brightness(.92)}@media(prefers-reduced-motion:no-preference){.ds-button-inverse svg{transition:transform 180ms var(--ease,cubic-bezier(.16,1,.3,1))}.ds-button-inverse:hover svg{transform:translateX(3px)}}@media(prefers-reduced-motion:reduce){.ds-button-inverse{transition:none}}"
+    },
+    {
+      "name": "Hero Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Compact anchor navigation over navy; the action and wordmark remain when these links hide.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"주 메뉴\"><a href=\"#workflow\">제품 기능</a><a href=\"#evidence\">검증 근거</a><a href=\"#faq\">자주 묻는 질문</a></nav>",
+      "css": ".ds-nav{display:flex;gap:32px;padding:16px;background:var(--ink,#172131);color:var(--white,#fff);font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif}.ds-nav a{padding:12px 0;font-size:var(--small,14px);font-weight:550;text-decoration:none;color:inherit}.ds-nav a:hover{color:#d6dce2}.ds-nav a:focus-visible{outline:3px solid var(--focus,#285bdd);outline-offset:5px;}@media(max-width:1100px){.ds-nav{gap:20px}.ds-nav a:last-child{display:none}}@media(max-width:800px){.ds-nav{display:none}}"
+    },
+    {
+      "name": "Slate Date Listbox",
+      "kind": "input",
+      "refersTo": "date-picker",
+      "description": "Open-state visual specimen of the custom date field. Production keyboard selection, focus return and viewport placement are implemented in site.js.",
+      "html": "<div class=\"ds-date\"><button class=\"ds-date-trigger\" type=\"button\" aria-label=\"상세 날짜 선택\" aria-haspopup=\"listbox\" aria-expanded=\"true\" aria-controls=\"ds-date-options\"><span>2024-04-01</span><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"m7 10 5 5 5-5\"/></svg></button><div class=\"ds-date-options\" id=\"ds-date-options\" role=\"listbox\" aria-label=\"상세 날짜\"><button type=\"button\" role=\"option\" aria-selected=\"true\">2024-04-01</button><button type=\"button\" role=\"option\" aria-selected=\"false\" tabindex=\"-1\">2024-04-02</button><button type=\"button\" role=\"option\" aria-selected=\"false\" tabindex=\"-1\">2024-04-03</button></div></div>",
+      "css": ".ds-date{max-width:360px;font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif;font-size:14px;line-height:1.65}.ds-date button{font:inherit;min-height:44px;cursor:pointer;transition:background-color 180ms,color 180ms}.ds-date-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;background:#26354a;color:var(--white,#fff);border:1px solid var(--gold,#f3ba55);padding:10px 12px;border-radius:8px}.ds-date-trigger svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.ds-date-trigger:hover{background:#3b4c64}.ds-date-trigger:focus-visible{outline:3px solid var(--focus,#285bdd);outline-offset:5px;}.ds-date-options{margin-top:8px;max-height:264px;overflow-y:auto;overscroll-behavior:contain;padding:6px;border:1px solid #526279;border-radius:12px;background:#213047;scrollbar-width:thin;scrollbar-color:#7f90a6 #213047}.ds-date-options button{display:block;width:100%;border:0;background:transparent;text-align:left;padding:11px 14px;color:#e2e8f0;border-radius:6px}.ds-date-options button:hover{background:#344760}.ds-date-options button[aria-selected=true]{background:var(--gold,#f3ba55);color:var(--ink,#172131)}.ds-date-options button:focus-visible{outline:2px solid #dce6f2;outline-offset:-2px}@media(prefers-reduced-motion:reduce){.ds-date button,.ds-unit button,.ds-format button{transition:none}}"
+    },
+    {
+      "name": "Metric Choice",
+      "kind": "chip",
+      "refersTo": "metric-chip",
+      "description": "Observed, valid and upstream interpolation are independent views, with selected state expressed through aria-pressed.",
+      "html": "<div class=\"ds-metric\" role=\"group\" aria-label=\"품질 지표\"><button type=\"button\" aria-pressed=\"true\">관측률</button><button type=\"button\" aria-pressed=\"false\">유효율</button><button type=\"button\" aria-pressed=\"false\">보간율</button></div>",
+      "css": ".ds-metric{display:flex;gap:4px;padding:5px;background:#dbe4e0;border-radius:100px;width:fit-content;font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif}.ds-metric button{background:transparent;color:var(--ink,#172131);padding:12px 16px;font-family:inherit;font-size:var(--small,14px);min-height:46px;border:0;border-radius:100px;font-weight:550;cursor:pointer}.ds-metric button[aria-pressed=true]{background:var(--ink,#172131);color:var(--white,#fff)}.ds-metric button:hover{background:var(--gold,#f3ba55);color:var(--ink,#172131)}.ds-metric button:focus-visible{outline:3px solid var(--focus,#285bdd);outline-offset:5px;}.ds-metric button:disabled{cursor:default;opacity:.6}"
+    },
+    {
+      "name": "Energy Unit Switch",
+      "kind": "chip",
+      "refersTo": "unit-switch",
+      "description": "Compact kWh/MWh switch with gold selection; production changes display units without replacing the saved value.",
+      "html": "<div class=\"ds-unit\" role=\"group\" aria-label=\"발전량 단위\"><button type=\"button\" aria-pressed=\"true\">kWh</button><button type=\"button\" aria-pressed=\"false\">MWh</button></div>",
+      "css": ".ds-unit{display:flex;width:fit-content;background:#243348;padding:3px;border-radius:8px;font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif}.ds-unit button{padding:6px 10px;min-height:36px;font-family:inherit;font-size:13px;color:#d5dce7;background:none;border:0;border-radius:6px;cursor:pointer;transition:background-color 180ms,color 180ms}.ds-unit button[aria-pressed=true]{background:var(--gold,#f3ba55);color:var(--ink,#172131)}.ds-unit button:focus-visible{outline:3px solid var(--focus,#285bdd);outline-offset:5px;}.ds-unit button:active{filter:brightness(.92)}@media(max-width:600px){.ds-unit button{min-height:40px}}@media(prefers-reduced-motion:reduce){.ds-date button,.ds-unit button,.ds-format button{transition:none}}"
+    },
+    {
+      "name": "Report Format Tabs",
+      "kind": "custom",
+      "refersTo": "report-tabs",
+      "description": "HTML summary and explicit CSV/JSON excerpts. This specimen shows the selected state; production roving keyboard behavior lives in site.js.",
+      "html": "<div class=\"ds-format\" role=\"tablist\" aria-label=\"월간 보고서 형식\"><button type=\"button\" role=\"tab\" aria-selected=\"true\">HTML 요약</button><button type=\"button\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">CSV 일부</button><button type=\"button\" role=\"tab\" aria-selected=\"false\" tabindex=\"-1\">JSON 일부</button></div>",
+      "css": ".ds-format{display:flex;gap:8px;margin-bottom:20px;font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif}.ds-format button{background:none;color:var(--muted,#59667a);padding:12px 18px;font-family:inherit;font-size:14px;min-height:44px;border:0;border-radius:8px;cursor:pointer;transition:background-color 180ms,color 180ms}.ds-format button[aria-selected=true]{background:var(--ink,#172131);color:var(--white,#fff)}.ds-format button:focus-visible{outline:3px solid var(--focus,#285bdd);outline-offset:5px;}.ds-format button:active{filter:brightness(.92)}@media(max-width:600px){.ds-format{gap:4px}.ds-format button{flex:1;padding-inline:8px}}@media(prefers-reduced-motion:reduce){.ds-date button,.ds-unit button,.ds-format button{transition:none}}"
+    },
+    {
+      "name": "Monthly Report Panel",
+      "kind": "card",
+      "refersTo": "report-card",
+      "description": "Single opaque navy panel with native text, retained PS_001 monthly scope and estimated-energy label.",
+      "html": "<article class=\"ds-report\"><h3>2024-04 · PS_001</h3><p class=\"ds-report-meta\">1개 발전소 · 30개 일별 파티션 · UTC</p><p class=\"ds-report-label\">추정 발전량</p><p class=\"ds-report-energy\"><strong>585,980.28</strong> <span>kWh</span></p><p class=\"ds-report-meta\">유효 전력 × 0.25h<br>계량기 실측 전력량과 다른 추정값입니다.</p></article>",
+      "css": ".ds-report{background:var(--ink,#172131);color:var(--white,#fff);border-radius:20px;padding:clamp(28px,3.4vw,48px);font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif;line-height:1.65}.ds-report h3{margin:0;font-size:clamp(24px,2.5vw,36px);letter-spacing:-.025em}.ds-report-meta{margin:12px 0 0;font-size:14px;line-height:1.7;color:var(--inverse-muted,#c0cbdc)}.ds-report-label{margin:44px 0 0;font-size:16px;color:var(--inverse-muted,#c0cbdc)}.ds-report-energy{margin:12px 0 20px;color:var(--gold,#f3ba55);font-variant-numeric:tabular-nums;white-space:nowrap}.ds-report-energy strong{font-size:clamp(36px,4vw,58px);font-weight:650;letter-spacing:-.035em}.ds-report-energy span{font-size:22px}@media(max-width:600px){.ds-report{padding:28px 24px}.ds-report h3{font-size:26px}.ds-report-energy strong{font-size:clamp(30px,9vw,44px)}.ds-report-energy span{font-size:16px}.ds-report-meta{font-size:13px}}"
+    },
+    {
+      "name": "Quality Panel",
+      "kind": "card",
+      "refersTo": "quality-card",
+      "description": "White product surface with valid-slot encoding; upstream interpolation remains separate overlapping information.",
+      "html": "<article class=\"ds-quality\"><h3>데이터 품질</h3><p class=\"ds-quality-meta\">계산 조건을 통과한 전력 슬롯</p><p class=\"ds-quality-total\"><strong>82.5</strong><span>% 유효율</span></p><div class=\"ds-quality-track\" aria-hidden=\"true\"><span></span></div><p class=\"ds-quality-meta\">원본 보간 표시는 유효·무효와 중첩될 수 있습니다.</p></article>",
+      "css": ".ds-quality{background:var(--white,#fff);color:var(--ink,#172131);border-radius:20px;padding:32px;font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif;line-height:1.65}.ds-quality h3{margin:0;font-size:22px;line-height:1.35;font-weight:650;letter-spacing:-.02em}.ds-quality-meta{margin:8px 0 0;font-size:14px;line-height:1.7;color:var(--muted,#59667a)}.ds-quality-total{display:flex;align-items:baseline;gap:12px;margin:32px 0 22px}.ds-quality-total strong{font-size:48px;line-height:1.1;letter-spacing:-.03em;font-weight:650;font-variant-numeric:tabular-nums}.ds-quality-total span{font-size:14px;color:var(--muted,#59667a)}.ds-quality-track{height:8px;background:#965d12;border-radius:2px;overflow:hidden}.ds-quality-track span{display:block;height:100%;width:82.4954932809%;background:var(--green,#16745e)}@media(max-width:1100px){.ds-quality{padding:24px}}@media(max-width:600px){.ds-quality{padding:24px 20px;border-radius:16px}.ds-quality-total strong{font-size:44px}}"
+    },
+    {
+      "name": "FAQ Disclosure",
+      "kind": "custom",
+      "refersTo": "disclosure",
+      "description": "Native disclosure remains usable without JavaScript and adds no nested presentation boundary.",
+      "html": "<details class=\"ds-disclosure\"><summary>추정 발전량은 실측 전력량인가요?<svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h14M12 5v14\"/></svg></summary><p>유효 전력과 시간 간격으로 계산한 추정값이며, 계량기의 실측 전력량과 다릅니다.</p></details>",
+      "css": ".ds-disclosure{background:var(--white,#fff);color:var(--ink,#172131);border-radius:16px;overflow:clip;font-family:Pretendard,\"Segoe UI\",\"Malgun Gothic\",sans-serif;font-size:var(--body,18px);line-height:1.65}.ds-disclosure[open]{background:#e9eeeb}.ds-disclosure summary{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:24px;cursor:pointer;font-weight:550;line-height:1.5;list-style:none}.ds-disclosure summary::-webkit-details-marker{display:none}.ds-disclosure summary:hover{background:#e9eeeb}.ds-disclosure summary:focus-visible{outline:3px solid var(--focus,#285bdd);outline-offset:5px;}.ds-disclosure svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}.ds-disclosure[open] svg path{d:path(\"M5 12h14\")}.ds-disclosure p{margin:0;padding:0 24px 24px}@media(max-width:600px){.ds-disclosure summary{padding:20px;font-size:16px}.ds-disclosure p{padding:0 20px 20px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "숫자부터 근거까지",
+    "overview": "Let a reader inspect solar-generation numbers and follow their evidence without moving the page around them. SolarOps navy and gold, bold Korean sans typography, generous full-width fields and one atmospheric landscape establish a calm, factual Persuade surface. The product fragments remain legible, editable HTML and SVG; the photograph provides setting.\n\nThis document belongs to the independent static artifact rooted at landing/. The FastAPI application and repository-root design files belong to the dashboard. The current v5 direction supersedes the earlier randomized direction and v1–v4 assessments. Leedlime informed the photographic split hero; Beacon informed broad fields, whitespace and a short evidence-led flow. Their claims and product UI were not copied.",
+    "keyCharacteristics": [
+      "A full-width landscape, a neutral contrast scrim and a stationary split hero.",
+      "Pretendard headings and tabular data numerals with three prominent historical processing figures.",
+      "One boundary per product panel; full-width section fields and whitespace carry hierarchy.",
+      "Real saved public-data aggregates rendered as HTML text and SVG geometry.",
+      "Direct-action feedback with reserved content height and reduced-motion support."
+    ],
+    "rules": [
+      {
+        "name": "The Evidence Color Rule",
+        "body": "Color distinguishes data roles and control states; labels retain the meaning, including valid, invalid, missing and overlapping interpolation.",
+        "section": "colors"
+      },
+      {
+        "name": "The Saved Precision Rule",
+        "body": "Tabular numerals aid comparison; display rounding never replaces independently retained source values.",
+        "section": "typography"
+      },
+      {
+        "name": "The Stationary Surface Rule",
+        "body": "No entry or scroll reveal, observer-driven panel movement, or parallax; only deliberate user actions trigger local feedback.",
+        "section": "layout"
+      },
+      {
+        "name": "The One Boundary Rule",
+        "body": "A product fragment receives one panel boundary; do not wrap it in another decorative card, browser mockup or screenshot frame.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve Pretendard sans typography, the full-width photograph, three large historical statistics and one boundary per product panel.",
+      "Do render product panels as HTML/SVG and keep source screenshots as comparison evidence.",
+      "Do keep direct-action feedback local: 180ms opacity/color responses, the current 160ms chart fill, and a 3px action-arrow shift; honor reduced motion.",
+      "Do retain the keyboard-accessible slate date listbox and consistent dark scrollbars for dates, tables and code.",
+      "Do distinguish 51 plants, 14,400,480 inverter rows and 12,572 published day partitions from the April 2024 overview of five plants and the PS_001 monthly report.",
+      "Do preserve the 0.002 kWh daily-rounding difference from the independently retained monthly total, source lineage and original report artifacts."
+    ],
+    "donts": [
+      "Don't reintroduce Gowun Batang headings, nested presentation frames, moving panels, entry/scroll reveals or parallax.",
+      "Don't substitute screenshot images for the editable product UI or add invented chart gaps or simulated live changes.",
+      "Don't turn estimated energy or review candidates into measured energy, confirmed faults, financial losses or commercial-success claims.",
+      "Don't imply a backend connection, customer upload, live monitoring or new publication from this independent static landing.",
+      "Don't copy customer, revenue, accuracy, conversion or uptime claims from visual references.",
+      "Don't overwrite dashboard-owned root design files or treat older captures as the current visual specification."
+    ]
+  }
+}

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="SolarOps Audit의 공개 자료 처리, 원본 대조, 실패·재처리 검증과 로컬 데모 실행 안내."
+    />
+    <meta name="theme-color" content="#172131" />
+    <title>검증 근거와 로컬 데모 | SolarOps Audit</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=6" />
+  </head>
+  <body>
+    <a class="skip" href="#main">본문으로 건너뛰기</a>
+    <header class="site-header wrap">
+      <a class="wordmark" href="./"
+        ><img src="assets/favicon.svg" width="32" height="32" alt="" /><span
+          >SolarOps <span class="wordmark-suffix">Audit</span></span
+        ></a
+      ><a class="header-action" href="./#demo">제품 화면으로 돌아가기</a>
+    </header>
+    <main class="reading wrap" id="main">
+      <h1>검증 근거와<br />로컬 데모</h1>
+      <p>
+        랜딩페이지에서 소개한 기능의 실제 검증 범위입니다. 공개 역사 자료, 합성
+        시험, 현재 제공 범위를 구분합니다. 아래 결과는 명시한 시점과 버전의
+        기록입니다.
+      </p>
+      <nav aria-label="검증 자료 목차">
+        <a href="#public-data">공개 자료 처리</a
+        ><a href="#reports">보고서와 원본 대조</a
+        ><a href="#publication">실패·재처리</a><a href="#demo">로컬 실행</a
+        ><a href="#sources">데이터 출처</a>
+      </nav>
+
+      <section id="public-data">
+        <h2>공개 자료 처리</h2>
+        <p>
+          2026-10-23 스택·자료 실사에서 확인한 역사 자료 처리 범위입니다. 고객
+          수나 운영 중인 고객 설비 수가 아닙니다.
+        </p>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">항목</th>
+                <th scope="col">확인한 값</th>
+                <th scope="col">범위</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">발전소</th>
+                <td>51개</td>
+                <td>BR-PVGen 전체 공개 자료</td>
+              </tr>
+              <tr>
+                <th scope="row">인버터 관측</th>
+                <td>14,400,480행</td>
+                <td>역사 자료 전체 처리</td>
+              </tr>
+              <tr>
+                <th scope="row">일별 파티션</th>
+                <td>12,572개</td>
+                <td>Compose의 계산 v2 활성 결과</td>
+              </tr>
+              <tr>
+                <th scope="row">랜딩페이지 화면</th>
+                <td>2024년 4월, 5개 발전소</td>
+                <td>해당 월에 자료가 있는 발전소만 표시</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          해당 월의 유효 슬롯 161,084개, 무효 34,180개, 누락 0개입니다. 원본
+          보간 19,318개는 별도 속성입니다. 관측 슬롯 완전성 100%는 등록된 일별
+          파티션의 예상 슬롯 기준이며, 미등록 날짜를 포함한 월 전체 확보율과
+          다릅니다.
+        </p>
+        <p>
+          <a
+            href="https://github.com/TaeyanG4/solarops-audit/blob/main/docs/benchmarks/stack-authenticity-20261023.md"
+            >스택·자료 실사 원문</a
+          >
+          · 비공개 저장소 접근 권한 필요
+        </p>
+      </section>
+
+      <section id="reports">
+        <h2>보고서와 원본 대조</h2>
+        <p>
+          월간 HTML 보고서, 일별 CSV, 원본 계보 JSON을 제공합니다. 보고서는 생성
+          당시 게시된 결과를 보존하며, 현재 게시 근거와 비교할 수 있습니다.
+        </p>
+        <p>
+          대표 검증 대상은 PS_001의 2024-04-03 UTC 자료입니다. 제품 계산 함수를
+          호출하지 않은 독립 CSV 계산, Parquet SQL, PostgreSQL, API에서
+          <strong>19,752.692125 kWh</strong>가 같음을 확인했습니다. 월간
+          CSV·계보에서도 해당 날짜 값을 대조했습니다.
+        </p>
+        <p>
+          PS_001의 2024년 4월 추정 합계는 585,980.279 kWh입니다. 화면은 소수
+          둘째 자리로 표시합니다. 원본→Parquet 대조는 대표 인버터 3,744행·기상
+          96행 범위이며, 모든 S3 원본 객체를 다시 읽은 검사는 아닙니다.
+        </p>
+        <p class="read-note">
+          계산은 유효한 15분 전력에 <code>W ÷ 1000 × 0.25 h</code>를 적용합니다.
+          원본 보간값이 포함될 수 있으며, 계량기 실측 전력량·매출·확정 손실을
+          의미하지 않습니다.
+        </p>
+        <p>
+          <a
+            href="https://github.com/TaeyanG4/solarops-audit/blob/main/docs/data-contract.md"
+            >계산·품질 계약</a
+          >
+          · 비공개 저장소 접근 권한 필요
+        </p>
+      </section>
+
+      <section id="publication">
+        <h2>실패·재처리 검증</h2>
+        <p>
+          v0.5.2의 합성 7일 자료로 커밋 도중 실패를 주입하고 이전 게시 결과의
+          보존, 재처리 후 7개 일별 논리 해시 일치, 보고서 생성을 확인했습니다.
+          별도 실제 PostgreSQL·MinIO 서비스 검사는 13개 통과했습니다.
+        </p>
+        <p>
+          객체를 먼저 저장·검증한 다음 활성 카탈로그를 전환합니다. BR-PVGen은
+          일별 게시 원자성, ONS는 월별 성공 cursor와 변경 날짜의 원자성을
+          사용합니다. 실패한 객체는 게시되지 않은 증거로 보존됩니다.
+        </p>
+        <p>
+          이 결과는 명시한 합성 시험과 단일 호스트 환경의 근거입니다. 고객 운영
+          실적, 다중 호스트 고가용성, 외부 SLO 또는 장시간 쓰기 부하를 입증하지
+          않습니다.
+        </p>
+        <p>
+          <a
+            href="https://github.com/TaeyanG4/solarops-audit/blob/main/docs/benchmarks/quality-v0.5.2.md"
+            >v0.5.2 검증 기록</a
+          >
+          · 비공개 저장소 접근 권한 필요
+        </p>
+      </section>
+
+      <section id="demo">
+        <h2>로컬 데모 실행</h2>
+        <p>
+          Python 3.12, Git,
+          <a href="https://docs.astral.sh/uv/getting-started/installation/"
+            >uv</a
+          >와 비공개 저장소 접근 권한이 필요합니다. 이미 저장소를 갖고 있다면
+          프로젝트 폴더에서 마지막 두 명령을 실행하세요.
+        </p>
+        <pre
+          tabindex="0"
+          role="region"
+          aria-label="로컬 데모 실행 명령"
+        ><code>git clone https://github.com/TaeyanG4/solarops-audit.git
+cd solarops-audit
+uv sync --frozen
+uv run python scripts/demo/portfolio_demo.py --serve</code></pre>
+        <p>
+          터미널에 표시되는 <code>http://127.0.0.1:8503/</code>을 같은 PC에서
+          엽니다. 합성 7일 자료로 정상 게시, 실패 주입, 재처리, 월간 보고서
+          생성을 순서대로 실행합니다. Docker와 공개 원본 전체 다운로드는
+          필요하지 않습니다. 최초 의존성 설치에는 네트워크가 필요할 수 있습니다.
+        </p>
+        <p>
+          종료는 실행한 터미널에서 <kbd>Ctrl</kbd> + <kbd>C</kbd>를 누릅니다.
+          서버 없이 검증하려면 <code>--serve</code>를 생략합니다. 실행마다 새
+          폴더를 만들고 이전 산출물은 보존합니다.
+        </p>
+        <p class="read-note">
+          현재는 로컬 엔지니어링 포트폴리오입니다. 공개 체험 서버, 고객 계정,
+          실제 고객 설비 연결, 상용 운영은 제공하지 않습니다. 저장소 권한이
+          없어도 이 랜딩페이지의 실제 캡처와 검증 요약은 읽을 수 있습니다.
+        </p>
+      </section>
+
+      <section id="sources">
+        <h2>데이터와 화면 출처</h2>
+        <ul>
+          <li>
+            <strong>BR-PVGen V.1:</strong> Caian Dutra de Jesus, Rhuan
+            Nascimento Ferreira, Eduardo Pestana de Aguiar(UFJF).
+            <a href="https://doi.org/10.5281/zenodo.21511487"
+              >DOI 10.5281/zenodo.21511487</a
+            >. CC BY 4.0. 브라질 51개 발전소의 2024-03-26~2025-06-09 자료이며
+            발전소별 기간은 다릅니다. 15분 집계·일부 보간된 원본입니다.
+          </li>
+          <li>
+            <strong>ONS 발전 자료:</strong>
+            <a href="https://dados.ons.org.br/dataset/geracao-usina-2"
+              >브라질 전력계통 운영기관 ONS</a
+            >, CC BY(버전 미명시). 별도 수집 경로에서 원문
+            시각·MWmed·검증/예측/미확정 유형을 보존합니다. 공식 시간대·구간
+            기준이 불명확해 기존 kWh에 합산하지 않습니다.
+          </li>
+          <li>
+            <strong>합성 DEMO_01:</strong> 저장소의 생성기가 만든 오프라인 시험
+            자료. 실제 발전 실적으로 해석하지 않습니다.
+          </li>
+          <li>
+            <strong>페이지 캡처:</strong> 2026-10-23에 실행 중인 로컬 SolarOps
+            대시보드에서 촬영했습니다. 공개 2024년 4월 전체 현황·품질과 PS_001
+            보고서입니다. 패널 영역 캡처와 무손실 WebP 변환만 사용했으며 값이나
+            화면 내용을 수정하지 않았습니다.
+          </li>
+        </ul>
+        <p>
+          미리보기는 2026-10-23에 읽은 공개 API 집계값과 PS_001 발행 보고서를
+          HTML·SVG로 구성했습니다. 날짜 선택·품질 설명·단위·보고서 형식 전환은
+          이 저장된 자료에서 동작하며, FastAPI 수집이나 실시간 조회를 실행하지
+          않습니다. 실제 화면 캡처는 확대 링크로 보존합니다. 일별 API의 소수점
+          반올림 때문에 30일 합계와 월 집계에는 0.002 kWh 차이가 있으며 원래
+          값을 유지합니다.
+        </p>
+      </section>
+      <section id="visual-sources">
+        <h2>소개 이미지와 글꼴</h2>
+        <p>
+          첫 화면의 풍경은 GlacierNPS의
+          <a
+            href="https://commons.wikimedia.org/wiki/File:Solar_Panels_at_Logan_Pass_(51420891744).jpg"
+            >Solar Panels at Logan Pass</a
+          >
+          사진입니다. Wikimedia Commons에서 Public domain으로 제공하는 사진을
+          WebP로 변환했습니다. 제품 소개용 풍경이며 분석 데이터의 발전소나 고객
+          운영 현장을 나타내지 않습니다. 그 위의 보고서는 공개 집계값을 HTML로
+          구성한 미리보기입니다.
+        </p>
+        <p>
+          제목과 본문은 Pretendard를 사용합니다. SIL OFL 1.1로 제공되며,
+          페이지에 필요한 문자로 용량을 줄여 직접 호스팅합니다.
+        </p>
+      </section>
+      <p><a class="button" href="./#demo">제품 화면 살펴보기</a></p>
+    </main>
+    <footer class="wrap site-footer">
+      <a class="wordmark" href="./"
+        >SolarOps <span class="wordmark-suffix">Audit</span></a
+      >
+      <p>2026 · 로컬 검증 프로젝트</p>
+      <div><a href="./">랜딩페이지로 돌아가기</a></div>
+    </footer>
+  </body>
+</html>

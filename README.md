@@ -12,6 +12,8 @@
 
 ## 빠른 실행
 
+제품 소개용 [독립 랜딩페이지](landing/README.md)도 제공합니다. 실제 화면과 검증 범위를 소개하는 정적 사이트이며 FastAPI 대시보드와 별도로 실행합니다. [디자인·화면 검수](landing/QA.md).
+
 Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/), Git을 준비합니다. 비공개 저장소 접근 권한이 필요합니다.
 
 ```text

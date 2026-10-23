@@ -12,6 +12,7 @@
 - kind ONS의 마지막 확인 설정은 매일 14:00 KST 활성, 다른 6개 DAG paused. 이번 인계에서는 Pod만 재확인했고 새 scheduled 실행은 확인하지 않았습니다. [일정 on/off](docs/runbooks/dags.md#ons-정기-수집-켜기끄기).
 - 공개 BR-PVGen 전체 51발전소/12,572일 v2는 Compose, kind의 BR 자료는 PS_001 하루, native는 v1 보존본. ONS의 기존 검증 범위는Compose 69,696행/21일·kind 167,424행/51일. 환경별 저장소는 독립입니다. [수집 근거](docs/benchmarks/incremental-v0.5.0.md).
 - 추정 kWh·검토 후보·누락/무효/보간을 구분합니다. ONS 원문 MWmed·시간 기준 미확정을 보존하고 기존 kWh에 합산하지 않습니다. 고객·매출·외부 SLO·장기 쓰기 부하는 미검증입니다.
+- [독립 랜딩 v6](http://127.0.0.1:8507/) 완료. 히어로 카드를 실제 공개 집계 기반 데모 창(전체 현황/월간 보고서/원본 계보)으로 교체, 보고서 문서형·계보 4단계 흐름, CSS 재작성. 1440/768/375 렌더·axe위반0, 미검증 범위는 [작업 기록](docs/worklog/2026-10-23-landing.md#v6-히어로-실제-데모-창과-전체-다듬기)·[QA](landing/QA.md). [실행](landing/README.md). 별도 loopback 정적 서버이며 FastAPI는 이 작업에서 변경하지 않았습니다.
 
 ## 다음 재개 지점
 
@@ -28,6 +29,7 @@
 
 | 일자 | 수행 영역과 결과 | 상세 |
 |---|---|---|
+| 10-23 | 랜딩 v6 히어로 데모 창·보고서/계보 재구성, v5 HTML/SVG 제품 화면·세너비 검수 | [랜딩 구현·검수](docs/worklog/2026-10-23-landing.md) |
 | 10-23 | R5 Astra 96 / Fable 94·원문 보존·hash 설명 정정·다음 세션 인계 | [인계·검증](docs/worklog/2026-10-23-handoff-r5.md), [R4 구현](docs/worklog/2026-10-23-quality-r5.md) |
 | 10-23 | Fable·Astra 면접 평가·합성 경계 3개 재현·후속 21/19/16점 등록 | [평가·재현·전달](docs/worklog/2026-10-23-interview.md) |
 | 10-23 | PORT-01~04완료·ONS상태UI·0.5.1배포·격리재현·제출자료·최신CI | [최종 수행](docs/worklog/2026-10-23-portfolio-finish.md) |
@@ -35,6 +37,5 @@
 | 10-23 | 입력/게시 4경계 수정·0.4.2 정렬·실제 KPO 재시도/추적·세 환경 7일 일치 | [구현·배포](docs/worklog/2026-10-23-integrity-delivery.md) |
 | 10-23 | 독립 검토·경계 4개 재현·6개 후속 계획 | [수용 판단](docs/worklog/2026-10-23-independent-review.md) |
 | 10-23 | 실제 수집/스케줄·환경별 아키텍처·README 정리 | [문서·상태](docs/worklog/2026-10-23-data-architecture.md) |
-| 10-23 | 서비스 CI·보고서 비교·격리 복원·합성 10만 건 조회 부하 | [전달기록](docs/worklog/2026-10-23-technical-delivery.md) |
 
 100줄 이내·최근 요약 최대 8개. 이전 handoff/discoveries는 [원문 보관](docs/worklog/archive/README.md)이며 현재 지침이 아닙니다.
